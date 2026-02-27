@@ -1,0 +1,10 @@
+node_modules
+dist
+.env
+.next
+.expo
+.agent
+apps/backend/api-server/dist
+apps/mobile/tenant-app/.expo
+coverage
+pnpm-lock.yaml

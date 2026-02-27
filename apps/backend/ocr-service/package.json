@@ -1,0 +1,8 @@
+{
+  "name": "@nhatroso/ocr-service",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "python3 -m pytest test_main.py"
+  }
+}
