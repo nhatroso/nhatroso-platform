@@ -135,3 +135,6 @@ coverage/
 
 # pnpm
 .pnpm-store
+
+# turbo
+.turbo/
