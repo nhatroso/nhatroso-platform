@@ -10,7 +10,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "test": "jest",
-    "lint": "eslint .",
+    "lint": "expo lint",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist"
   },
@@ -30,7 +30,7 @@
     "@types/jest": "^30.0.0",
     "@types/react": "~19.2.2",
     "@types/react-test-renderer": "^19.1.0",
-    "eslint": "^10.0.2",
+    "eslint": "^8.57.1",
     "eslint-config-expo": "^55.0.0",
     "react-test-renderer": "^19.2.4",
     "typescript": "~5.9.2"

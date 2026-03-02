@@ -1,0 +1,264 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions", "partialIndexes"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  extensions = [btree_gist, uuid_ossp(map: "uuid-ossp")]
+}
+
+model User {
+  id                   String                 @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  email                String?                @unique
+  phone                String?                @unique
+  passwordHash         String                 @map("password_hash")
+  role                 String
+  status               String
+  createdAt            DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime               @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  auditEventsActor     AuditEvent[]           @relation("AuditActor")
+  auditEventsOwner     AuditEvent[]           @relation("AuditOwner")
+  buildings            Building[]
+  tenantContracts      ContractTenant[]
+  contracts            Contract[]
+  invoiceStatusHistory InvoiceStatusHistory[]
+  invoices             Invoice[]
+  meterReadings        MeterReading[]
+  priceRules           PriceRule[]
+  readingOverrides     ReadingOverride[]
+  refreshTokens        RefreshToken[]
+  services             Service[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  jti       String    @unique
+  expiresAt DateTime  @map("expires_at") @db.Timestamptz(6)
+  revokedAt DateTime? @map("revoked_at") @db.Timestamptz(6)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@map("refresh_tokens")
+}
+
+model Building {
+  id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  ownerId   String   @map("owner_id") @db.Uuid
+  name      String
+  address   String?
+  status    String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  floors    Floor[]
+  rooms     Room[]
+
+  @@index([ownerId], map: "idx_buildings_owner_id")
+  @@map("buildings")
+}
+
+model Floor {
+  id         String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  buildingId String   @map("building_id") @db.Uuid
+  identifier String
+  status     String
+  building   Building @relation(fields: [buildingId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  rooms      Room[]
+
+  @@map("floors")
+}
+
+model Room {
+  id         String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  buildingId String      @map("building_id") @db.Uuid
+  floorId    String?     @map("floor_id") @db.Uuid
+  code       String
+  status     String
+  createdAt  DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime    @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  contracts  Contract?
+  invoices   Invoice[]
+  meters     Meter[]
+  priceRules PriceRule[]
+  building   Building    @relation(fields: [buildingId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  floor      Floor?      @relation(fields: [floorId], references: [id], onUpdate: NoAction)
+
+  @@unique([buildingId, code])
+  @@index([buildingId], map: "idx_rooms_building_id")
+  @@index([status], map: "idx_rooms_status")
+  @@map("rooms")
+}
+
+model Service {
+  id           String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  ownerId      String        @map("owner_id") @db.Uuid
+  name         String
+  unit         String
+  status       String
+  createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  invoiceLines InvoiceLine[]
+  priceRules   PriceRule[]
+  owner        User          @relation(fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@map("services")
+}
+
+model PriceRule {
+  id             String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  ownerId        String    @map("owner_id") @db.Uuid
+  roomId         String    @map("room_id") @db.Uuid
+  serviceId      String    @map("service_id") @db.Uuid
+  unitPrice      Decimal   @map("unit_price") @db.Decimal
+  effectiveStart DateTime  @map("effective_start") @db.Date
+  effectiveEnd   DateTime? @map("effective_end") @db.Date
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  owner          User      @relation(fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  room           Room      @relation(fields: [roomId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  service        Service   @relation(fields: [serviceId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@map("price_rules")
+}
+
+model Contract {
+  id           String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  ownerId      String           @map("owner_id") @db.Uuid
+  roomId       String           @unique(map: "ux_contracts_one_active_per_room", where: raw("(status = 'ACTIVE'::text)")) @map("room_id") @db.Uuid
+  startDate    DateTime         @map("start_date") @db.Date
+  endDate      DateTime?        @map("end_date") @db.Date
+  billingCycle String           @map("billing_cycle")
+  status       String
+  createdAt    DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  tenants      ContractTenant[]
+  owner        User             @relation(fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  room         Room             @relation(fields: [roomId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  invoices     Invoice[]
+
+  @@index([roomId], map: "idx_contracts_room_id")
+  @@map("contracts")
+}
+
+model ContractTenant {
+  contractId String   @map("contract_id") @db.Uuid
+  tenantId   String   @map("tenant_id") @db.Uuid
+  contract   Contract @relation(fields: [contractId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  tenant     User     @relation(fields: [tenantId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([contractId, tenantId])
+  @@index([tenantId], map: "idx_contract_tenants_tenant_id")
+  @@map("contract_tenants")
+}
+
+model Meter {
+  id       String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  roomId   String         @map("room_id") @db.Uuid
+  type     String
+  serialNo String?        @map("serial_no")
+  readings MeterReading[]
+  room     Room           @relation(fields: [roomId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@map("meters")
+}
+
+model MeterReading {
+  id            String            @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  meterId       String            @map("meter_id") @db.Uuid
+  period        String            @db.Char(7)
+  photoUrl      String            @map("photo_url")
+  ocrRawValue   String?           @map("ocr_raw_value")
+  ocrValue      Int?              @map("ocr_value")
+  ocrConfidence Decimal?          @map("ocr_confidence") @db.Decimal
+  finalValue    Int?              @map("final_value")
+  status        String
+  createdById   String            @map("created_by") @db.Uuid
+  createdAt     DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  createdBy     User              @relation(fields: [createdById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  meter         Meter             @relation(fields: [meterId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  overrides     ReadingOverride[]
+
+  @@unique([meterId, period])
+  @@map("meter_readings")
+}
+
+model ReadingOverride {
+  id             String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  readingId      String       @map("reading_id") @db.Uuid
+  reason         String
+  overriddenById String       @map("overridden_by") @db.Uuid
+  overriddenAt   DateTime     @default(now()) @map("overridden_at") @db.Timestamptz(6)
+  overriddenBy   User         @relation(fields: [overriddenById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  reading        MeterReading @relation(fields: [readingId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@map("reading_overrides")
+}
+
+model Invoice {
+  id            String                 @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  ownerId       String                 @map("owner_id") @db.Uuid
+  roomId        String                 @map("room_id") @db.Uuid
+  contractId    String                 @map("contract_id") @db.Uuid
+  period        String                 @db.Char(7)
+  status        String
+  totalAmount   Decimal                @map("total_amount") @db.Decimal
+  createdAt     DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime               @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  lines         InvoiceLine[]
+  statusHistory InvoiceStatusHistory[]
+  contract      Contract               @relation(fields: [contractId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  owner         User                   @relation(fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  room          Room                   @relation(fields: [roomId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([contractId, period], map: "ux_invoices_contract_period")
+  @@unique([contractId, period])
+  @@map("invoices")
+}
+
+model InvoiceLine {
+  id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  invoiceId String   @map("invoice_id") @db.Uuid
+  itemType  String   @map("item_type")
+  serviceId String?  @map("service_id") @db.Uuid
+  quantity  Decimal  @db.Decimal
+  unitPrice Decimal  @map("unit_price") @db.Decimal
+  amount    Decimal  @db.Decimal
+  metadata  Json?
+  invoice   Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  service   Service? @relation(fields: [serviceId], references: [id], onUpdate: NoAction)
+
+  @@map("invoice_lines")
+}
+
+model InvoiceStatusHistory {
+  id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  invoiceId   String   @map("invoice_id") @db.Uuid
+  fromStatus  String?  @map("from_status")
+  toStatus    String   @map("to_status")
+  reason      String?
+  actorUserId String?  @map("actor_user_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  actorUser   User?    @relation(fields: [actorUserId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@map("invoice_status_history")
+}
+
+model AuditEvent {
+  id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  ownerId     String?  @map("owner_id") @db.Uuid
+  actorUserId String?  @map("actor_user_id") @db.Uuid
+  actionType  String   @map("action_type")
+  targetType  String   @map("target_type")
+  targetId    String?  @map("target_id") @db.Uuid
+  ip          String?
+  userAgent   String?  @map("user_agent")
+  reason      String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  actorUser   User?    @relation("AuditActor", fields: [actorUserId], references: [id], onUpdate: NoAction)
+  owner       User?    @relation("AuditOwner", fields: [ownerId], references: [id], onUpdate: NoAction)
+
+  @@index([ownerId, createdAt], map: "idx_audit_events_owner_created_at")
+  @@map("audit_events")
+}
