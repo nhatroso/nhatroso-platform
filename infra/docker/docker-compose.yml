@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: nhatroso
       POSTGRES_DB: nhatroso_core
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
@@ -16,7 +16,7 @@ services:
     image: redis:7-alpine
     container_name: nhatroso-redis
     ports:
-      - "6379:6379"
+      - '6379:6379'
     restart: unless-stopped
 
 volumes:
