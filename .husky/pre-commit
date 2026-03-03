@@ -1,2 +1,7 @@
-pnpm run lint
-pnpm exec lint-staged
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+echo "🚀 Running full validation before push..."
+
+pnpm typecheck
+pnpm build

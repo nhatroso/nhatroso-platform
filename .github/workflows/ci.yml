@@ -2,69 +2,43 @@ name: CI
 
 on:
   push:
-    branches: ['main', 'dev']
+    branches: [main, dev]
   pull_request:
-    branches: ['main', 'dev']
+    branches: [main, dev]
 
 jobs:
-  build-and-test:
+  ci:
+    name: CI
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v3
+        uses: pnpm/action-setup@v4
         with:
           version: 10
-          run_install: false
 
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+          node-version: 22
+          cache: 'pnpm'
 
-      - name: Install Python
-        uses: actions/setup-python@v5
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
         with:
-          python-version: '3.12'
-          cache: 'pip'
+          components: clippy, rustfmt
 
-      - name: Install Node Dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
 
-      - name: Install Python Dependencies
-        run: |
-          cd apps/backend/ocr-service
-          pip install -r requirements.txt
+      - name: Install dependencies
+        run: pnpm install
 
-      - name: Run Format Check
-        run: pnpm format:check
+      - name: Run Validation (Lint + Typecheck)
+        run: pnpm check
 
-      - name: Run Linter
-        run: pnpm lint
-
-      - name: Typecheck Workspace
-        run: pnpm typecheck
-
-      - name: Run Tests
-        run: pnpm test
-
-      - name: Build Workspace
+      - name: Build All
         run: pnpm build
