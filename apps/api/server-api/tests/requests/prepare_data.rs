@@ -1,36 +1,28 @@
 use axum::http::{HeaderName, HeaderValue};
 use loco_rs::{app::AppContext, TestServer};
-use server_api::{models::users, views::auth::LoginResponse};
+use server_api::{models::_entities::users, controllers::auth::AuthResponse};
+use sea_orm::{EntityTrait, ColumnTrait, QueryFilter};
 
 const USER_EMAIL: &str = "test@loco.com";
-const USER_PASSWORD: &str = "1234";
+const USER_PASSWORD: &str = "12341234";
 
 pub struct LoggedInUser {
     pub user: users::Model,
     pub token: String,
+    pub refresh_token: String,
 }
 
 pub async fn init_user_login(request: &TestServer, ctx: &AppContext) -> LoggedInUser {
     let register_payload = serde_json::json!({
-        "name": "loco",
         "email": USER_EMAIL,
         "password": USER_PASSWORD
     });
 
-    //Creating a new user
+    // Creating a new user
     request
         .post("/api/auth/register")
         .json(&register_payload)
         .await;
-    let user = users::Model::find_by_email(&ctx.db, USER_EMAIL)
-        .await
-        .unwrap();
-
-    let verify_payload = serde_json::json!({
-        "token": user.email_verification_token,
-    });
-
-    request.post("/api/auth/verify").json(&verify_payload).await;
 
     let response = request
         .post("/api/auth/login")
@@ -40,13 +32,17 @@ pub async fn init_user_login(request: &TestServer, ctx: &AppContext) -> LoggedIn
         }))
         .await;
 
-    let login_response: LoginResponse = serde_json::from_str(&response.text()).unwrap();
+    let login_response: AuthResponse = serde_json::from_str(&response.text()).unwrap();
 
     LoggedInUser {
-        user: users::Model::find_by_email(&ctx.db, USER_EMAIL)
+        user: users::Entity::find()
+            .filter(users::Column::Email.eq(USER_EMAIL))
+            .one(&ctx.db)
             .await
+            .unwrap()
             .unwrap(),
         token: login_response.token,
+        refresh_token: login_response.refresh_token,
     }
 }
 

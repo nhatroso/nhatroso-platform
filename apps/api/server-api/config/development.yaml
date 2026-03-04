@@ -33,7 +33,7 @@ workers:
   #   - BackgroundAsync - Workers operate asynchronously in the background, processing tasks with async capabilities.
   mode: BackgroundQueue
 
-  
+
 # Queue Configuration
 queue:
   kind: Redis
@@ -70,7 +70,7 @@ mailer:
 # Database Configuration
 database:
   # Database connection URI
-  uri: {{ get_env(name="DATABASE_URL", default="postgres://loco:loco@localhost:5432/server-api_development") }}
+  uri: {{ get_env(name="DATABASE_URL", default="postgres://nhatroso:nhatroso@localhost:5432/nhatroso_db") }}
   # When enabled, the sql query will be logged.
   enable_logging: false
   # Set the timeout duration when acquiring a connection.
@@ -93,6 +93,6 @@ auth:
   # JWT authentication
   jwt:
     # Secret key for token generation and verification
-    secret: p11DU7ZGzpp0yhaljO7Q
+    secret: C7Jv4x7FYe4orZlCOu2M
     # Token expiration time in seconds
     expiration: 604800 # 7 days
