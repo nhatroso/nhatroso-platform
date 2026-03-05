@@ -1,0 +1,36 @@
+﻿Name,Assignee,Epic,Priority,Sprint,Status,Story Point
+OCR: capture/upload meter photo to object storage + create draft reading,Bảo Đinh,OCR,P0,Sprint 3,Backlog,8
+NFR: rate limiting for login + lockout policy,Bảo Đinh,Security,P1,Sprint 2,Backlog,5
+Queue: Redis job queue for OCR processing (retry/idempotency),Bảo Đinh,OCR,P1,Sprint 3,Backlog,5
+Contracts: create contract (room + tenants) + enforce 1 active contract/room,Bảo Đinh,Owner – Contracts,P0,Sprint 2,Backlog,8
+Audit: append-only audit events for critical actions + export API,Bảo Đinh,Platform,P1,Sprint 5,Backlog,8
+Object storage: integrate upload + signed URL generation (S3-compatible),Bảo Đinh,Platform / Storage,P0,Sprint 3,Backlog,8
+Infra: PostgreSQL + Redis provisioning (local docker-compose),Bảo Đinh,Platform / Infra,P1,Sprint 1,Backlog,3
+Observability: request-id logging + structured logs (userId when available),Bảo Đinh,Platform,P2,Sprint 2,Backlog,3
+Tenant: invoice list endpoint + strict contract-based authorization,Bảo Đinh,Tenant – Billing,P0,Sprint 5,Backlog,5
+OCR: OCR job orchestration + callback handling (value + confidence),Bảo Đinh,OCR,P0,Sprint 3,Backlog,8
+Property: CRUD floors and rooms + unique room code per building,Bảo Đinh,Owner – Room Management,P0,Sprint 1,Backlog,8
+Security: safe error responses (403 without resource existence leak),Bảo Đinh,Security,P1,Sprint 2,Backlog,3
+OCR: manual correction/finalize reading + override reason logging,Bảo Đinh,OCR,P0,Sprint 3,Backlog,5
+Tenant: invoice detail endpoint incl. signed meter photo URLs,Bảo Đinh,Tenant – Billing,P0,Sprint 5,Backlog,5
+Auth: login/logout + refresh token revocation,Bảo Đinh,Account,P0,Sprint 1,Backlog,5
+Meter: create meters for rooms (electric/water),Bảo Đinh,OCR,P1,Sprint 2,Backlog,3
+Billing: invoice generation (idempotent) for period YYYY-MM,Bảo Đinh,Billing & Invoices,P0,Sprint 4,Backlog,8
+Pricing: create effective-dated room price rule + prevent overlap,Bảo Đinh,Owner – Pricing,P0,Sprint 2,Backlog,8
+Property: CRUD buildings + archive rules,Bảo Đinh,Owner – Room Management,P0,Sprint 1,Backlog,5
+Testing: E2E smoke flow (owner setup → readings → invoice → tenant view),Bảo Đinh,QA,P1,Sprint 6,Backlog,8
+Billing: invoice status workflow (Unpaid/Pending/Paid/Voided) + history,Bảo Đinh,Billing & Invoices,P0,Sprint 4,Backlog,5
+Contracts: end contract + update room status (Occupied/Vacant),Bảo Đinh,Owner – Contracts,P0,Sprint 2,Backlog,5
+Testing: integration tests for pricing overlap + invoice idempotency,Bảo Đinh,QA,P1,Sprint 6,Backlog,8
+"Billing: compute invoice line items (rent, electric, water, services)",Bảo Đinh,Billing & Invoices,P0,Sprint 4,Backlog,8
+Security: RBAC guards + owner resource ownership checks,Bảo Đinh,Security,P0,Sprint 1,Backlog,5
+OCR service: FastAPI skeleton + POST /ocr/jobs + callback contract,Bảo Đinh,OCR,P0,Sprint 3,Backlog,5
+Billing: handle missing readings/invalid sequences → PENDING_CONFIRMATION invoices,Bảo Đinh,Billing & Invoices,P0,Sprint 4,Backlog,5
+"Infra: Nginx reverse proxy (TLS termination, routing)",Bảo Đinh,Platform / Infra,P1,Sprint 1,Backlog,3
+OCR: validate reading vs previous finalized + block if decreased,Bảo Đinh,OCR,P0,Sprint 3,Backlog,5
+Data privacy: tenant cannot access other tenants’ invoices (negative tests),Bảo Đinh,Security,P0,Sprint 5,Backlog,3
+Auth: user registration (email/phone) + identifier normalization,Bảo Đinh,Account,P0,Sprint 1,Doing,5
+Security: signed URL service for photos/docs (15 min expiry),Bảo Đinh,Security,P0,Sprint 3,Backlog,5
+"Define DB schema + migrations (baseline tables, constraints)",Bảo Đinh,Platform / Database,P0,Sprint 1,Done,5
+"Project setup: repo, environments, CI skeleton",Bảo Đinh,Platform,P0,Sprint 1,Done,3
+Services: service catalog CRUD (owner scoped),Bảo Đinh,Owner – Pricing,P0,Sprint 2,Backlog,5
