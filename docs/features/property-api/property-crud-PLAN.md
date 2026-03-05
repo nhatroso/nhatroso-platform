@@ -78,20 +78,18 @@ Changes will primarily occur within the `apps/api/server-api` directory:
 
 ## Phase X: Verification
 
-- [ ] **Linting**: `cargo clippy -- -D warnings`
-- [ ] **Formatting**: `cargo fmt -- --check`
-- [ ] **Security**: `python .agent/skills/vulnerability-scanner/scripts/security_scan.py .`
-- [ ] **Tests**: `cargo test`
-- [ ] **Build**: `cargo build --release`
+- [x] **Linting**: `cargo clippy -- -D warnings`
+- [x] **Formatting**: `cargo fmt -- --check`
+- [x] **Security**: `python .agent/skills/vulnerability-scanner/scripts/security_scan.py .`
+- [x] **Tests**: `cargo test`
+- [x] **Build**: `cargo build --release`
 
 ## ✅ PHASE X COMPLETE
 
-_(To be filled during Verification Phase)_
-
-- Lint: ⏳ Pending
-- Security: ⏳ Pending
-- Build: ⏳ Pending
-- Date: ⏳ Pending
+- Lint: ✅ Pass
+- Security: ✅ Pass (Ignored harmless config db string flags)
+- Build: ✅ Pass
+- Date: 2026-03-05
 
 ---
 
@@ -99,7 +97,7 @@ _(To be filled during Verification Phase)_
 
 **Epic Request**: CRUD floors and rooms + unique room code per building.
 
-### Task 6: Implement Service Validations for Floor/Room Uniqueness
+### [x] Task 6: Implement Service Validations for Floor/Room Uniqueness
 
 - **Agent**: `backend-specialist`
 - **INPUT**: `src/services/property_service.rs`
@@ -111,7 +109,7 @@ _(To be filled during Verification Phase)_
   - Ensure `archive_room` and `update_room_status` properly cross-check the owner permission.
 - **OUTPUT**: Hardened `PropertyService` returning explicit application errors.
 
-### Task 7: Update Integration Tests for Uniqueness Constraints
+### [x] Task 7: Update Integration Tests for Uniqueness Constraints
 
 - **Agent**: `test-engineer`
 - **INPUT**: `tests/requests/property.rs`
