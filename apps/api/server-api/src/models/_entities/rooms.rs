@@ -4,16 +4,13 @@ use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
-#[sea_orm(table_name = "users")]
+#[sea_orm(table_name = "rooms")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
-    #[sea_orm(unique)]
-    pub email: Option<String>,
-    #[sea_orm(unique)]
-    pub phone: Option<String>,
-    pub password_hash: String,
-    pub role: String,
+    pub building_id: Uuid,
+    pub floor_id: Option<Uuid>,
+    pub code: String,
     pub status: String,
     pub created_at: DateTimeWithTimeZone,
     pub updated_at: DateTimeWithTimeZone,
@@ -21,10 +18,22 @@ pub struct Model {
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(has_many = "super::buildings::Entity")]
+    #[sea_orm(
+        belongs_to = "super::buildings::Entity",
+        from = "Column::BuildingId",
+        to = "super::buildings::Column::Id",
+        on_update = "NoAction",
+        on_delete = "Cascade"
+    )]
     Buildings,
-    #[sea_orm(has_many = "super::refresh_tokens::Entity")]
-    RefreshTokens,
+    #[sea_orm(
+        belongs_to = "super::floors::Entity",
+        from = "Column::FloorId",
+        to = "super::floors::Column::Id",
+        on_update = "NoAction",
+        on_delete = "SetNull"
+    )]
+    Floors,
 }
 
 impl Related<super::buildings::Entity> for Entity {
@@ -33,8 +42,8 @@ impl Related<super::buildings::Entity> for Entity {
     }
 }
 
-impl Related<super::refresh_tokens::Entity> for Entity {
+impl Related<super::floors::Entity> for Entity {
     fn to() -> RelationDef {
-        Relation::RefreshTokens.def()
+        Relation::Floors.def()
     }
 }

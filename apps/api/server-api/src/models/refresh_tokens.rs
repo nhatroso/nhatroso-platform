@@ -4,6 +4,8 @@ use loco_rs::model::{ModelError, ModelResult};
 use sea_orm::{entity::prelude::*, ActiveValue};
 use uuid::Uuid;
 
+impl ActiveModelBehavior for ActiveModel {}
+
 impl super::_entities::refresh_tokens::Model {
     pub async fn create(db: &DatabaseConnection, user_id: Uuid) -> ModelResult<(Self, String)> {
         let jti = Uuid::new_v4();

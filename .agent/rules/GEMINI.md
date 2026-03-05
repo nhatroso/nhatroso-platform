@@ -22,7 +22,7 @@ Agent activated → Check frontmatter "skills:" → Read SKILL.md (INDEX) → Re
 ### 2. Enforcement Protocol
 
 1. **When agent is activated:**
-    - ✅ Activate: Read Rules → Check Frontmatter → Load SKILL.md → Apply All.
+   - ✅ Activate: Read Rules → Check Frontmatter → Load SKILL.md → Apply All.
 2. **Forbidden:** Never skip reading agent rules or skill instructions. "Read → Understand → Apply" is mandatory.
 
 ---
@@ -31,14 +31,14 @@ Agent activated → Check frontmatter "skills:" → Read SKILL.md (INDEX) → Re
 
 **Before ANY action, classify the request:**
 
-| Request Type     | Trigger Keywords                           | Active Tiers                   | Result                      |
-| ---------------- | ------------------------------------------ | ------------------------------ | --------------------------- |
-| **QUESTION**     | "what is", "how does", "explain"           | TIER 0 only                    | Text Response               |
-| **SURVEY/INTEL** | "analyze", "list files", "overview"        | TIER 0 + Explorer              | Session Intel (No File)     |
-| **SIMPLE CODE**  | "fix", "add", "change" (single file)       | TIER 0 + TIER 1 (lite)         | Inline Edit                 |
-| **COMPLEX CODE** | "build", "create", "implement", "refactor" | TIER 0 + TIER 1 (full) + Agent | **{task-slug}.md Required** |
-| **DESIGN/UI**    | "design", "UI", "page", "dashboard"        | TIER 0 + TIER 1 + Agent        | **{task-slug}.md Required** |
-| **SLASH CMD**    | /create, /orchestrate, /debug              | Command-specific flow          | Variable                    |
+| Request Type     | Trigger Keywords                           | Active Tiers                   | Result                                                        |
+| ---------------- | ------------------------------------------ | ------------------------------ | ------------------------------------------------------------- |
+| **QUESTION**     | "what is", "how does", "explain"           | TIER 0 only                    | Text Response                                                 |
+| **SURVEY/INTEL** | "analyze", "list files", "overview"        | TIER 0 + Explorer              | Session Intel (No File)                                       |
+| **SIMPLE CODE**  | "fix", "add", "change" (single file)       | TIER 0 + TIER 1 (lite)         | Inline Edit                                                   |
+| **COMPLEX CODE** | "build", "create", "implement", "refactor" | TIER 0 + TIER 1 (full) + Agent | **docs/features/{feature-name}/{TASK-SLUG}-PLAN.md Required** |
+| **DESIGN/UI**    | "design", "UI", "page", "dashboard"        | TIER 0 + TIER 1 + Agent        | **docs/features/{feature-name}/{TASK-SLUG}-PLAN.md Required** |
+| **SLASH CMD**    | /create, /orchestrate, /debug              | Command-specific flow          | Variable                                                      |
 
 ---
 
@@ -75,12 +75,12 @@ When auto-applying an agent, inform the user:
 
 **Before ANY code or design work, you MUST complete this mental checklist:**
 
-| Step | Check | If Unchecked |
-|------|-------|--------------|
-| 1 | Did I identify the correct agent for this domain? | → STOP. Analyze request domain first. |
-| 2 | Did I READ the agent's `.md` file (or recall its rules)? | → STOP. Open `.agent/agents/{agent}.md` |
-| 3 | Did I announce `🤖 Applying knowledge of @[agent]...`? | → STOP. Add announcement before response. |
-| 4 | Did I load required skills from agent's frontmatter? | → STOP. Check `skills:` field and read them. |
+| Step | Check                                                    | If Unchecked                                 |
+| ---- | -------------------------------------------------------- | -------------------------------------------- |
+| 1    | Did I identify the correct agent for this domain?        | → STOP. Analyze request domain first.        |
+| 2    | Did I READ the agent's `.md` file (or recall its rules)? | → STOP. Open `.agent/agents/{agent}.md`      |
+| 3    | Did I announce `🤖 Applying knowledge of @[agent]...`?   | → STOP. Add announcement before response.    |
+| 4    | Did I load required skills from agent's frontmatter?     | → STOP. Check `skills:` field and read them. |
 
 **Failure Conditions:**
 
@@ -219,20 +219,20 @@ When user's prompt is NOT in English:
 
 ### 🎭 Gemini Mode Mapping
 
-| Mode     | Agent             | Behavior                                     |
-| -------- | ----------------- | -------------------------------------------- |
-| **plan** | `project-planner` | 4-phase methodology. NO CODE before Phase 4. |
-| **ask**  | -                 | Focus on understanding. Ask questions.       |
-| **edit** | `orchestrator`    | Execute. Check `{task-slug}.md` first.       |
+| Mode     | Agent             | Behavior                                                                 |
+| -------- | ----------------- | ------------------------------------------------------------------------ |
+| **plan** | `project-planner` | 4-phase methodology. NO CODE before Phase 4.                             |
+| **ask**  | -                 | Focus on understanding. Ask questions.                                   |
+| **edit** | `orchestrator`    | Execute. Check `docs/features/{feature-name}/{TASK-SLUG}-PLAN.md` first. |
 
 **Plan Mode (4-Phase):**
 
 1. ANALYSIS → Research, questions
-2. PLANNING → `{task-slug}.md`, task breakdown
+2. PLANNING → `docs/features/{feature-name}/{TASK-SLUG}-PLAN.md`, task breakdown
 3. SOLUTIONING → Architecture, design (NO CODE!)
 4. IMPLEMENTATION → Code + tests
 
-> 🔴 **Edit mode:** If multi-file or structural change → Offer to create `{task-slug}.md`. For single-file fixes → Proceed directly.
+> 🔴 **Edit mode:** If multi-file or structural change → Offer to create `docs/features/{feature-name}/{TASK-SLUG}-PLAN.md`. For single-file fixes → Proceed directly.
 
 ---
 

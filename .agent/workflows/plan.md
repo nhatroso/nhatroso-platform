@@ -25,7 +25,7 @@ Use the `project-planner` agent with this context:
 CONTEXT:
 - User Request: $ARGUMENTS
 - Mode: PLANNING ONLY (no code)
-- Output: docs/PLAN-{task-slug}.md (dynamic naming)
+- Output: docs/features/{feature-name}/{TASK-SLUG}-PLAN.md (dynamic naming)
 
 NAMING RULES:
 1. Extract 2-3 key words from request
@@ -45,20 +45,21 @@ RULES:
 
 ## Expected Output
 
-| Deliverable | Location |
-|-------------|----------|
-| Project Plan | `docs/PLAN-{task-slug}.md` |
-| Task Breakdown | Inside plan file |
-| Agent Assignments | Inside plan file |
-| Verification Checklist | Phase X in plan file |
+| Deliverable            | Location                                           |
+| ---------------------- | -------------------------------------------------- |
+| Project Plan           | `docs/features/{feature-name}/{TASK-SLUG}-PLAN.md` |
+| Task Breakdown         | Inside plan file                                   |
+| Agent Assignments      | Inside plan file                                   |
+| Verification Checklist | Phase X in plan file                               |
 
 ---
 
 ## After Planning
 
 Tell user:
+
 ```
-[OK] Plan created: docs/PLAN-{slug}.md
+[OK] Plan created: docs/features/{feature-name}/{TASK-SLUG}-PLAN.md
 
 Next steps:
 - Review the plan
@@ -70,13 +71,13 @@ Next steps:
 
 ## Naming Examples
 
-| Request | Plan File |
-|---------|-----------|
-| `/plan e-commerce site with cart` | `docs/PLAN-ecommerce-cart.md` |
-| `/plan mobile app for fitness` | `docs/PLAN-fitness-app.md` |
-| `/plan add dark mode feature` | `docs/PLAN-dark-mode.md` |
-| `/plan fix authentication bug` | `docs/PLAN-auth-fix.md` |
-| `/plan SaaS dashboard` | `docs/PLAN-saas-dashboard.md` |
+| Request                         | Plan File                                        |
+| ------------------------------- | ------------------------------------------------ |
+| /plan e-commerce site with cart | `docs/features/ecommerce/ecommerce-cart-PLAN.md` |
+| /plan mobile app for fitness    | `docs/features/fitness/fitness-app-PLAN.md`      |
+| /plan add dark mode feature     | `docs/features/dark-mode/dark-mode-PLAN.md`      |
+| /plan fix authentication bug    | `docs/features/auth/auth-fix-PLAN.md`            |
+| /plan SaaS dashboard            | `docs/features/dashboard/saas-dashboard-PLAN.md` |
 
 ---
 

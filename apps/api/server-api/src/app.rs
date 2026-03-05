@@ -46,7 +46,9 @@ impl Hooks for App {
     }
 
     fn routes(_ctx: &AppContext) -> AppRoutes {
-        AppRoutes::with_default_routes().add_route(controllers::auth::routes())
+        AppRoutes::with_default_routes()
+            .add_route(controllers::auth::routes())
+            .add_route(controllers::property::routes())
     }
 
     async fn after_routes(router: axum::Router, _ctx: &AppContext) -> Result<axum::Router> {
