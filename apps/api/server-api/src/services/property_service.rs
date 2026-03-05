@@ -97,10 +97,31 @@ impl PropertyService {
 
     pub async fn create_floor(
         db: &DatabaseConnection,
-        _owner_id: Uuid,
+        owner_id: Uuid,
         params: &CreateFloorParams,
     ) -> ModelResult<crate::models::floors::Model> {
         // Validate building exists and belongs to owner
+        BuildingEntity::find_by_id(params.building_id)
+            .filter(BuildingColumn::OwnerId.eq(owner_id))
+            .one(db)
+            .await?
+            .ok_or_else(|| ModelError::EntityNotFound)?;
+
+        // Check uniqueness
+        let existing_floor = crate::models::_entities::floors::Entity::find()
+            .filter(crate::models::_entities::floors::Column::BuildingId.eq(params.building_id))
+            .filter(
+                crate::models::_entities::floors::Column::Identifier.eq(params.identifier.clone()),
+            )
+            .one(db)
+            .await?;
+
+        if existing_floor.is_some() {
+            return Err(ModelError::Any(
+                anyhow::anyhow!("DUPLICATE_FLOOR_IDENTIFIER").into(),
+            ));
+        }
+
         let floor = FloorActiveModel {
             building_id: Set(params.building_id),
             identifier: Set(params.identifier.clone()),
@@ -113,9 +134,29 @@ impl PropertyService {
 
     pub async fn create_room(
         db: &DatabaseConnection,
-        _owner_id: Uuid,
+        owner_id: Uuid,
         params: &CreateRoomParams,
     ) -> ModelResult<crate::models::rooms::Model> {
+        // Validate building exists and belongs to owner
+        BuildingEntity::find_by_id(params.building_id)
+            .filter(BuildingColumn::OwnerId.eq(owner_id))
+            .one(db)
+            .await?
+            .ok_or_else(|| ModelError::EntityNotFound)?;
+
+        // Check uniqueness
+        let existing_room = RoomEntity::find()
+            .filter(RoomColumn::BuildingId.eq(params.building_id))
+            .filter(RoomColumn::Code.eq(params.code.clone()))
+            .one(db)
+            .await?;
+
+        if existing_room.is_some() {
+            return Err(ModelError::Any(
+                anyhow::anyhow!("DUPLICATE_ROOM_IDENTIFIER").into(),
+            ));
+        }
+
         let room = RoomActiveModel {
             building_id: Set(params.building_id),
             floor_id: Set(params.floor_id),
@@ -128,11 +169,18 @@ impl PropertyService {
     pub async fn update_room_status(
         db: &DatabaseConnection,
         room_id: Uuid,
-        _owner_id: Uuid,
+        owner_id: Uuid,
         params: &UpdateRoomStatusParams,
     ) -> ModelResult<crate::models::rooms::Model> {
         let room = RoomEntity::find_by_id(room_id)
-            .one(db) // TODO: enforce owner_id thru building join
+            .one(db)
+            .await?
+            .ok_or_else(|| ModelError::EntityNotFound)?;
+
+        // Enforce owner_id thru building join
+        BuildingEntity::find_by_id(room.building_id)
+            .filter(BuildingColumn::OwnerId.eq(owner_id))
+            .one(db)
             .await?
             .ok_or_else(|| ModelError::EntityNotFound)?;
 
@@ -144,10 +192,17 @@ impl PropertyService {
     pub async fn archive_room(
         db: &DatabaseConnection,
         room_id: Uuid,
-        _owner_id: Uuid,
+        owner_id: Uuid,
     ) -> ModelResult<crate::models::rooms::Model> {
         let room = RoomEntity::find_by_id(room_id)
-            .one(db) // TODO: enforce owner_id
+            .one(db)
+            .await?
+            .ok_or_else(|| ModelError::EntityNotFound)?;
+
+        // Enforce owner_id thru building join
+        BuildingEntity::find_by_id(room.building_id)
+            .filter(BuildingColumn::OwnerId.eq(owner_id))
+            .one(db)
             .await?
             .ok_or_else(|| ModelError::EntityNotFound)?;
 

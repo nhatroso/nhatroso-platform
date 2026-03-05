@@ -115,7 +115,23 @@ pub async fn create_floor(
     check_owner(&auth).await?;
     let owner_id: Uuid = auth.claims.pid.parse().unwrap_or_default();
 
-    let floor = PropertyService::create_floor(&ctx.db, owner_id, &params).await?;
+    let floor = PropertyService::create_floor(&ctx.db, owner_id, &params)
+        .await
+        .map_err(|e| {
+            if let loco_rs::model::ModelError::Any(ref err) = e {
+                if err.to_string() == "DUPLICATE_FLOOR_IDENTIFIER" {
+                    return Error::CustomError(
+                        axum::http::StatusCode::CONFLICT,
+                        loco_rs::controller::ErrorDetail {
+                            error: Some("Conflict".to_string()),
+                            description: Some("DUPLICATE_FLOOR_IDENTIFIER".to_string()),
+                            errors: None,
+                        },
+                    );
+                }
+            }
+            Error::from(e)
+        })?;
     format::json(floor)
 }
 
@@ -139,7 +155,23 @@ pub async fn create_room(
     check_owner(&auth).await?;
     let owner_id: Uuid = auth.claims.pid.parse().unwrap_or_default();
 
-    let room = PropertyService::create_room(&ctx.db, owner_id, &params).await?;
+    let room = PropertyService::create_room(&ctx.db, owner_id, &params)
+        .await
+        .map_err(|e| {
+            if let loco_rs::model::ModelError::Any(ref err) = e {
+                if err.to_string() == "DUPLICATE_ROOM_IDENTIFIER" {
+                    return Error::CustomError(
+                        axum::http::StatusCode::CONFLICT,
+                        loco_rs::controller::ErrorDetail {
+                            error: Some("Conflict".to_string()),
+                            description: Some("DUPLICATE_ROOM_IDENTIFIER".to_string()),
+                            errors: None,
+                        },
+                    );
+                }
+            }
+            Error::from(e)
+        })?;
     format::json(room)
 }
 

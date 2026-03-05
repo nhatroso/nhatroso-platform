@@ -92,3 +92,30 @@ _(To be filled during Verification Phase)_
 - Security: ⏳ Pending
 - Build: ⏳ Pending
 - Date: ⏳ Pending
+
+---
+
+## Addendum: Floor & Room Unique Constraints
+
+**Epic Request**: CRUD floors and rooms + unique room code per building.
+
+### Task 6: Implement Service Validations for Floor/Room Uniqueness
+
+- **Agent**: `backend-specialist`
+- **INPUT**: `src/services/property_service.rs`
+- **ACTION**:
+  - Update `create_floor` to ensure the building exists and belongs to the owner.
+  - Check DB if `(building_id, identifier)` exists before creating the Floor, returning a `409 DUPLICATE_FLOOR_IDENTIFIER` custom error if true.
+  - Update `create_room` to ensure the building exists and belongs to the owner.
+  - Check DB if `(building_id, code)` exists before creating the Room, returning a `409 DUPLICATE_ROOM_IDENTIFIER` custom error if true.
+  - Ensure `archive_room` and `update_room_status` properly cross-check the owner permission.
+- **OUTPUT**: Hardened `PropertyService` returning explicit application errors.
+
+### Task 7: Update Integration Tests for Uniqueness Constraints
+
+- **Agent**: `test-engineer`
+- **INPUT**: `tests/requests/property.rs`
+- **ACTION**:
+  - Add tests attempting to create a floor with an existing `identifier` in the same building (expecting failure).
+  - Add tests attempting to create a room with an existing `code` in the same building (expecting failure).
+- **OUTPUT**: Passing integration tests demonstrating uniqueness constraints.

@@ -68,6 +68,19 @@ async fn test_property_workflow() {
         let floor_res: serde_json::Value = serde_json::from_str(&res.text()).unwrap();
         let floor_id = floor_res["id"].as_str().unwrap().to_string();
 
+        // 2b. Create Duplicate Floor (should fail with 409)
+        let res = request
+            .post("/api/v1/floors")
+            .add_header(auth_key.clone(), auth_value.clone())
+            .json(&create_floor_payload)
+            .await;
+
+        assert_eq!(
+            res.status_code(),
+            409,
+            "Create duplicate floor should fail with 409"
+        );
+
         // 3. Create Room
         let create_room_payload = serde_json::json!({
             "building_id": building_id,
@@ -85,6 +98,19 @@ async fn test_property_workflow() {
         let room_res: serde_json::Value = serde_json::from_str(&res.text()).unwrap();
         let room_id = room_res["id"].as_str().unwrap().to_string();
         assert_eq!(room_res["status"], "VACANT");
+
+        // 3b. Create Duplicate Room (should fail with 409)
+        let res = request
+            .post("/api/v1/rooms")
+            .add_header(auth_key.clone(), auth_value.clone())
+            .json(&create_room_payload)
+            .await;
+
+        assert_eq!(
+            res.status_code(),
+            409,
+            "Create duplicate room should fail with 409"
+        );
 
         // 4. Update Room Status to OCCUPIED
         let update_status_payload = serde_json::json!({
