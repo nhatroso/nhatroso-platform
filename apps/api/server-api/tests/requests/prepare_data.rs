@@ -1,7 +1,7 @@
 use axum::http::{HeaderName, HeaderValue};
 use loco_rs::{app::AppContext, TestServer};
-use server_api::{models::_entities::users, controllers::auth::AuthResponse};
-use sea_orm::{EntityTrait, ColumnTrait, QueryFilter};
+use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
+use server_api::{controllers::auth::AuthResponse, models::_entities::users};
 
 const USER_EMAIL: &str = "test@loco.com";
 const USER_PASSWORD: &str = "12341234";

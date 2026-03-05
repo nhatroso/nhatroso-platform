@@ -1,0 +1,52 @@
+﻿Name,Requirement ID,Type,Priority,Related Epic,Status,Acceptance Criteria
+Login & account creation,REQ-001,Functional,Must,Account,Ready,"- User can create an account with email/phone.
+- User can log in and log out.
+- Errors are shown for invalid credentials."
+User registration (email/phone),REQ-003,Functional,Must,Account,Draft,"- User can register with email or phone and a password.
+- System validates required fields and password policy.
+- System prevents duplicate email/phone accounts with clear error message."
+Role-based access control (Owner vs Tenant),REQ-004,Functional,Must,Security,Draft,"- System supports at least 2 roles: Owner and Tenant.
+- Tenant cannot access Owner-only screens and APIs.
+- Unauthorized requests return 401/403 with safe error messages."
+Manage buildings/blocks/floors/rooms,REQ-005,Functional,Must,Owner – Room Management,Draft,"- Owner can create, edit, and archive buildings/blocks, floors, and rooms.
+- Room has a unique identifier within its building/block.
+- Room status can be set to: Vacant, Deposited, Occupied, Maintenance."
+Configure service pricing per room and over time,REQ-006,Functional,Must,Owner – Pricing,Draft,"- Owner can set unit prices for electricity, water, and other services (wifi, cleaning, etc.).
+- System stores pricing history with effective dates.
+- Monthly billing uses the price effective for the billing period."
+Create and manage rental contracts,REQ-008,Functional,Must,Owner – Contracts,Draft,"- Owner can create a contract linking a room and one or more tenants.
+- Contract includes start date, end date (optional), and payment cycle.
+- Contract can be ended and the room status updates accordingly."
+Capture meter reading by photo (Owner),REQ-009,Functional,Must,OCR,Draft,"- Owner can open camera and attach a meter photo to a room for a billing period.
+- System stores the original image as evidence and links it to the reading.
+- Owner can view the stored photo later from invoice/reading details."
+OCR recognition outputs numeric reading,REQ-012,Functional,Must,OCR,Draft,"- OCR service returns a numeric string reading and a confidence score.
+- System rejects non-numeric outputs and requests re-capture or manual entry.
+- Reading is stored with timestamp, room, meter type (electric/water), and photo evidence."
+OCR logic validation vs previous reading (human-in-the-loop),REQ-013,Functional,Must,OCR,Draft,"- System compares current reading to previous reading for the same room and meter type.
+- If current < previous, system blocks auto-confirm and prompts for re-capture or manual entry.
+- Owner can override with a reason and the system logs the override."
+Manual correction before finalizing meter reading,REQ-014,Functional,Must,OCR,Draft,"- Owner can edit the OCR-extracted number before saving as final reading.
+- System displays the photo next to the extracted value for review.
+- Audit log records original OCR value, final value, and editor."
+Generate monthly invoices per room,REQ-015,Functional,Must,Billing & Invoices,Draft,"- Owner can generate invoices for a selected billing period for all active contracts.
+- Invoice includes rent, electricity, water, and configured services.
+- Invoice total is calculated from consumption (new-old readings) and unit prices for that period."
+Invoice status workflow,REQ-016,Functional,Must,Billing & Invoices,Draft,"- Invoice supports statuses at minimum: Unpaid, Pending confirmation, Paid, Voided.
+- Owner can mark invoice as voided with a reason.
+- Status changes are timestamped and traceable."
+Tenant can view invoice details with meter photos,REQ-017,Functional,Must,Tenant – Billing,Draft,"- Tenant can view a list of invoices by month with amounts and status.
+- Tenant can open an invoice to see line items (rent, electric, water, services).
+- Tenant can view the meter photo evidence attached to the invoice/readings."
+Room status reflects contract lifecycle,REQ-024,Functional,Must,Owner – Room Management,Draft,"- When a contract is activated, room status becomes Occupied.
+- When a contract ends, room status becomes Vacant (unless manually set to Maintenance).
+- System prevents creating multiple active contracts for the same room."
+System keeps an audit trail for critical actions,REQ-026,Non-functional,Must,Platform,Draft,"- System records who did what and when for: login events, reading overrides, invoice edits/status changes, and contract changes.
+- Audit records are tamper-evident (append-only behavior at application level).
+- Admin/Owner can export audit logs for a date range."
+Security: password hashing and JWT auth,REQ-027,Non-functional,Must,Security,Draft,"- Passwords are never stored in plain text; strong hashing is used.
+- API authentication uses JWT (or equivalent) with expiration.
+- System supports refresh or re-login flow when token expires."
+Data privacy: tenant documents access control,REQ-028,Non-functional,Must,Security,Draft,"- Only authorized Owner accounts can view tenant ID document images.
+- Tenants can only access their own invoices and tickets.
+- Access violations are logged and return 403 without leaking sensitive details."

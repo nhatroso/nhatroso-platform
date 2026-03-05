@@ -41,7 +41,7 @@ mailer:
 
 # Database Configuration
 database:
-  uri: '{{ get_env(name="DATABASE_URL", default="postgres://nhatroso:nhatroso@localhost:5433/nhatroso_db_test") }}'
+  uri: '{{ get_env(name="DATABASE_URL", default="postgres://nhatroso:nhatroso@localhost:5432/nhatroso_db_test") }}'
   enable_logging: false
   connect_timeout: 500
   idle_timeout: 500

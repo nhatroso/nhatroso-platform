@@ -3,12 +3,11 @@
 #![allow(clippy::unused_async)]
 
 use loco_rs::prelude::*;
-use sea_orm::{ActiveValue, ActiveModelTrait};
+use sea_orm::{ActiveModelTrait, ActiveValue};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    models::_entities::users::Model as UsersModel,
-    models::_entities::users::ActiveModel,
+    models::_entities::users::ActiveModel, models::_entities::users::Model as UsersModel,
     services::auth_service,
 };
 
@@ -54,7 +53,8 @@ pub async fn register(
     let password = params.password.unwrap_or_default();
 
     // Hash password
-    let password_hash = loco_rs::hash::hash_password(&password).map_err(|e| Error::Message(e.to_string()))?;
+    let password_hash =
+        loco_rs::hash::hash_password(&password).map_err(|e| Error::Message(e.to_string()))?;
 
     let user_id = uuid::Uuid::new_v4();
     let item = ActiveModel {
@@ -70,7 +70,19 @@ pub async fn register(
 
     let db_res = item.insert(&ctx.db).await?;
 
-    let tokens = auth_service::generate_tokens(&ctx.db, &ctx.config.auth.as_ref().unwrap().jwt.as_ref().unwrap().secret, db_res.id).await?;
+    let tokens = auth_service::generate_tokens(
+        &ctx.db,
+        &ctx.config
+            .auth
+            .as_ref()
+            .unwrap()
+            .jwt
+            .as_ref()
+            .unwrap()
+            .secret,
+        db_res.id,
+    )
+    .await?;
 
     format::json(AuthResponse {
         token: tokens.access_token,
@@ -100,7 +112,19 @@ pub async fn login(
         return Err(Error::Unauthorized("Invalid credentials".to_string()));
     }
 
-    let tokens = auth_service::generate_tokens(&ctx.db, &ctx.config.auth.as_ref().unwrap().jwt.as_ref().unwrap().secret, user.id).await?;
+    let tokens = auth_service::generate_tokens(
+        &ctx.db,
+        &ctx.config
+            .auth
+            .as_ref()
+            .unwrap()
+            .jwt
+            .as_ref()
+            .unwrap()
+            .secret,
+        user.id,
+    )
+    .await?;
 
     format::json(AuthResponse {
         token: tokens.access_token,
@@ -125,9 +149,18 @@ pub async fn refresh(
 ) -> Result<Response> {
     let tokens = auth_service::rotate_refresh_token(
         &ctx.db,
-        &ctx.config.auth.as_ref().unwrap().jwt.as_ref().unwrap().secret,
-        &params.refresh_token
-    ).await.map_err(|e| Error::Unauthorized(e.to_string()))?;
+        &ctx.config
+            .auth
+            .as_ref()
+            .unwrap()
+            .jwt
+            .as_ref()
+            .unwrap()
+            .secret,
+        &params.refresh_token,
+    )
+    .await
+    .map_err(|e| Error::Unauthorized(e.to_string()))?;
 
     format::json(serde_json::json!({
         "token": tokens.access_token,
@@ -170,10 +203,7 @@ pub async fn logout(
     ),
     tag = "Auth"
 )]
-pub async fn current_user(
-    auth: JWT,
-    State(_ctx): State<AppContext>,
-) -> Result<Response> {
+pub async fn current_user(auth: JWT, State(_ctx): State<AppContext>) -> Result<Response> {
     format::json(serde_json::json!({
         "status": "ok",
         "user_id": auth.claims.pid

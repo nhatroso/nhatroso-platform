@@ -4,13 +4,8 @@ use loco_rs::model::{ModelError, ModelResult};
 use sea_orm::{entity::prelude::*, ActiveValue};
 use uuid::Uuid;
 
-
-
 impl super::_entities::refresh_tokens::Model {
-    pub async fn create(
-        db: &DatabaseConnection,
-        user_id: Uuid,
-    ) -> ModelResult<(Self, String)> {
+    pub async fn create(db: &DatabaseConnection, user_id: Uuid) -> ModelResult<(Self, String)> {
         let jti = Uuid::new_v4();
 
         let refresh_token = ActiveModel {
@@ -27,7 +22,8 @@ impl super::_entities::refresh_tokens::Model {
     }
 
     pub async fn validate_and_revoke(db: &DatabaseConnection, jti_str: &str) -> ModelResult<Self> {
-        let jti = Uuid::parse_str(jti_str).map_err(|_| ModelError::Any(anyhow::anyhow!("Invalid token format").into()))?;
+        let jti = Uuid::parse_str(jti_str)
+            .map_err(|_| ModelError::Any(anyhow::anyhow!("Invalid token format").into()))?;
 
         let token = Entity::find()
             .filter(super::_entities::refresh_tokens::Column::Jti.eq(jti))
@@ -53,7 +49,8 @@ impl super::_entities::refresh_tokens::Model {
     }
 
     pub async fn revoke(db: &DatabaseConnection, jti_str: &str) -> ModelResult<()> {
-        let jti = Uuid::parse_str(jti_str).map_err(|_| ModelError::Any(anyhow::anyhow!("Invalid token format").into()))?;
+        let jti = Uuid::parse_str(jti_str)
+            .map_err(|_| ModelError::Any(anyhow::anyhow!("Invalid token format").into()))?;
 
         let token = Entity::find()
             .filter(super::_entities::refresh_tokens::Column::Jti.eq(jti))

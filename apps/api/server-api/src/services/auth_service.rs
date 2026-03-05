@@ -19,7 +19,15 @@ pub async fn generate_tokens(
 
     let jwt = JWT::new(jwt_secret);
 
-    let access_token = jwt.generate_token(expiration_seconds, user_id.to_string(), serde_json::Map::new())        .map_err(|e| loco_rs::model::ModelError::Any(anyhow::anyhow!("JWT generation failed: {}", e).into()))?;
+    let access_token = jwt
+        .generate_token(
+            expiration_seconds,
+            user_id.to_string(),
+            serde_json::Map::new(),
+        )
+        .map_err(|e| {
+            loco_rs::model::ModelError::Any(anyhow::anyhow!("JWT generation failed: {}", e).into())
+        })?;
 
     // Create DB refresh token
     let (_, refresh_token) = RefreshTokensModel::create(db, user_id).await?;
@@ -42,9 +50,6 @@ pub async fn rotate_refresh_token(
     generate_tokens(db, jwt_secret, token.user_id).await
 }
 
-pub async fn revoke_token(
-    db: &DatabaseConnection,
-    jti_str: &str,
-) -> ModelResult<()> {
+pub async fn revoke_token(db: &DatabaseConnection, jti_str: &str) -> ModelResult<()> {
     RefreshTokensModel::revoke(db, jti_str).await
 }

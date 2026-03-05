@@ -1,0 +1,95 @@
+﻿Name,Acceptance Criteria,Priority,Related Epic,Requirement ID,Status,Type
+Text detection to locate digit region on meter,"- System detects and crops the numeric region of the meter image.
+- Cropped region is saved for debugging/audit purposes.
+- If detection confidence is below threshold, system asks for re-capture or manual input.",Should,OCR,REQ-011,Draft,Functional
+Availability & resilience for core services,"- Core services remain usable if OCR service is temporarily unavailable (graceful degradation).
+- System surfaces clear status for OCR failures and allows manual entry.
+- Service-to-service timeouts prevent cascading failures.",Should,Platform,REQ-031,Draft,Non-functional
+Automated payment reminder notifications,"- Owner can configure reminder schedule (e.g., X days before/after due date).
+- System sends reminders only for unpaid invoices.
+- Reminder events are logged per invoice.",Could,Notifications,REQ-021,Draft,Functional
+Deployment: containerized services via Docker Compose,"- System can be started in a clean environment using Docker Compose.
+- Each service (core backend, OCR service, database, cache/queue) has its own container configuration.
+- Environment variables are used for secrets and connection strings.",Should,DevOps,REQ-032,Draft,Non-functional
+Login & account creation,"- User can create an account with email/phone.
+- User can log in and log out.
+- Errors are shown for invalid credentials.",Must,Account,REQ-001,Ready,Functional
+Tenant maintenance request / ticket system,"- Tenant can create a ticket with category (electric, water, internet, other), description, and optional photos.
+- Tenant can see ticket status updates (New, In progress, Resolved).
+- Owner can comment internally and change status.",Should,Tenant – Support,REQ-022,Draft,Functional
+OCR recognition outputs numeric reading,"- OCR service returns a numeric string reading and a confidence score.
+- System rejects non-numeric outputs and requests re-capture or manual entry.
+- Reading is stored with timestamp, room, meter type (electric/water), and photo evidence.",Must,OCR,REQ-012,Draft,Functional
+Performance – page load time,- Core pages load within 2 seconds on average under expected load.,Should,Platform,REQ-002,Draft,Non-functional
+Owner dashboard: revenue and occupancy analytics,"- Owner can view revenue by month/quarter for a selected date range.
+- Owner can view occupancy rate over time and current vacant vs occupied counts.
+- Dashboard values match invoice and contract data for the same period.",Should,Reporting,REQ-023,Draft,Functional
+OCR logic validation vs previous reading (human-in-the-loop),"- System compares current reading to previous reading for the same room and meter type.
+- If current < previous, system blocks auto-confirm and prompts for re-capture or manual entry.
+- Owner can override with a reason and the system logs the override.",Must,OCR,REQ-013,Draft,Functional
+Room status reflects contract lifecycle,"- When a contract is activated, room status becomes Occupied.
+- When a contract ends, room status becomes Vacant (unless manually set to Maintenance).
+- System prevents creating multiple active contracts for the same room.",Must,Owner – Room Management,REQ-024,Draft,Functional
+Tenant profile self-update (limited fields),"- Tenant can update personal contact fields (phone, email) subject to verification.
+- Tenant cannot edit contract terms, invoice amounts, or meter readings.
+- Changes are logged with timestamp.",Could,Tenant – Profile,REQ-025,Draft,Functional
+System keeps an audit trail for critical actions,"- System records who did what and when for: login events, reading overrides, invoice edits/status changes, and contract changes.
+- Audit records are tamper-evident (append-only behavior at application level).
+- Admin/Owner can export audit logs for a date range.",Must,Platform,REQ-026,Draft,Non-functional
+User registration (email/phone),"- User can register with email or phone and a password.
+- System validates required fields and password policy.
+- System prevents duplicate email/phone accounts with clear error message.",Must,Account,REQ-003,Draft,Functional
+Security: password hashing and JWT auth,"- Passwords are never stored in plain text; strong hashing is used.
+- API authentication uses JWT (or equivalent) with expiration.
+- System supports refresh or re-login flow when token expires.",Must,Security,REQ-027,Draft,Non-functional
+Role-based access control (Owner vs Tenant),"- System supports at least 2 roles: Owner and Tenant.
+- Tenant cannot access Owner-only screens and APIs.
+- Unauthorized requests return 401/403 with safe error messages.",Must,Security,REQ-004,Draft,Functional
+Manual correction before finalizing meter reading,"- Owner can edit the OCR-extracted number before saving as final reading.
+- System displays the photo next to the extracted value for review.
+- Audit log records original OCR value, final value, and editor.",Must,OCR,REQ-014,Draft,Functional
+Data privacy: tenant documents access control,"- Only authorized Owner accounts can view tenant ID document images.
+- Tenants can only access their own invoices and tickets.
+- Access violations are logged and return 403 without leaking sensitive details.",Must,Security,REQ-028,Draft,Non-functional
+Asynchronous OCR processing via queue,"- When an image is uploaded, OCR request can be queued and processed asynchronously.
+- Client receives processing status (Queued/Processing/Completed/Failed).
+- System retries failed OCR jobs with a capped retry policy.",Should,OCR,REQ-029,Draft,Functional
+System performance: core screens responsive under normal load,"- 95% of core API requests complete within 2 seconds under expected load.
+- OCR processing time is reported separately and does not block core services.
+- System uses caching where appropriate to reduce repeated reads.",Should,Platform,REQ-030,Draft,Non-functional
+Generate monthly invoices per room,"- Owner can generate invoices for a selected billing period for all active contracts.
+- Invoice includes rent, electricity, water, and configured services.
+- Invoice total is calculated from consumption (new-old readings) and unit prices for that period.",Must,Billing & Invoices,REQ-015,Draft,Functional
+Manage buildings/blocks/floors/rooms,"- Owner can create, edit, and archive buildings/blocks, floors, and rooms.
+- Room has a unique identifier within its building/block.
+- Room status can be set to: Vacant, Deposited, Occupied, Maintenance.",Must,Owner – Room Management,REQ-005,Draft,Functional
+Invoice status workflow,"- Invoice supports statuses at minimum: Unpaid, Pending confirmation, Paid, Voided.
+- Owner can mark invoice as voided with a reason.
+- Status changes are timestamped and traceable.",Must,Billing & Invoices,REQ-016,Draft,Functional
+Tenant can view invoice details with meter photos,"- Tenant can view a list of invoices by month with amounts and status.
+- Tenant can open an invoice to see line items (rent, electric, water, services).
+- Tenant can view the meter photo evidence attached to the invoice/readings.",Must,Tenant – Billing,REQ-017,Draft,Functional
+Dynamic VietQR generation for bank transfer,"- System generates a VietQR (or equivalent) for each invoice with amount and transfer content containing invoice code.
+- QR can be displayed on tenant invoice screen and downloadable as image.
+- If bank account info is missing, system hides QR and shows instructions.",Should,Payments,REQ-018,Draft,Functional
+Payment confirmation via bank webhook (Casso/Sepay),"- System can receive webhook events with transaction amount and transfer content.
+- If content matches an invoice code and amount is sufficient, system marks invoice as Paid automatically.
+- If multiple invoices match or mismatch occurs, system flags for manual review.",Should,Payments,REQ-019,Draft,Functional
+Automated invoice notification to tenant,"- When an invoice is generated, tenant receives a notification (in-app at minimum).
+- Notification includes room, billing period, and amount.
+- Tenant can tap notification to open the invoice.",Should,Notifications,REQ-020,Draft,Functional
+Configure service pricing per room and over time,"- Owner can set unit prices for electricity, water, and other services (wifi, cleaning, etc.).
+- System stores pricing history with effective dates.
+- Monthly billing uses the price effective for the billing period.",Must,Owner – Pricing,REQ-006,Draft,Functional
+Tenant profile & ID document storage,"- Owner can add and update tenant profile data (name, phone/email, emergency contact optional).
+- Owner can upload and view ID document images for a tenant.
+- Files are only accessible to authorized Owner accounts.",Should,Owner – Tenant Management,REQ-007,Draft,Functional
+Create and manage rental contracts,"- Owner can create a contract linking a room and one or more tenants.
+- Contract includes start date, end date (optional), and payment cycle.
+- Contract can be ended and the room status updates accordingly.",Must,Owner – Contracts,REQ-008,Draft,Functional
+Capture meter reading by photo (Owner),"- Owner can open camera and attach a meter photo to a room for a billing period.
+- System stores the original image as evidence and links it to the reading.
+- Owner can view the stored photo later from invoice/reading details.",Must,OCR,REQ-009,Draft,Functional
+OCR preprocessing pipeline (crop/deskew/denoise),"- System performs automatic preprocessing on uploaded meter photos (at least grayscale + denoise + deskew).
+- Preprocessed image improves text visibility and is used for recognition.
+- If preprocessing fails, system falls back to original image and flags the attempt.",Should,OCR,REQ-010,Draft,Functional

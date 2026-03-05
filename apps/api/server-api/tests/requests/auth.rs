@@ -1,9 +1,9 @@
 use loco_rs::testing::prelude::*;
+use sea_orm::ColumnTrait;
+use sea_orm::EntityTrait;
+use sea_orm::QueryFilter;
 use serial_test::serial;
 use server_api::{app::App, models::_entities::users};
-use sea_orm::EntityTrait;
-use sea_orm::ColumnTrait;
-use sea_orm::QueryFilter;
 
 use super::prepare_data;
 
@@ -32,7 +32,8 @@ async fn can_register() {
         assert_eq!(
             response.status_code(),
             200,
-            "Register request should succeed, got error: {}", response.text()
+            "Register request should succeed, got error: {}",
+            response.text()
         );
 
         let saved_user = users::Entity::find()
@@ -107,11 +108,7 @@ async fn can_get_current_user() {
             .add_header(auth_key, auth_value)
             .await;
 
-        assert_eq!(
-            response.status_code(),
-            200,
-            "Me request should succeed"
-        );
+        assert_eq!(response.status_code(), 200, "Me request should succeed");
 
         let json: serde_json::Value = serde_json::from_str(&response.text()).unwrap();
         assert_eq!(json.get("status").unwrap().as_str().unwrap(), "ok");
@@ -131,10 +128,7 @@ async fn can_refresh_token() {
             "refresh_token": user_data.refresh_token,
         });
 
-        let response = request
-            .post("/api/auth/refresh")
-            .json(&payload)
-            .await;
+        let response = request.post("/api/auth/refresh").json(&payload).await;
 
         assert_eq!(
             response.status_code(),
@@ -147,10 +141,7 @@ async fn can_refresh_token() {
         assert!(json.get("refresh_token").is_some());
 
         // Should not be able to reuse the old refresh token
-        let reused_response = request
-            .post("/api/auth/refresh")
-            .json(&payload)
-            .await;
+        let reused_response = request.post("/api/auth/refresh").json(&payload).await;
 
         assert_eq!(
             reused_response.status_code(),
@@ -181,17 +172,10 @@ async fn can_logout() {
             .json(&payload)
             .await;
 
-        assert_eq!(
-            response.status_code(),
-            200,
-            "Logout request should succeed"
-        );
+        assert_eq!(response.status_code(), 200, "Logout request should succeed");
 
         // Refresh token should now be invalid
-        let refresh_response = request
-            .post("/api/auth/refresh")
-            .json(&payload)
-            .await;
+        let refresh_response = request.post("/api/auth/refresh").json(&payload).await;
 
         assert_eq!(
             refresh_response.status_code(),

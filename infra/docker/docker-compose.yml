@@ -1,17 +1,17 @@
 services:
+# 1 core and 1 test db
   postgres:
     image: postgres:16-alpine
     container_name: nhatroso-postgres
     environment:
       POSTGRES_USER: nhatroso
       POSTGRES_PASSWORD: nhatroso
-      POSTGRES_DB: nhatroso_core
+      POSTGRES_DB: nhatroso_db
     ports:
       - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
-
   redis:
     image: redis:7-alpine
     container_name: nhatroso-redis
