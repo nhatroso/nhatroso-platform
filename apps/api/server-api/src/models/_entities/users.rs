@@ -10,7 +10,8 @@ pub struct Model {
     #[sea_orm(unique)]
     pub email: Option<String>,
     #[sea_orm(unique)]
-    pub phone: Option<String>,
+    pub phone: String,
+    pub name: String,
     pub password_hash: String,
     pub role: String,
     pub status: String,

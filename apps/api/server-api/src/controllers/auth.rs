@@ -12,17 +12,32 @@ use crate::{
 };
 
 use utoipa::ToSchema;
+use axum::{http::StatusCode, response::IntoResponse};
+
+fn error_response(code: &str, status: StatusCode) -> Result<Response> {
+    Ok((
+        status,
+        Json(serde_json::json!({
+            "success": false,
+            "error": {
+                "code": code
+            }
+        }))
+    ).into_response())
+}
 
 #[derive(Clone, Debug, Deserialize, ToSchema)]
 pub struct RegisterParams {
-    pub email: String,
-    pub password: Option<String>,
+    pub email: Option<String>,
+    pub phone: String,
+    pub name: String,
+    pub password: String,
 }
 
 #[derive(Clone, Debug, Deserialize, ToSchema)]
 pub struct LoginParams {
-    pub email: String,
-    pub password: Option<String>,
+    pub phone: String,
+    pub password: String,
 }
 
 #[derive(Clone, Debug, Deserialize, ToSchema)]
@@ -50,25 +65,43 @@ pub async fn register(
     State(ctx): State<AppContext>,
     Json(params): Json<RegisterParams>,
 ) -> Result<Response> {
-    let password = params.password.unwrap_or_default();
+    if params.name.trim().is_empty() {
+        return error_response("AUTH_NAME_EMPTY", StatusCode::BAD_REQUEST);
+    }
+    if params.phone.trim().is_empty() {
+        return error_response("AUTH_PHONE_EMPTY", StatusCode::BAD_REQUEST);
+    }
+    if params.password.len() < 8 {
+        return error_response("AUTH_PASSWORD_TOO_SHORT", StatusCode::BAD_REQUEST);
+    }
 
     // Hash password
     let password_hash =
-        loco_rs::hash::hash_password(&password).map_err(|e| Error::Message(e.to_string()))?;
+        loco_rs::hash::hash_password(&params.password).map_err(|e| Error::Message(e.to_string()))?;
 
     let user_id = uuid::Uuid::new_v4();
     let item = ActiveModel {
         id: ActiveValue::Set(user_id),
-        email: ActiveValue::Set(Some(params.email.clone())),
+        email: ActiveValue::Set(params.email),
+        name: ActiveValue::Set(params.name),
         password_hash: ActiveValue::Set(password_hash),
         role: ActiveValue::Set("TENANT".to_string()),
         status: ActiveValue::Set("ACTIVE".to_string()),
-        phone: ActiveValue::NotSet,
+        phone: ActiveValue::Set(params.phone),
         created_at: ActiveValue::Set(chrono::Utc::now().into()),
         updated_at: ActiveValue::Set(chrono::Utc::now().into()),
     };
 
-    let db_res = item.insert(&ctx.db).await?;
+    let db_res = match item.insert(&ctx.db).await {
+        Ok(res) => res,
+        Err(e) => {
+            let err_msg = e.to_string();
+            if err_msg.contains("UNIQUE constraint failed") || err_msg.contains("duplicate key value") {
+                return error_response("AUTH_USER_EXISTS", StatusCode::BAD_REQUEST);
+            }
+            return Err(Error::from(e));
+        }
+    };
 
     let tokens = auth_service::generate_tokens(
         &ctx.db,
@@ -105,12 +138,17 @@ pub async fn login(
     State(ctx): State<AppContext>,
     Json(params): Json<LoginParams>,
 ) -> Result<Response> {
-    let user: UsersModel = UsersModel::find_by_email(&ctx.db, &params.email).await?;
+    let user_res = UsersModel::find_by_phone(&ctx.db, &params.phone).await;
+    let user = match user_res {
+        Ok(u) => u,
+        Err(_) => return error_response("AUTH_INVALID_CREDENTIALS", StatusCode::UNAUTHORIZED),
+    };
 
-    let valid = user.verify_password(&params.password.unwrap_or_default());
+    let valid = user.verify_password(&params.password);
     if !valid {
-        return Err(Error::Unauthorized("Invalid credentials".to_string()));
+        return error_response("AUTH_INVALID_CREDENTIALS", StatusCode::UNAUTHORIZED);
     }
+
 
     let tokens = auth_service::generate_tokens(
         &ctx.db,
@@ -147,7 +185,7 @@ pub async fn refresh(
     State(ctx): State<AppContext>,
     Json(params): Json<RefreshParams>,
 ) -> Result<Response> {
-    let tokens = auth_service::rotate_refresh_token(
+    let tokens_res = auth_service::rotate_refresh_token(
         &ctx.db,
         &ctx.config
             .auth
@@ -159,8 +197,12 @@ pub async fn refresh(
             .secret,
         &params.refresh_token,
     )
-    .await
-    .map_err(|e| Error::Unauthorized(e.to_string()))?;
+    .await;
+
+    let tokens = match tokens_res {
+        Ok(t) => t,
+        Err(_) => return error_response("AUTH_INVALID_REFRESH_TOKEN", StatusCode::UNAUTHORIZED)
+    };
 
     format::json(serde_json::json!({
         "token": tokens.access_token,
