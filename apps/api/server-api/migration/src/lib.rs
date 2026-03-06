@@ -4,6 +4,8 @@ pub use sea_orm_migration::prelude::*;
 
 mod m20260304_034518_users;
 mod m20260304_034525_create_refresh_tokens;
+mod m20260305_153000_add_name_to_users;
+mod m20260305_154000_update_users_nullability;
 pub struct Migrator;
 
 #[async_trait::async_trait]
@@ -12,6 +14,8 @@ impl MigratorTrait for Migrator {
         vec![
             Box::new(m20260304_034518_users::Migration),
             Box::new(m20260304_034525_create_refresh_tokens::Migration),
+            Box::new(m20260305_153000_add_name_to_users::Migration),
+            Box::new(m20260305_154000_update_users_nullability::Migration),
             // inject-above (do not remove this comment)
         ]
     }

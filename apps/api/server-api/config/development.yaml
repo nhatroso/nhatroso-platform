@@ -38,7 +38,7 @@ workers:
 queue:
   kind: Redis
   # Redis connection URI
-  uri: {{ get_env(name="REDIS_URL", default="redis://127.0.0.1") }}
+  uri: {{ get_env(name="REDIS_URL", default="redis://localhost:6379") }}
   # Dangerously flush all data in Redis on startup. dangerous operation, make sure that you using this flag only on dev environments or test mode
   dangerously_flush: false
 
