@@ -3,5 +3,5 @@
 
 echo "🚀 Running full validation before push..."
 
-pnpm typecheck
+pnpm check
 pnpm build
