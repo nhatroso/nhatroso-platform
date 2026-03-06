@@ -36,7 +36,11 @@ export default function LoginPage() {
     const result = LoginSchema.safeParse(data);
     if (!result.success) {
       // Zod validation returns the translation key
-      setError(tErrors(result.error.errors[0].message as any));
+      setError(
+        tErrors(
+          result.error.errors[0].message as Parameters<typeof tErrors>[0],
+        ),
+      );
       setLoading(false);
       return;
     }
@@ -57,7 +61,7 @@ export default function LoginPage() {
       router.push('/dashboard');
     } catch (err) {
       const key = err instanceof Error ? err.message : 'UNKNOWN_ERROR';
-      setError(tErrors(key as any));
+      setError(tErrors(key as Parameters<typeof tErrors>[0]));
     } finally {
       setLoading(false);
     }

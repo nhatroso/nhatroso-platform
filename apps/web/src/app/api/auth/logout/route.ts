@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
 
-export async function POST(_request: NextRequest) {
+export async function POST() {
   const res = NextResponse.json({ success: true });
   res.cookies.delete('token');
   return res;
