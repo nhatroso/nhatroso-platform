@@ -1,0 +1,11 @@
+{
+  "Heading": "Buildings",
+  "Description": "Manage your properties and rentals.",
+  "CreateBuilding": "Create Building",
+  "Archive": "Archive",
+  "Update": "Update",
+  "Details": "Building Details",
+  "Name": "Name",
+  "Address": "Address",
+  "Status": "Status"
+}
