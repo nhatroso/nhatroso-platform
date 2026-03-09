@@ -6,5 +6,6 @@
   "AUTH_INVALID_CREDENTIALS": "Invalid phone number or password",
   "AUTH_INVALID_REFRESH_TOKEN": "Your session has expired or is invalid",
   "AUTH_INVALID_EMAIL": "Invalid email address",
-  "UNKNOWN_ERROR": "An unknown error occurred"
+  "UNKNOWN_ERROR": "An unknown error occurred",
+  "BUILDING_HAS_ACTIVE_ROOMS": "Cannot archive building: It has active occupied or deposited rooms"
 }

@@ -6,5 +6,6 @@
   "AUTH_INVALID_CREDENTIALS": "Tài khoản hoặc mật khẩu không đúng",
   "AUTH_INVALID_REFRESH_TOKEN": "Tài khoản hoặc phiên bản đăng nhập đã hết hạn",
   "AUTH_INVALID_EMAIL": "Email không hợp lệ",
-  "UNKNOWN_ERROR": "Đã có lỗi không xác định xảy ra"
+  "UNKNOWN_ERROR": "Đã có lỗi không xác định xảy ra",
+  "BUILDING_HAS_ACTIVE_ROOMS": "Không thể lưu trữ tòa nhà: Vẫn còn phòng đang được thuê hoặc đặt cọc"
 }

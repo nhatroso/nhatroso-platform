@@ -8,6 +8,10 @@ use utoipa::OpenApi;
         crate::controllers::auth::refresh,
         crate::controllers::auth::logout,
         crate::controllers::auth::current_user,
+        crate::controllers::buildings::create,
+        crate::controllers::buildings::list,
+        crate::controllers::buildings::update,
+        crate::controllers::buildings::archive,
     ),
     components(
         schemas(
@@ -15,11 +19,14 @@ use utoipa::OpenApi;
             crate::controllers::auth::LoginParams,
             crate::controllers::auth::RefreshParams,
             crate::controllers::auth::AuthResponse,
+            crate::controllers::buildings::CreateBuildingParams,
+            crate::controllers::buildings::UpdateBuildingParams,
         )
     ),
     modifiers(&SecurityAddon),
     tags(
-        (name = "Auth", description = "Authentication endpoints")
+        (name = "Auth", description = "Authentication endpoints"),
+        (name = "Property", description = "Property and building management endpoints")
     )
 )]
 pub struct ApiDoc;
