@@ -18,6 +18,7 @@ export function FloorList({ blockId, selectedId, onSelect }: FloorListProps) {
 
   React.useEffect(() => {
     fetchFloors();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [blockId]);
 
   const fetchFloors = async () => {

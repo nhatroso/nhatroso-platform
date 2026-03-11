@@ -43,6 +43,8 @@ pub enum Relation {
         on_delete = "SetNull"
     )]
     Floors,
+    #[sea_orm(has_many = "super::price_rules::Entity")]
+    PriceRules,
 }
 
 impl Related<super::blocks::Entity> for Entity {
@@ -60,5 +62,11 @@ impl Related<super::buildings::Entity> for Entity {
 impl Related<super::floors::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Floors.def()
+    }
+}
+
+impl Related<super::price_rules::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::PriceRules.def()
     }
 }

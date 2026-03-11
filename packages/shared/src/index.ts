@@ -8,3 +8,7 @@ export * from './schemas/floors';
 export * from './types/floors';
 export * from './schemas/rooms';
 export * from './types/rooms';
+export * from './schemas/services';
+export * from './types/services';
+export * from './schemas/price_rules';
+export * from './types/price_rules';

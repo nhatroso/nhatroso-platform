@@ -58,6 +58,16 @@ pub async fn create(
         return error_response("NOT_FOUND", StatusCode::NOT_FOUND);
     };
 
+    let existing = Rooms::find()
+        .filter(Column::BuildingId.eq(floor.building_id))
+        .filter(Column::Code.eq(&params.code))
+        .one(&ctx.db)
+        .await?;
+
+    if existing.is_some() {
+        return error_response("ROOM_CODE_EXISTS", StatusCode::CONFLICT);
+    }
+
     let item = ActiveModel {
         id: ActiveValue::Set(Uuid::new_v4()),
         building_id: ActiveValue::Set(floor.building_id),
@@ -114,9 +124,20 @@ pub async fn update(
         return error_response("NOT_FOUND", StatusCode::NOT_FOUND);
     };
 
-    let mut active_model = item.into_active_model();
+    let mut active_model = item.clone().into_active_model();
 
     if let Some(code) = params.code {
+        let existing = Rooms::find()
+            .filter(Column::BuildingId.eq(item.building_id))
+            .filter(Column::Code.eq(&code))
+            .filter(Column::Id.ne(id))
+            .one(&ctx.db)
+            .await?;
+
+        if existing.is_some() {
+            return error_response("ROOM_CODE_EXISTS", StatusCode::CONFLICT);
+        }
+
         active_model.code = ActiveValue::Set(code);
     }
 

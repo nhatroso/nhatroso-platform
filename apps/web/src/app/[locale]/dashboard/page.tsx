@@ -42,10 +42,24 @@ export default function DashboardPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-zinc-600">
+            <p className="text-zinc-600 mb-6">
               This is a protected area. Only authenticated users can see this
               content.
             </p>
+            <div className="flex gap-4">
+              <Button
+                onClick={() => router.push('/dashboard/buildings')}
+                className="bg-zinc-900 text-white hover:bg-zinc-800"
+              >
+                Manage Buildings
+              </Button>
+              <Button
+                onClick={() => router.push('/dashboard/services')}
+                className="bg-white text-zinc-900 border-2 border-zinc-900 hover:bg-zinc-100"
+              >
+                Service Catalog
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </main>

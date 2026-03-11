@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useTranslations } from 'next-intl';
 import { Room, CreateRoomInput } from '@nhatroso/shared';
 import { getRooms, createRoom } from '@/services/api/buildings';
+import { RoomPricingModal } from './RoomPricingModal';
 
 interface RoomListProps {
   floorId: string;
@@ -9,13 +10,19 @@ interface RoomListProps {
 
 export function RoomList({ floorId }: RoomListProps) {
   const t = useTranslations('Buildings');
+  const tErrors = useTranslations('Errors');
   const [rooms, setRooms] = React.useState<Room[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [isCreating, setIsCreating] = React.useState(false);
   const [newCode, setNewCode] = React.useState('');
+  const [errorMsg, setErrorMsg] = React.useState('');
+  const [managingRoomPrice, setManagingRoomPrice] = React.useState<Room | null>(
+    null,
+  );
 
   React.useEffect(() => {
     fetchRooms();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [floorId]);
 
   const fetchRooms = async () => {
@@ -33,14 +40,21 @@ export function RoomList({ floorId }: RoomListProps) {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCode.trim()) return;
+    setErrorMsg('');
     try {
       setIsCreating(true);
       const payload: CreateRoomInput = { code: newCode };
       await createRoom(floorId, payload);
       setNewCode('');
       fetchRooms();
-    } catch (err) {
-      console.error(err);
+    } catch (err: unknown) {
+      if (err instanceof Error && err.message) {
+        // Try to translate the error code, fallback to message
+        const translatedErr = tErrors(err.message) || err.message;
+        setErrorMsg(translatedErr);
+      } else {
+        setErrorMsg('Failed to create room');
+      }
     } finally {
       setIsCreating(false);
     }
@@ -74,8 +88,31 @@ export function RoomList({ floorId }: RoomListProps) {
             {rooms.map((rm) => (
               <div
                 key={rm.id}
-                className="flex flex-col items-start justify-between border-2 border-zinc-200 bg-white p-3 transition-colors hover:border-zinc-900"
+                className="group flex flex-col items-start justify-between border-2 border-zinc-200 bg-white p-3 transition-colors hover:border-zinc-900"
               >
+                <div className="flex gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+                  <button
+                    onClick={() => setManagingRoomPrice(rm)}
+                    className="p-2 text-zinc-400 hover:text-zinc-900"
+                    title={t('Pricing') || 'Pricing'}
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="square"
+                        strokeLinejoin="miter"
+                        strokeWidth="2"
+                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      ></path>
+                    </svg>
+                  </button>
+                  {/* Future actions like Edit / Delete can go here */}
+                  <div className="p-2 text-zinc-300">⚙</div>
+                </div>
                 <span className="font-black text-lg text-zinc-900">
                   {rm.code}
                 </span>
@@ -95,6 +132,11 @@ export function RoomList({ floorId }: RoomListProps) {
       </div>
 
       <div className="border-t border-zinc-200 bg-zinc-50 p-4">
+        {errorMsg && (
+          <div className="mb-2 bg-red-50 p-2 text-xs font-bold text-red-600 border-l-4 border-red-600">
+            {errorMsg}
+          </div>
+        )}
         <form onSubmit={handleCreate} className="flex flex-col gap-2">
           <input
             type="text"
@@ -113,6 +155,13 @@ export function RoomList({ floorId }: RoomListProps) {
           </button>
         </form>
       </div>
+
+      {managingRoomPrice && (
+        <RoomPricingModal
+          room={managingRoomPrice}
+          onClose={() => setManagingRoomPrice(null)}
+        />
+      )}
     </div>
   );
 }

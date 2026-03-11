@@ -52,6 +52,8 @@ impl Hooks for App {
             .add_route(controllers::blocks::routes())
             .add_route(controllers::floors::routes())
             .add_route(controllers::rooms::routes())
+            .add_route(controllers::services::routes())
+            .add_route(controllers::price_rules::routes())
     }
 
     async fn after_routes(router: axum::Router, _ctx: &AppContext) -> Result<axum::Router> {

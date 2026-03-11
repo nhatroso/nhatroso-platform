@@ -10,6 +10,7 @@ mod m20260306_075955_buildings;
 mod m20260306_080005_blocks;
 mod m20260306_080006_floors;
 mod m20260306_080015_rooms;
+mod m20260311_030533_add_services_and_price_rules;
 pub struct Migrator;
 
 #[async_trait::async_trait]
@@ -24,6 +25,7 @@ impl MigratorTrait for Migrator {
             Box::new(m20260306_080005_blocks::Migration),
             Box::new(m20260306_080006_floors::Migration),
             Box::new(m20260306_080015_rooms::Migration),
+            Box::new(m20260311_030533_add_services_and_price_rules::Migration),
             // inject-above (do not remove this comment)
         ]
     }

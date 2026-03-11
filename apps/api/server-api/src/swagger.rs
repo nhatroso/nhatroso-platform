@@ -21,6 +21,14 @@ use utoipa::OpenApi;
         crate::controllers::rooms::create,
         crate::controllers::rooms::list_by_floor,
         crate::controllers::rooms::update,
+        crate::controllers::services::create,
+        crate::controllers::services::list,
+        crate::controllers::services::update,
+        crate::controllers::services::archive,
+        crate::controllers::price_rules::create,
+        crate::controllers::price_rules::list,
+        crate::controllers::price_rules::update,
+        crate::controllers::price_rules::remove,
     ),
     components(
         schemas(
@@ -36,12 +44,20 @@ use utoipa::OpenApi;
             crate::controllers::floors::UpdateFloorParams,
             crate::controllers::rooms::CreateRoomParams,
             crate::controllers::rooms::UpdateRoomParams,
+            crate::controllers::services::CreateServiceParams,
+            crate::controllers::services::UpdateServiceParams,
+            crate::controllers::services::ServiceResponse,
+            crate::controllers::price_rules::CreatePriceRuleParams,
+            crate::controllers::price_rules::UpdatePriceRuleParams,
+            crate::controllers::price_rules::PriceRuleResponse,
         )
     ),
     modifiers(&SecurityAddon),
     tags(
         (name = "Auth", description = "Authentication endpoints"),
-        (name = "Property", description = "Property and building management endpoints")
+        (name = "Property", description = "Property and building management endpoints"),
+        (name = "Services", description = "Service catalog management endpoints"),
+        (name = "Pricing", description = "Effective-dated price rules endpoints")
     )
 )]
 pub struct ApiDoc;

@@ -22,6 +22,7 @@ export function BlockList({
 
   React.useEffect(() => {
     fetchBlocks();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [buildingId]);
 
   const fetchBlocks = async () => {

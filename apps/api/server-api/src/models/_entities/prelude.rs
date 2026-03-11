@@ -3,6 +3,8 @@
 pub use super::blocks::Entity as Blocks;
 pub use super::buildings::Entity as Buildings;
 pub use super::floors::Entity as Floors;
+pub use super::price_rules::Entity as PriceRules;
 pub use super::refresh_tokens::Entity as RefreshTokens;
 pub use super::rooms::Entity as Rooms;
+pub use super::services::Entity as Services;
 pub use super::users::Entity as Users;

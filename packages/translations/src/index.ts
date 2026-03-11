@@ -4,6 +4,8 @@ import viAuth from './locales/vi/auth.json';
 import enAuth from './locales/en/auth.json';
 import viBuildings from './locales/vi/buildings.json';
 import enBuildings from './locales/en/buildings.json';
+import viServices from './locales/vi/services.json';
+import enServices from './locales/en/services.json';
 
 export const i18nConfig = {
   locales: ['vi', 'en'] as const,
@@ -17,11 +19,13 @@ export const translations = {
     Errors: viErrors,
     Auth: viAuth,
     Buildings: viBuildings,
+    Services: viServices,
   },
   en: {
     Errors: enErrors,
     Auth: enAuth,
     Buildings: enBuildings,
+    Services: enServices,
   },
 };
 

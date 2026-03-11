@@ -209,7 +209,10 @@ export async function createRoom(
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error('Failed to create room');
+  if (!res.ok) {
+    const errBody = await res.json().catch(() => null);
+    throw new Error(errBody?.error?.code || 'Failed to create room');
+  }
   return res.json();
 }
 
@@ -222,6 +225,9 @@ export async function updateRoom(
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error('Failed to update room');
+  if (!res.ok) {
+    const errBody = await res.json().catch(() => null);
+    throw new Error(errBody?.error?.code || 'Failed to update room');
+  }
   return res.json();
 }
