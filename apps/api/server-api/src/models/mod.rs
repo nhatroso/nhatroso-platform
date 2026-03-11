@@ -4,3 +4,4 @@ pub mod users;
 pub mod rooms;
 pub mod floors;
 pub mod buildings;
+pub mod blocks;

@@ -18,6 +18,7 @@ impl MigrationTrait for Migration {
                         .default(Expr::cust("uuid_generate_v4()")),
                 )
                 .col(ColumnDef::new(Rooms::BuildingId).uuid().not_null())
+                .col(ColumnDef::new(Rooms::BlockId).uuid().not_null())
                 .col(ColumnDef::new(Rooms::FloorId).uuid().null())
                 .col(ColumnDef::new(Rooms::Code).string().not_null())
                 .col(
@@ -52,6 +53,14 @@ impl MigrationTrait for Migration {
                         .from(Rooms::Table, Rooms::FloorId)
                         .to(Floors::Table, Floors::Id)
                         .on_delete(ForeignKeyAction::SetNull)
+                        .on_update(ForeignKeyAction::Cascade),
+                )
+                .foreign_key(
+                    ForeignKey::create()
+                        .name("fk-rooms-block_id")
+                        .from(Rooms::Table, Rooms::BlockId)
+                        .to(Blocks::Table, Blocks::Id)
+                        .on_delete(ForeignKeyAction::Cascade)
                         .on_update(ForeignKeyAction::Cascade),
                 )
                 .to_owned(),
@@ -94,6 +103,7 @@ enum Rooms {
     Table,
     Id,
     BuildingId,
+    BlockId,
     FloorId,
     Code,
     Status,
@@ -109,6 +119,12 @@ enum Buildings {
 
 #[derive(DeriveIden)]
 enum Floors {
+    Table,
+    Id,
+}
+
+#[derive(DeriveIden)]
+enum Blocks {
     Table,
     Id,
 }

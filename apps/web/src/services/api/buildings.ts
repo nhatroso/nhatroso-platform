@@ -2,20 +2,46 @@ import {
   Building,
   CreateBuildingInput,
   UpdateBuildingInput,
+  Block,
+  CreateBlockInput,
+  UpdateBlockInput,
+  Floor,
+  CreateFloorInput,
+  UpdateFloorInput,
+  Room,
+  CreateRoomInput,
+  UpdateRoomInput,
 } from '@nhatroso/shared';
 
 const API_BASE_URL = '/api/proxy';
 
+/**
+ * Universal wrapper for API calls that auto-redirects to login on 401
+ */
+async function apiFetch(
+  input: RequestInfo | URL,
+  init?: RequestInit,
+): Promise<Response> {
+  const res = await fetch(input, init);
+
+  if (res.status === 401) {
+    if (typeof window !== 'undefined') {
+      const pathname = window.location.pathname;
+      const localeMatch = pathname.match(/^\/(vi|en)/);
+      const locale = localeMatch ? localeMatch[1] : '';
+      window.location.href = locale ? `/${locale}/login` : '/login';
+    }
+  }
+
+  return res;
+}
+
 export async function getBuildings(): Promise<Building[]> {
-  const res = await fetch(`${API_BASE_URL}/buildings`, {
+  const res = await apiFetch(`${API_BASE_URL}/buildings`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
     },
-    // Required to send and receive cookies (JWT token) across domains if applicable,
-    // or same-origin. The Loco.rs backend uses HTTP-only cookies or Bearer tokens.
-    // If using Bearer tokens stored in cookies:
-    // credentials: 'include', // Uncomment if handling cookies directly
   });
 
   if (!res.ok) {
@@ -28,7 +54,7 @@ export async function getBuildings(): Promise<Building[]> {
 export async function createBuilding(
   data: CreateBuildingInput,
 ): Promise<Building> {
-  const res = await fetch(`${API_BASE_URL}/buildings`, {
+  const res = await apiFetch(`${API_BASE_URL}/buildings`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -47,7 +73,7 @@ export async function updateBuilding(
   id: string,
   data: UpdateBuildingInput,
 ): Promise<Building> {
-  const res = await fetch(`${API_BASE_URL}/buildings/${id}`, {
+  const res = await apiFetch(`${API_BASE_URL}/buildings/${id}`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
@@ -66,7 +92,7 @@ export async function updateBuilding(
 }
 
 export async function archiveBuilding(id: string): Promise<Building> {
-  const res = await fetch(`${API_BASE_URL}/buildings/${id}/archive`, {
+  const res = await apiFetch(`${API_BASE_URL}/buildings/${id}/archive`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -80,5 +106,122 @@ export async function archiveBuilding(id: string): Promise<Building> {
     throw new Error('Failed to archive building');
   }
 
+  return res.json();
+}
+
+// ==========================================
+// BLOCKS
+// ==========================================
+
+export async function getBlocks(buildingId: string): Promise<Block[]> {
+  const res = await apiFetch(`${API_BASE_URL}/buildings/${buildingId}/blocks`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (!res.ok) throw new Error('Failed to fetch blocks');
+  return res.json();
+}
+
+export async function createBlock(
+  buildingId: string,
+  data: CreateBlockInput,
+): Promise<Block> {
+  const res = await apiFetch(`${API_BASE_URL}/buildings/${buildingId}/blocks`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error('Failed to create block');
+  return res.json();
+}
+
+export async function updateBlock(
+  id: string,
+  data: UpdateBlockInput,
+): Promise<Block> {
+  const res = await apiFetch(`${API_BASE_URL}/blocks/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error('Failed to update block');
+  return res.json();
+}
+
+// ==========================================
+// FLOORS
+// ==========================================
+
+export async function getFloors(blockId: string): Promise<Floor[]> {
+  const res = await apiFetch(`${API_BASE_URL}/blocks/${blockId}/floors`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (!res.ok) throw new Error('Failed to fetch floors');
+  return res.json();
+}
+
+export async function createFloor(
+  blockId: string,
+  data: CreateFloorInput,
+): Promise<Floor> {
+  const res = await apiFetch(`${API_BASE_URL}/blocks/${blockId}/floors`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error('Failed to create floor');
+  return res.json();
+}
+
+export async function updateFloor(
+  id: string,
+  data: UpdateFloorInput,
+): Promise<Floor> {
+  const res = await apiFetch(`${API_BASE_URL}/floors/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error('Failed to update floor');
+  return res.json();
+}
+
+// ==========================================
+// ROOMS
+// ==========================================
+
+export async function getRooms(floorId: string): Promise<Room[]> {
+  const res = await apiFetch(`${API_BASE_URL}/floors/${floorId}/rooms`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (!res.ok) throw new Error('Failed to fetch rooms');
+  return res.json();
+}
+
+export async function createRoom(
+  floorId: string,
+  data: CreateRoomInput,
+): Promise<Room> {
+  const res = await apiFetch(`${API_BASE_URL}/floors/${floorId}/rooms`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error('Failed to create room');
+  return res.json();
+}
+
+export async function updateRoom(
+  id: string,
+  data: UpdateRoomInput,
+): Promise<Room> {
+  const res = await apiFetch(`${API_BASE_URL}/rooms/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error('Failed to update room');
   return res.json();
 }

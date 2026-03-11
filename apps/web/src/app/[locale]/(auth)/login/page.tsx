@@ -19,8 +19,8 @@ import Link from 'next/link';
 
 export default function LoginPage() {
   const router = useRouter();
-  const tErrors = useTranslations('errors');
-  const tAuth = useTranslations('auth.login');
+  const tErrors = useTranslations('Errors');
+  const tAuth = useTranslations('Auth.login');
   const [error, setError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
 

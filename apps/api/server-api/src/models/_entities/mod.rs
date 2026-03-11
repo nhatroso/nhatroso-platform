@@ -2,6 +2,7 @@
 
 pub mod prelude;
 
+pub mod blocks;
 pub mod buildings;
 pub mod floors;
 pub mod refresh_tokens;

@@ -94,7 +94,7 @@ export default function BuildingsPage() {
           {isLoading ? (
             <div className="flex h-32 items-center justify-center">
               <span className="text-sm font-medium uppercase text-zinc-400">
-                Loading...
+                {t('Loading')}
               </span>
             </div>
           ) : (
@@ -147,7 +147,7 @@ export default function BuildingsPage() {
                 </svg>
               </div>
               <h2 className="text-lg font-bold text-zinc-400">
-                SELECT A PROPERTY
+                {t('SelectPropertyFirst')}
               </h2>
             </div>
           </div>

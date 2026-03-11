@@ -46,7 +46,18 @@ async function handleProxy(
     }
 
     if (!response.ok) {
-      return NextResponse.json(data, { status: response.status });
+      console.error(
+        `[API Proxy] Route ${endpoint} returned status ${response.status}`,
+        data,
+      );
+      const res = NextResponse.json(data, { status: response.status });
+
+      // Auto-clear token if backend says it's invalid
+      if (response.status === 401) {
+        res.cookies.delete('token');
+      }
+
+      return res;
     }
 
     return NextResponse.json(data);

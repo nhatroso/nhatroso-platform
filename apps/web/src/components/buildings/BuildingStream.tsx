@@ -1,4 +1,5 @@
 import { Building } from '@nhatroso/shared';
+import { useTranslations } from 'next-intl';
 
 interface BuildingStreamProps {
   buildings: Building[];
@@ -11,10 +12,12 @@ export function BuildingStream({
   selectedId,
   onSelect,
 }: BuildingStreamProps) {
+  const t = useTranslations('Buildings');
+
   if (buildings.length === 0) {
     return (
       <div className="p-6 text-sm italic text-zinc-500">
-        No properties found.
+        {t('EmptyBuildings')}
       </div>
     );
   }
@@ -48,7 +51,7 @@ export function BuildingStream({
                       isSelected ? 'text-zinc-400' : 'text-zinc-500'
                     }`}
                   >
-                    {b.address || 'No Address'}
+                    {b.address || t('NoAddress')}
                   </p>
                 </div>
                 <div
@@ -60,7 +63,7 @@ export function BuildingStream({
                       : 'bg-zinc-800 text-zinc-300'
                   }`}
                 >
-                  {b.status}
+                  {t(`Status_${b.status}`)}
                 </div>
               </div>
             </button>

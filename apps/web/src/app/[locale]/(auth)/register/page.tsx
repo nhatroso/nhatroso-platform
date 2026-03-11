@@ -19,8 +19,8 @@ import Link from 'next/link';
 
 export default function RegisterPage() {
   const router = useRouter();
-  const tErrors = useTranslations('errors');
-  const tAuth = useTranslations('auth.register');
+  const tErrors = useTranslations('Errors');
+  const tAuth = useTranslations('Auth.register');
   const [error, setError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
 

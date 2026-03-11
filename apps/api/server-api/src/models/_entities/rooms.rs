@@ -9,6 +9,7 @@ pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
     pub building_id: Uuid,
+    pub block_id: Uuid,
     pub floor_id: Option<Uuid>,
     pub code: String,
     pub status: String,
@@ -18,6 +19,14 @@ pub struct Model {
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
+    #[sea_orm(
+        belongs_to = "super::blocks::Entity",
+        from = "Column::BlockId",
+        to = "super::blocks::Column::Id",
+        on_update = "Cascade",
+        on_delete = "Cascade"
+    )]
+    Blocks,
     #[sea_orm(
         belongs_to = "super::buildings::Entity",
         from = "Column::BuildingId",
@@ -34,6 +43,12 @@ pub enum Relation {
         on_delete = "SetNull"
     )]
     Floors,
+}
+
+impl Related<super::blocks::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Blocks.def()
+    }
 }
 
 impl Related<super::buildings::Entity> for Entity {

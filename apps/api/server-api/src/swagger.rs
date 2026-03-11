@@ -12,6 +12,15 @@ use utoipa::OpenApi;
         crate::controllers::buildings::list,
         crate::controllers::buildings::update,
         crate::controllers::buildings::archive,
+        crate::controllers::blocks::create,
+        crate::controllers::blocks::list_by_building,
+        crate::controllers::blocks::update,
+        crate::controllers::floors::create,
+        crate::controllers::floors::list_by_block,
+        crate::controllers::floors::update,
+        crate::controllers::rooms::create,
+        crate::controllers::rooms::list_by_floor,
+        crate::controllers::rooms::update,
     ),
     components(
         schemas(
@@ -21,6 +30,12 @@ use utoipa::OpenApi;
             crate::controllers::auth::AuthResponse,
             crate::controllers::buildings::CreateBuildingParams,
             crate::controllers::buildings::UpdateBuildingParams,
+            crate::controllers::blocks::CreateBlockParams,
+            crate::controllers::blocks::UpdateBlockParams,
+            crate::controllers::floors::CreateFloorParams,
+            crate::controllers::floors::UpdateFloorParams,
+            crate::controllers::rooms::CreateRoomParams,
+            crate::controllers::rooms::UpdateRoomParams,
         )
     ),
     modifiers(&SecurityAddon),
