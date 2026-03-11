@@ -11,7 +11,7 @@ use utoipa::ToSchema;
 use uuid::Uuid;
 
 use crate::models::{
-    _entities::floors::{Column as FloorsColumn, Entity as Floors},
+    _entities::floors::Entity as Floors,
     _entities::rooms::{ActiveModel, Column, Entity as Rooms},
 };
 
