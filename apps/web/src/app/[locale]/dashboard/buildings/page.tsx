@@ -53,39 +53,31 @@ export default function BuildingsPage() {
   };
 
   return (
-    <div className="flex h-[calc(100vh-64px)] w-full overflow-hidden bg-zinc-50 tracking-tight text-zinc-900">
-      {/*
-        Radical Design: 30/70 Asymmetric Split (Continuous Stream on left).
-        If nothing selected on mobile, full width. If selected, panel takes over.
-      */}
+    <div className="flex h-[calc(100vh-112px)] w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+      {/* Left: Building list */}
       <div
-        className={`flex-col border-r border-zinc-200 bg-white transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] ${
+        className={`flex flex-col border-r border-gray-200 bg-white transition-all duration-300 dark:border-gray-700 dark:bg-gray-800/50 ${
           selectedBuildingId || isCreating
-            ? 'hidden w-full md:flex md:w-[30%] lg:w-[25%]'
-            : 'flex w-full md:w-[30%] lg:w-[25%]'
+            ? 'hidden w-full md:flex md:w-[320px] lg:w-[360px]'
+            : 'flex w-full md:w-[320px] lg:w-[360px]'
         }`}
       >
-        <div className="flex items-center justify-between border-b border-zinc-200 p-6">
-          <h1 className="text-2xl font-black uppercase tracking-tighter">
-            {t('Heading')}
-          </h1>
+        <div className="flex shrink-0 items-center justify-between border-b border-gray-100 px-5 py-4 dark:border-gray-700">
+          <div>
+            <h1 className="text-lg font-bold tracking-tight text-gray-900 dark:text-white">
+              {t('Heading')}
+            </h1>
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              {buildings.length} {t('Heading').toLowerCase()}
+            </p>
+          </div>
           <button
             onClick={handleCreateNew}
-            className="flex h-10 w-10 items-center justify-center rounded-none bg-zinc-900 text-white transition-transform hover:scale-105 hover:bg-orange-600 active:scale-95"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800"
             aria-label={t('CreateBuilding')}
           >
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="square"
-                strokeLinejoin="miter"
-                strokeWidth={2}
-                d="M12 4v16m8-8H4"
-              />
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
           </button>
         </div>
@@ -93,9 +85,7 @@ export default function BuildingsPage() {
         <div className="flex-1 overflow-y-auto">
           {isLoading ? (
             <div className="flex h-32 items-center justify-center">
-              <span className="text-sm font-medium uppercase text-zinc-400">
-                {t('Loading')}
-              </span>
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-blue-600" />
             </div>
           ) : (
             <BuildingStream
@@ -107,12 +97,12 @@ export default function BuildingsPage() {
         </div>
       </div>
 
-      {/* Detail/Edit Panel Segment */}
+      {/* Right: Detail/Edit Panel */}
       <div
-        className={`flex-1 bg-zinc-50 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] ${
+        className={`flex-1 overflow-hidden bg-gray-50/50 transition-all duration-300 dark:bg-gray-900/50 ${
           selectedBuildingId || isCreating
-            ? 'translate-x-0 opacity-100'
-            : 'translate-x-8 opacity-0 pointer-events-none md:pointer-events-auto md:translate-x-0 md:opacity-100'
+            ? 'flex'
+            : 'hidden md:flex'
         }`}
       >
         {selectedBuildingId || isCreating ? (
@@ -123,32 +113,24 @@ export default function BuildingsPage() {
             onSuccess={() => {
               fetchBuildings();
               if (isCreating) {
-                // Keep panel open after create or optionally close it. Let's close for now or let them see the new one.
                 setIsCreating(false);
               }
             }}
           />
         ) : (
-          <div className="hidden h-full items-center justify-center md:flex">
-            <div className="text-center">
-              <div className="mb-4 inline-flex h-24 w-24 items-center justify-center border-2 border-dashed border-zinc-300 text-zinc-300">
-                <svg
-                  className="h-8 w-8"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="square"
-                    strokeLinejoin="miter"
-                    strokeWidth={2}
-                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                  />
+          <div className="hidden h-full w-full items-center justify-center md:flex">
+            <div className="flex flex-col items-center text-center">
+              <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-blue-50 dark:bg-gray-800">
+                <svg className="h-12 w-12 text-blue-500/50 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
               </div>
-              <h2 className="text-lg font-bold text-zinc-400">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-200">
                 {t('SelectPropertyFirst')}
-              </h2>
+              </h3>
+              <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                Choose a building from the list to view or edit details.
+              </p>
             </div>
           </div>
         )}

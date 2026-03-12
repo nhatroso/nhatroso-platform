@@ -6,6 +6,10 @@ import viBuildings from './locales/vi/buildings.json';
 import enBuildings from './locales/en/buildings.json';
 import viServices from './locales/vi/services.json';
 import enServices from './locales/en/services.json';
+import viSidebar from './locales/vi/sidebar.json';
+import enSidebar from './locales/en/sidebar.json';
+import viDashboard from './locales/vi/dashboard.json';
+import enDashboard from './locales/en/dashboard.json';
 
 export const i18nConfig = {
   locales: ['vi', 'en'] as const,
@@ -20,12 +24,16 @@ export const translations = {
     Auth: viAuth,
     Buildings: viBuildings,
     Services: viServices,
+    Sidebar: viSidebar,
+    Dashboard: viDashboard,
   },
   en: {
     Errors: enErrors,
     Auth: enAuth,
     Buildings: enBuildings,
     Services: enServices,
+    Sidebar: enSidebar,
+    Dashboard: enDashboard,
   },
 };
 

@@ -1,68 +1,135 @@
 'use client';
 
-import * as React from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { useTranslations } from 'next-intl';
+
+const kpiData = [
+  { key: 'totalProperties', value: '12', icon: 'building', color: 'blue' },
+  { key: 'totalRooms', value: '148', icon: 'door', color: 'green' },
+  { key: 'activeTenants', value: '124', icon: 'users', color: 'teal' },
+  { key: 'monthlyRevenue', value: '₫186.5M', icon: 'money', color: 'emerald' },
+  { key: 'pendingBills', value: '7', icon: 'invoice', color: 'yellow' },
+  { key: 'occupancyRate', value: '83.8%', icon: 'chart', color: 'cyan' },
+] as const;
+
+function KpiIcon({ type }: { type: string }) {
+  const cls = 'h-7 w-7';
+  switch (type) {
+    case 'building':
+      return (
+        <svg className={cls} fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clipRule="evenodd" />
+        </svg>
+      );
+    case 'door':
+      return (
+        <svg className={cls} fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm4 0v12h6V4H7z" clipRule="evenodd" />
+        </svg>
+      );
+    case 'users':
+      return (
+        <svg className={cls} fill="currentColor" viewBox="0 0 20 20">
+          <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+        </svg>
+      );
+    case 'money':
+      return (
+        <svg className={cls} fill="currentColor" viewBox="0 0 20 20">
+          <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
+          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clipRule="evenodd" />
+        </svg>
+      );
+    case 'invoice':
+      return (
+        <svg className={cls} fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+        </svg>
+      );
+    case 'chart':
+      return (
+        <svg className={cls} fill="currentColor" viewBox="0 0 20 20">
+          <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
+          <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" />
+        </svg>
+      );
+    default:
+      return null;
+  }
+}
+
+const colorMap: Record<string, { bg: string; icon: string; text: string }> = {
+  blue: {
+    bg: 'bg-blue-100 dark:bg-blue-900',
+    icon: 'text-blue-600 dark:text-blue-300',
+    text: 'text-blue-600 dark:text-blue-400',
+  },
+  green: {
+    bg: 'bg-green-100 dark:bg-green-900',
+    icon: 'text-green-600 dark:text-green-300',
+    text: 'text-green-600 dark:text-green-400',
+  },
+  teal: {
+    bg: 'bg-teal-100 dark:bg-teal-900',
+    icon: 'text-teal-600 dark:text-teal-300',
+    text: 'text-teal-600 dark:text-teal-400',
+  },
+  emerald: {
+    bg: 'bg-emerald-100 dark:bg-emerald-900',
+    icon: 'text-emerald-600 dark:text-emerald-300',
+    text: 'text-emerald-600 dark:text-emerald-400',
+  },
+  yellow: {
+    bg: 'bg-yellow-100 dark:bg-yellow-900',
+    icon: 'text-yellow-600 dark:text-yellow-300',
+    text: 'text-yellow-600 dark:text-yellow-400',
+  },
+  cyan: {
+    bg: 'bg-cyan-100 dark:bg-cyan-900',
+    icon: 'text-cyan-600 dark:text-cyan-300',
+    text: 'text-cyan-600 dark:text-cyan-400',
+  },
+};
 
 export default function DashboardPage() {
-  const router = useRouter();
-
-  const handleLogout = async () => {
-    // In a real app, we'd call the logout API.
-    // For now, we'll just clear the cookie (though HttpOnly means we should do it via API).
-    // Let's assume the API route handler will handle it.
-    await fetch('/api/auth/logout', { method: 'POST' });
-    router.push('/login');
-  };
+  const t = useTranslations('Dashboard');
 
   return (
-    <div className="flex min-h-screen flex-col bg-zinc-50">
-      <header className="border-b bg-white border-zinc-200">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <h1 className="text-xl font-bold tracking-tight">NHATROSO</h1>
-          <Button variant="outline" size="sm" onClick={handleLogout}>
-            Logout
-          </Button>
-        </div>
-      </header>
+    <div>
+      <h1 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">
+        {t('title')}
+      </h1>
 
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <Card className="border-zinc-200 shadow-sm">
-          <CardHeader>
-            <CardTitle>Welcome to your Dashboard</CardTitle>
-            <CardDescription>
-              You have successfully logged in using your phone number.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-zinc-600 mb-6">
-              This is a protected area. Only authenticated users can see this
-              content.
-            </p>
-            <div className="flex gap-4">
-              <Button
-                onClick={() => router.push('/dashboard/buildings')}
-                className="bg-zinc-900 text-white hover:bg-zinc-800"
-              >
-                Manage Buildings
-              </Button>
-              <Button
-                onClick={() => router.push('/dashboard/services')}
-                className="bg-white text-zinc-900 border-2 border-zinc-900 hover:bg-zinc-100"
-              >
-                Service Catalog
-              </Button>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {kpiData.map((kpi) => {
+          const colors = colorMap[kpi.color];
+          return (
+            <div
+              key={kpi.key}
+              className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+            >
+              <div className="flex items-center">
+                <div
+                  className={`inline-flex shrink-0 items-center justify-center rounded-lg p-3 ${colors.bg}`}
+                >
+                  <span className={colors.icon}>
+                    <KpiIcon type={kpi.icon} />
+                  </span>
+                </div>
+                <div className="ms-4">
+                  <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                    {t(kpi.key)}
+                  </p>
+                  <h3
+                    className={`text-2xl font-bold ${colors.text}`}
+                  >
+                    {kpi.value}
+                  </h3>
+                </div>
+              </div>
             </div>
-          </CardContent>
-        </Card>
-      </main>
+          );
+        })}
+      </div>
     </div>
   );
 }

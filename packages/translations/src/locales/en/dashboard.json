@@ -1,0 +1,9 @@
+{
+  "title": "Dashboard",
+  "totalProperties": "Total Properties",
+  "totalRooms": "Total Rooms",
+  "activeTenants": "Active Tenants",
+  "monthlyRevenue": "Monthly Revenue",
+  "pendingBills": "Pending Bills",
+  "occupancyRate": "Occupancy Rate"
+}

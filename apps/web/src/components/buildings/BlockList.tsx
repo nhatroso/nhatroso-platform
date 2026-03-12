@@ -2,23 +2,21 @@ import * as React from 'react';
 import { useTranslations } from 'next-intl';
 import { Block, CreateBlockInput } from '@nhatroso/shared';
 import { getBlocks, createBlock } from '@/services/api/buildings';
+import { FloorList } from './FloorList';
 
 interface BlockListProps {
   buildingId: string;
-  selectedId: string | null;
-  onSelect: (id: string) => void;
 }
 
-export function BlockList({
-  buildingId,
-  selectedId,
-  onSelect,
-}: BlockListProps) {
+export function BlockList({ buildingId }: BlockListProps) {
   const t = useTranslations('Buildings');
   const [blocks, setBlocks] = React.useState<Block[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [isCreating, setIsCreating] = React.useState(false);
   const [newIdentifier, setNewIdentifier] = React.useState('');
+  const [expandedBlockId, setExpandedBlockId] = React.useState<string | null>(
+    null,
+  );
 
   React.useEffect(() => {
     fetchBlocks();
@@ -43,8 +41,9 @@ export function BlockList({
     try {
       setIsCreating(true);
       const payload: CreateBlockInput = { identifier: newIdentifier };
-      await createBlock(buildingId, payload);
+      const newBlock = await createBlock(buildingId, payload);
       setNewIdentifier('');
+      setExpandedBlockId(newBlock.id);
       fetchBlocks();
     } catch (err) {
       console.error(err);
@@ -53,98 +52,115 @@ export function BlockList({
     }
   };
 
+  const toggleBlock = (id: string) => {
+    setExpandedBlockId((prev) => (prev === id ? null : id));
+  };
+
   if (loading) {
     return (
-      <div className="flex flex-1 items-center justify-center p-8">
-        <span className="text-sm font-bold uppercase tracking-widest text-zinc-400">
-          {t('LoadingBlocks')}
-        </span>
+      <div className="flex w-full items-center justify-center p-8">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-200 border-t-blue-600" />
       </div>
     );
   }
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="border-b border-zinc-200 bg-zinc-100 p-4">
-        <h3 className="text-sm font-black uppercase tracking-widest text-zinc-500">
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
           {t('Blocks')}
         </h3>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
+      <div className="space-y-3">
         {blocks.length === 0 ? (
-          <div className="p-6 text-center text-xs font-bold uppercase tracking-widest text-zinc-400">
+          <div className="rounded-lg border border-dashed border-gray-300 p-8 text-center text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400">
             {t('EmptyBlocks')}
           </div>
         ) : (
-          <ul className="flex flex-col">
-            {blocks.map((blk) => (
-              <li
-                key={blk.id}
-                className="border-b border-zinc-200 last:border-0"
-              >
-                <button
-                  type="button"
-                  onClick={() => onSelect(blk.id)}
-                  className={`flex w-full items-center justify-between p-4 transition-colors ${
-                    selectedId === blk.id
-                      ? 'bg-zinc-900 text-white'
-                      : 'bg-white text-zinc-900 hover:bg-zinc-100'
+          blocks.map((blk) => {
+            const isExpanded = expandedBlockId === blk.id;
+
+            if (expandedBlockId && !isExpanded) return null;
+
+            return (
+              <React.Fragment key={blk.id}>
+                <div
+                  className={`overflow-hidden border transition-all duration-200 ${
+                    isExpanded
+                      ? 'rounded-sm border-blue-500 bg-white shadow-sm dark:border-blue-500 dark:bg-gray-800'
+                      : 'rounded-xl border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:hover:border-gray-600'
                   }`}
                 >
-                  <span className="font-bold uppercase">{blk.identifier}</span>
-                  <div className="flex items-center space-x-2">
-                    <span
-                      className={`text-[10px] uppercase font-black tracking-widest px-1.5 py-0.5 ${
-                        selectedId === blk.id
-                          ? 'bg-zinc-700 text-zinc-200'
-                          : 'bg-zinc-100 text-zinc-500'
-                      }`}
-                    >
-                      {t(`Status_${blk.status}`)}
-                    </span>
+                  <button
+                    type="button"
+                    onClick={() => toggleBlock(blk.id)}
+                    className="flex w-full items-center justify-between px-5 py-4 text-left focus:outline-none"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span
+                        className={`font-semibold transition-colors ${isExpanded ? 'text-blue-700 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}
+                      >
+                        {blk.identifier}
+                      </span>
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider ${
+                          blk.status === 'ACTIVE'
+                            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                            : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+                        }`}
+                      >
+                        {t(`Status_${blk.status}`)}
+                      </span>
+                    </div>
                     <svg
-                      className={`h-4 w-4 ${
-                        selectedId === blk.id ? 'text-white' : 'text-zinc-300'
-                      }`}
+                      className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${isExpanded ? 'rotate-180 text-blue-500' : ''}`}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
                     >
                       <path
-                        strokeLinecap="square"
-                        strokeLinejoin="miter"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                         strokeWidth={2}
-                        d="M9 5l7 7-7 7"
+                        d="M19 9l-7 7-7-7"
                       />
                     </svg>
+                  </button>
+                </div>
+
+                {isExpanded && (
+                  <div className="animate-in fade-in slide-in-from-top-2 mt-4 duration-300">
+                    <FloorList blockId={blk.id} />
                   </div>
-                </button>
-              </li>
-            ))}
-          </ul>
+                )}
+              </React.Fragment>
+            );
+          })
         )}
       </div>
 
-      <div className="border-t border-zinc-200 bg-zinc-50 p-4">
-        <form onSubmit={handleCreate} className="flex flex-col gap-2">
-          <input
-            type="text"
-            value={newIdentifier}
-            onChange={(e) => setNewIdentifier(e.target.value)}
-            placeholder={t('PlaceholderBlockName')}
-            className="w-full rounded-none border border-zinc-300 bg-white px-3 py-2 text-sm font-bold text-zinc-900 placeholder-zinc-400 focus:border-zinc-900 focus:outline-none focus:ring-0"
-            disabled={isCreating}
-          />
-          <button
-            type="submit"
-            disabled={isCreating || !newIdentifier.trim()}
-            className="w-full rounded-none bg-zinc-900 px-4 py-2 text-xs font-black uppercase tracking-widest text-white transition-transform hover:bg-orange-600 active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
-          >
-            {t('AddBlock')}
-          </button>
-        </form>
-      </div>
+      {!expandedBlockId && (
+        <div className="mt-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <form onSubmit={handleCreate} className="flex gap-3">
+            <input
+              type="text"
+              value={newIdentifier}
+              onChange={(e) => setNewIdentifier(e.target.value)}
+              placeholder={t('PlaceholderBlockName')}
+              className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+              disabled={isCreating}
+            />
+            <button
+              type="submit"
+              disabled={isCreating || !newIdentifier.trim()}
+              className="shrink-0 rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 disabled:opacity-50 dark:bg-blue-600 dark:hover:bg-blue-700 transition-colors"
+            >
+              {t('AddBlock')}
+            </button>
+          </form>
+        </div>
+      )}
     </div>
   );
 }

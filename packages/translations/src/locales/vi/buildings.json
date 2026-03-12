@@ -1,5 +1,7 @@
 {
   "Heading": "Tòa nhà",
+  "BuildingDetails": "Chi tiết Tòa nhà",
+  "BuildingDetailsDescription": "Cập nhật thông tin cơ bản của tòa nhà này.",
   "Description": "Quản lý các tòa nhà của bạn.",
   "CreateBuilding": "Tạo Tòa nhà",
   "Archive": "Lưu trữ",

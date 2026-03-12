@@ -4,17 +4,6 @@ import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { RegisterSchema } from '@nhatroso/shared';
 import { useTranslations } from 'next-intl';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import Link from 'next/link';
 
 export default function RegisterPage() {
@@ -32,10 +21,8 @@ export default function RegisterPage() {
     const formData = new FormData(e.currentTarget);
     const data = Object.fromEntries(formData.entries());
 
-    // Validate with Zod
     const result = RegisterSchema.safeParse(data);
     if (!result.success) {
-      // Zod validation returns the translation key
       setError(
         tErrors(
           result.error.errors[0].message as Parameters<typeof tErrors>[0],
@@ -54,7 +41,6 @@ export default function RegisterPage() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        // Backend now returns error.code
         throw new Error(errorData?.error?.code || 'UNKNOWN_ERROR');
       }
 
@@ -68,75 +54,116 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 p-4">
-      <Card className="w-full max-w-md shadow-lg border-zinc-200">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold tracking-tight">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 dark:bg-gray-900">
+      <div className="w-full max-w-md">
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            NHATROSO
+          </h1>
+        </div>
+
+        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm sm:p-8 dark:border-gray-700 dark:bg-gray-800">
+          <h2 className="mb-1 text-2xl font-bold text-gray-900 dark:text-white">
             {tAuth('title')}
-          </CardTitle>
-          <CardDescription>{tAuth('description')}</CardDescription>
-        </CardHeader>
-        <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
+          </h2>
+          <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">
+            {tAuth('description')}
+          </p>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
-              <div className="rounded-lg bg-red-50 p-3 text-sm text-red-500 border border-red-100">
+              <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:border-red-800 dark:bg-gray-800 dark:text-red-400">
                 {error}
               </div>
             )}
-            <div className="space-y-2">
-              <Label htmlFor="name">{tAuth('nameLabel')}</Label>
-              <Input
+
+            <div>
+              <label
+                htmlFor="name"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                {tAuth('nameLabel')}
+              </label>
+              <input
                 id="name"
                 name="name"
                 placeholder={tAuth('namePlaceholder')}
                 required
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="phone">{tAuth('phoneLabel')}</Label>
-              <Input
+
+            <div>
+              <label
+                htmlFor="phone"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                {tAuth('phoneLabel')}
+              </label>
+              <input
                 id="phone"
                 name="phone"
                 type="tel"
                 placeholder={tAuth('phonePlaceholder')}
                 required
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">{tAuth('emailLabel')}</Label>
-              <Input
+
+            <div>
+              <label
+                htmlFor="email"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                {tAuth('emailLabel')}
+              </label>
+              <input
                 id="email"
                 name="email"
                 type="email"
                 placeholder={tAuth('emailPlaceholder')}
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
               />
             </div>
-            <Label htmlFor="password">{tAuth('passwordLabel')}</Label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              required
-              placeholder={tAuth('passwordPlaceholder')}
-              minLength={8}
-            />
-          </CardContent>
-          <CardFooter className="flex flex-col space-y-4">
-            <Button type="submit" className="w-full" disabled={loading}>
+
+            <div>
+              <label
+                htmlFor="password"
+                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+              >
+                {tAuth('passwordLabel')}
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                placeholder={tAuth('passwordPlaceholder')}
+                minLength={8}
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full rounded-lg bg-blue-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 disabled:opacity-50 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+            >
               {loading ? tAuth('submitBtnLoading') : tAuth('submitBtn')}
-            </Button>
-            <p className="text-sm text-center text-zinc-500">
+            </button>
+
+            <p className="text-center text-sm text-gray-500 dark:text-gray-400">
               {tAuth('hasAccountPrompt')}{' '}
               <Link
                 href="/login"
-                className="text-black font-semibold hover:underline"
+                className="font-medium text-blue-600 hover:underline dark:text-blue-500"
               >
                 {tAuth('loginLink')}
               </Link>
             </p>
-          </CardFooter>
-        </form>
-      </Card>
+          </form>
+        </div>
+      </div>
     </div>
   );
 }
