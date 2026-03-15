@@ -5,8 +5,8 @@
 use axum::{http::StatusCode, response::IntoResponse};
 use loco_rs::controller::extractor::auth::JWT;
 use loco_rs::prelude::*;
-use sea_orm::{ActiveModelTrait, ActiveValue, ColumnTrait, EntityTrait, QueryFilter};
-use serde::Deserialize;
+use sea_orm::{ActiveModelTrait, ActiveValue, ColumnTrait, EntityTrait, QueryFilter, QueryOrder, RelationTrait, JoinType, QuerySelect, FromQueryResult};
+use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use uuid::Uuid;
 
@@ -36,6 +36,17 @@ pub struct CreateRoomParams {
 #[derive(Clone, Debug, Deserialize, ToSchema)]
 pub struct UpdateRoomParams {
     pub code: Option<String>,
+}
+
+#[derive(Clone, Debug, Serialize, ToSchema, FromQueryResult)]
+pub struct AvailableRoomResponse {
+    pub id: Uuid,
+    pub building_id: Uuid,
+    pub floor_id: Option<Uuid>,
+    pub code: String,
+    pub status: String,
+    pub building_name: String,
+    pub floor_name: Option<String>,
 }
 
 #[utoipa::path(
@@ -147,9 +158,63 @@ pub async fn update(
     format::json(res)
 }
 
+#[utoipa::path(
+    get,
+    path = "/api/rooms/available",
+    security(("bearer_auth" = [])),
+    responses((status = 200, description = "List of available (VACANT) rooms")),
+    tag = "Property"
+)]
+pub async fn list_available(
+    auth: JWT,
+    State(ctx): State<AppContext>,
+) -> Result<Response> {
+    let user_id = Uuid::parse_str(&auth.claims.pid).map_err(|_| Error::Message("Invalid UUID".to_string()))?;
+
+    let items = Rooms::find()
+        .join(JoinType::InnerJoin, crate::models::_entities::rooms::Relation::Buildings.def())
+        .join(JoinType::LeftJoin, crate::models::_entities::rooms::Relation::Floors.def())
+        .filter(crate::models::_entities::buildings::Column::OwnerId.eq(user_id))
+        .filter(Column::Status.eq("VACANT"))
+        .select_only()
+        .column(Column::Id)
+        .column(Column::BuildingId)
+        .column(Column::FloorId)
+        .column(Column::Code)
+        .column(Column::Status)
+        .column_as(crate::models::_entities::buildings::Column::Name, "building_name")
+        .column_as(crate::models::_entities::floors::Column::Identifier, "floor_name")
+        .order_by_asc(Column::Code)
+        .into_model::<AvailableRoomResponse>()
+        .all(&ctx.db)
+        .await?;
+
+    format::json(items)
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/rooms/{id}",
+    security(("bearer_auth" = [])),
+    responses((status = 200, description = "Room information")),
+    tag = "Property"
+)]
+pub async fn get_by_id(
+    _auth: JWT,
+    Path(id): Path<Uuid>,
+    State(ctx): State<AppContext>,
+) -> Result<Response> {
+    let item = Rooms::find_by_id(id).one(&ctx.db).await?;
+    let Some(item) = item else {
+        return error_response("NOT_FOUND", StatusCode::NOT_FOUND);
+    };
+    format::json(item)
+}
+
 pub fn routes() -> Routes {
     Routes::new()
         .prefix("api/v1")
         .add("/floors/{floor_id}/rooms", post(create).get(list_by_floor))
-        .add("/rooms/{id}", patch(update))
+        .add("/rooms/{id}", get(get_by_id).patch(update))
+        .add("/rooms/available", get(list_available))
 }

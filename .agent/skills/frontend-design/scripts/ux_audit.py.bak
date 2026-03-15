@@ -199,19 +199,19 @@ class UXAuditor:
         if complex_elements > 5:
             has_progressive = re.search(r'step|wizard|stage|accordion|collapsible|tab|more\.\.\.|advanced|show more', content, re.IGNORECASE)
             if not has_progressive:
-                self.warnings.append(f"[Cognitive Load] {filepath}: Many form elements without progressive disclosure. Consider accordion, tabs, or 'Advanced' toggle.")
+                self.warnings.append(f"[Cognitive Load] {file_path}: Many form elements without progressive disclosure. Consider accordion, tabs, or 'Advanced' toggle.")
 
         # Visual noise check
         has_many_colors = len(re.findall(r'#[0-9a-fA-F]{3,6}|rgb|hsl', content)) > 15
         has_many_borders = len(re.findall(r'border:|border-', content)) > 10
         if has_many_colors and has_many_borders:
-            self.warnings.append(f"[Cognitive Load] {filepath}: High visual noise detected. Many colors and borders increase cognitive load.")
+            self.warnings.append(f"[Cognitive Load] {file_path}: High visual noise detected. Many colors and borders increase cognitive load.")
 
         # Familiar patterns
         if has_form:
             has_standard_labels = bool(re.search(r'<label|placeholder|aria-label', content, re.IGNORECASE))
             if not has_standard_labels:
-                self.issues.append(f"[Cognitive Load] {filepath}: Form inputs without labels. Use <label> for accessibility and clarity.")
+                self.issues.append(f"[Cognitive Load] {file_path}: Form inputs without labels. Use <label> for accessibility and clarity.")
 
         # --- 1.8 PERSUASIVE DESIGN (Ethical) ---
 

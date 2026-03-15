@@ -26,7 +26,6 @@ impl MigratorTrait for Migrator {
             Box::new(m20260306_080006_floors::Migration),
             Box::new(m20260306_080015_rooms::Migration),
             Box::new(m20260311_030533_add_services_and_price_rules::Migration),
-            // inject-above (do not remove this comment)
         ]
     }
 }

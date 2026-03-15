@@ -49,7 +49,6 @@ impl Hooks for App {
         AppRoutes::with_default_routes()
             .add_route(controllers::auth::routes())
             .add_route(controllers::buildings::routes())
-            .add_route(controllers::blocks::routes())
             .add_route(controllers::floors::routes())
             .add_route(controllers::rooms::routes())
             .add_route(controllers::services::routes())

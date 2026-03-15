@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "dev": "cargo loco start",
+    "dev": "cargo watch -x \"run -- start\"",
     "build": "cargo build",
     "lint": "cargo clippy -- -D warnings",
     "format": "cargo fmt",

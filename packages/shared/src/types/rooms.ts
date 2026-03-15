@@ -4,6 +4,8 @@ export interface Room {
   block_id: string; // uuid
   floor_id: string | null; // uuid
   code: string;
+  building_name?: string;
+  floor_name?: string;
   status: string; // e.g. "VACANT", "OCCUPIED", "ARCHIVED", etc.
   created_at: string;
   updated_at: string;

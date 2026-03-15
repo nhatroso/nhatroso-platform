@@ -5,10 +5,10 @@ import { getFloors, createFloor } from '@/services/api/buildings';
 import { RoomList } from './RoomList';
 
 interface FloorListProps {
-  blockId: string;
+  buildingId: string;
 }
 
-export function FloorList({ blockId }: FloorListProps) {
+export function FloorList({ buildingId }: FloorListProps) {
   const t = useTranslations('Buildings');
   const [floors, setFloors] = React.useState<Floor[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -19,12 +19,12 @@ export function FloorList({ blockId }: FloorListProps) {
   React.useEffect(() => {
     fetchFloors();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [blockId]);
+  }, [buildingId]);
 
   const fetchFloors = async () => {
     try {
       setLoading(true);
-      const data = await getFloors(blockId);
+      const data = await getFloors(buildingId);
       setFloors(data);
     } catch (err) {
       console.error(err);
@@ -39,7 +39,7 @@ export function FloorList({ blockId }: FloorListProps) {
     try {
       setIsCreating(true);
       const payload: CreateFloorInput = { identifier: newIdentifier };
-      const newFloor = await createFloor(blockId, payload);
+      const newFloor = await createFloor(buildingId, payload);
       setNewIdentifier('');
       setExpandedFloorId(newFloor.id);
       fetchFloors();

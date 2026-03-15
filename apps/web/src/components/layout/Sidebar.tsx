@@ -12,6 +12,7 @@ interface SidebarProps {
 const navItems = [
   { key: 'dashboard', href: '/dashboard', icon: 'grid' },
   { key: 'buildings', href: '/dashboard/buildings', icon: 'building' },
+  { key: 'contracts', href: '/dashboard/contracts', icon: 'document' },
   { key: 'services', href: '/dashboard/services', icon: 'cog' },
 ] as const;
 
@@ -22,6 +23,12 @@ function NavIcon({ type }: { type: string }) {
         <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
           <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
           <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" />
+        </svg>
+      );
+    case 'document':
+      return (
+        <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 5.586L15.414 9A2 2 0 0116 10.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
         </svg>
       );
     case 'building':

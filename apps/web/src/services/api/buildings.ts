@@ -1,10 +1,7 @@
-import {
+  import {
   Building,
   CreateBuildingInput,
   UpdateBuildingInput,
-  Block,
-  CreateBlockInput,
-  UpdateBlockInput,
   Floor,
   CreateFloorInput,
   UpdateFloorInput,
@@ -110,50 +107,11 @@ export async function archiveBuilding(id: string): Promise<Building> {
 }
 
 // ==========================================
-// BLOCKS
-// ==========================================
-
-export async function getBlocks(buildingId: string): Promise<Block[]> {
-  const res = await apiFetch(`${API_BASE_URL}/buildings/${buildingId}/blocks`, {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' },
-  });
-  if (!res.ok) throw new Error('Failed to fetch blocks');
-  return res.json();
-}
-
-export async function createBlock(
-  buildingId: string,
-  data: CreateBlockInput,
-): Promise<Block> {
-  const res = await apiFetch(`${API_BASE_URL}/buildings/${buildingId}/blocks`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) throw new Error('Failed to create block');
-  return res.json();
-}
-
-export async function updateBlock(
-  id: string,
-  data: UpdateBlockInput,
-): Promise<Block> {
-  const res = await apiFetch(`${API_BASE_URL}/blocks/${id}`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) throw new Error('Failed to update block');
-  return res.json();
-}
-
-// ==========================================
 // FLOORS
 // ==========================================
 
-export async function getFloors(blockId: string): Promise<Floor[]> {
-  const res = await apiFetch(`${API_BASE_URL}/blocks/${blockId}/floors`, {
+export async function getFloors(buildingId: string): Promise<Floor[]> {
+  const res = await apiFetch(`${API_BASE_URL}/buildings/${buildingId}/floors`, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
   });
@@ -162,10 +120,10 @@ export async function getFloors(blockId: string): Promise<Floor[]> {
 }
 
 export async function createFloor(
-  blockId: string,
+  buildingId: string,
   data: CreateFloorInput,
 ): Promise<Floor> {
-  const res = await apiFetch(`${API_BASE_URL}/blocks/${blockId}/floors`, {
+  const res = await apiFetch(`${API_BASE_URL}/buildings/${buildingId}/floors`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
