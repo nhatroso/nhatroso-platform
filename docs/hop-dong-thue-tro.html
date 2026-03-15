@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hợp Đồng Thuê Phòng Trọ — NHATROSO</title>
+    <meta
+      name="description"
+      content="Mẫu hợp đồng thuê phòng trọ chuẩn pháp luật Việt Nam, theo Nghị định 30/2020/NĐ-CP."
+    />
+
+    <style>
+      /* ─── Design Tokens ─── */
+      :root {
+        --color-ink: #000000;
+        --color-ink-light: #333333;
+        --color-paper: #ffffff;
+        --color-border: #000000;
+        --font-body: 'Times New Roman', Georgia, serif;
+        --radius-none: 0px;
+
+        /* Spacing scale */
+        --space-xs: 4px;
+        --space-sm: 8px;
+        --space-md: 16px;
+        --space-lg: 24px;
+        --space-xl: 32px;
+        --space-2xl: 48px;
+        --space-3xl: 64px;
+      }
+
+      /* ─── Reset & Base ─── */
+      *, *::before, *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html {
+        font-size: 13pt;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      body {
+        font-family: var(--font-body);
+        font-size: 13pt;
+        color: var(--color-ink);
+        background: #f5f5f5;
+        line-height: 1.3;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        padding: var(--space-xl) var(--space-md);
+      }
+
+      /* ─── Contract Page (A4: 210mm × 297mm) ─── */
+      .contract {
+        background: var(--color-paper);
+        width: 210mm;
+        min-height: 297mm;
+        /* Administrative Margins: Top 25, Bottom 25, Left 25, Right 25 */
+        padding: 25mm 25mm 25mm 25mm;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        position: relative;
+        text-align: justify;
+      }
+
+      /* ─── Header ─── */
+      .contract-header {
+        text-align: center;
+        margin-bottom: var(--space-xl);
+      }
+
+      .header-top {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: var(--space-lg);
+      }
+
+      .republic-name {
+        font-size: 13pt;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 2px;
+      }
+
+      .motto {
+        font-size: 14pt;
+        font-weight: 700;
+        position: relative;
+        display: inline-block;
+      }
+
+      .motto::after {
+        content: '';
+        display: block;
+        width: 100%;
+        height: 1px;
+        background: #000;
+        margin: 5px auto 0;
+      }
+
+      .contract-title {
+        font-size: 15pt;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin: var(--space-lg) 0 var(--space-xs);
+      }
+
+      .contract-number {
+        font-size: 13pt;
+        margin-bottom: var(--space-md);
+      }
+
+      .contract-date {
+        font-style: italic;
+        text-align: right;
+        margin-bottom: var(--space-lg);
+      }
+
+      /* ─── Content Styling ─── */
+      .legal-bases {
+        font-style: italic;
+        margin-bottom: var(--space-lg);
+      }
+
+      .legal-bases ul {
+        list-style: none;
+      }
+
+      .legal-bases li {
+        margin-bottom: 4px;
+      }
+
+      .preamble {
+        margin-bottom: var(--space-lg);
+      }
+
+      .party {
+        margin-bottom: var(--space-lg);
+      }
+
+      .party-label {
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: var(--space-sm);
+      }
+
+      .field-row {
+        display: flex;
+        gap: var(--space-sm);
+        margin-bottom: 6px;
+        flex-wrap: wrap;
+      }
+
+      .field-label {
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+
+      .field-value {
+        flex: 1;
+        border-bottom: 1px dotted #000;
+        min-width: 150px;
+      }
+
+      .agreement-intro {
+        font-weight: 700;
+        font-style: italic;
+        margin-bottom: var(--space-lg);
+      }
+
+      .section {
+        margin-bottom: var(--space-lg);
+      }
+
+      .section-title {
+        font-size: 13pt;
+        font-weight: 700;
+        margin-bottom: var(--space-sm);
+      }
+
+      .section-content p {
+        margin-bottom: 6px;
+      }
+
+      .inline-field {
+        border-bottom: 1px dotted #000;
+        display: inline-block;
+        min-width: 60px;
+        text-align: center;
+      }
+
+      .inline-field.wide { min-width: 200px; }
+      .inline-field.medium { min-width: 120px; }
+
+      /* ─── Renewal Table ─── */
+      .renewal-table-wrapper {
+        margin: var(--space-lg) 0;
+      }
+
+      .renewal-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .renewal-table th, .renewal-table td {
+        border: 1px solid #000;
+        padding: 8px;
+        text-align: center;
+        vertical-align: middle;
+      }
+
+      .renewal-table th {
+        font-weight: 700;
+        background: #fcfcfc;
+      }
+
+      /* ─── Signatures ─── */
+      .signatures {
+        display: flex;
+        justify-content: space-between;
+        margin-top: var(--space-3xl);
+        gap: var(--space-xl);
+      }
+
+      .signature-block {
+        text-align: center;
+        flex: 1;
+      }
+
+      .signature-role {
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+      }
+
+      .signature-instruction {
+        font-style: italic;
+        font-size: 12pt;
+        margin-bottom: 80px; /* Space for signature */
+      }
+
+      .signature-name {
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+
+      /* ─── Print Styles ─── */
+      @page {
+        size: A4;
+        margin: 0; /* Handled by .contract padding */
+      }
+
+      @media print {
+        body {
+          background: white;
+          padding: 0;
+        }
+        .contract {
+          box-shadow: none;
+          width: 100%;
+          border: none;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <article class="contract">
+      <!-- ─── Header ─── -->
+      <header class="contract-header">
+        <div class="header-top">
+          <p class="republic-name">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</p>
+          <p class="motto">Độc lập - Tự do - Hạnh phúc</p>
+        </div>
+        <h1 class="contract-title">HỢP ĐỒNG THUÊ PHÒNG TRỌ</h1>
+      </header>
+
+      <div class="contract-date">
+        ........, ngày ....... tháng ....... năm ...........
+      </div>
+
+      <p class="preamble">
+        Hôm nay, tại địa chỉ: ......................................................................., chúng tôi gồm có:
+      </p>
+
+      <!-- ─── Party A ─── -->
+      <div class="party">
+        <p class="party-label">I. BÊN CHO THUÊ (BÊN A):</p>
+        <div class="field-row">
+          <span class="field-label">Ông/Bà:</span>
+          <span class="field-value"></span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">CMND/CCCD số:</span>
+          <span class="field-value"></span>
+          <span class="field-label">Ngày cấp:</span>
+          <span class="field-value"></span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Địa chỉ thường trú:</span>
+          <span class="field-value"></span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Số điện thoại:</span>
+          <span class="field-value"></span>
+        </div>
+      </div>
+
+      <!-- ─── Party B ─── -->
+      <div class="party">
+        <p class="party-label">II. BÊN THUÊ (BÊN B):</p>
+        <div class="field-row">
+          <span class="field-label">Ông/Bà:</span>
+          <span class="field-value"></span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">CMND/CCCD số:</span>
+          <span class="field-value"></span>
+          <span class="field-label">Ngày cấp:</span>
+          <span class="field-value"></span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Địa chỉ thường trú:</span>
+          <span class="field-value"></span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Số điện thoại:</span>
+          <span class="field-value"></span>
+        </div>
+      </div>
+
+      <p class="agreement-intro">
+        Hai bên cùng thỏa thuận và thống nhất ký kết hợp đồng với các điều khoản sau đây:
+      </p>
+
+      <!-- ─── Section 1: Rental Content ─── -->
+      <section class="section">
+        <h2 class="section-title">Điều 1. Đối tượng thuê và thời hạn thuê</h2>
+        <div class="section-content">
+          <p>
+            1.1. Bên A đồng ý cho Bên B thuê phòng trọ số: <span class="inline-field"></span>,
+            tại địa chỉ: <span class="inline-field wide"></span>.
+          </p>
+          <p>
+            1.2. Thời hạn thuê là: <span class="inline-field"></span> tháng,
+            kể từ ngày ....../....../........... đến ngày ....../....../...........
+          </p>
+        </div>
+      </section>
+
+      <!-- ─── Section 2: Price and Payment ─── -->
+      <section class="section">
+        <h2 class="section-title">Điều 2. Giá thuê và phương thức thanh toán</h2>
+        <div class="section-content">
+          <p>
+            2.1. Giá thuê phòng là: <span class="inline-field wide"></span> đồng/tháng (Bằng chữ:
+            <span class="inline-field wide"></span>).
+          </p>
+          <p>
+            2.2. Giá thuê chưa bao gồm chi phí điện, nước, internet, vệ sinh, bảo trì, bảo dưỡng, khoản phí khác.
+          </p>
+          <p>
+            2.3. Bên B phải đặt cọc cho Bên A số tiền là: <span class="inline-field wide"></span> đồng.
+            Tiền cọc sẽ được trả lại sau khi thanh lý hợp đồng và trừ đi các khoản thiệt hại (nếu có).
+          </p>
+          <p>
+            2.4. Bên B thanh toán tiền thuê phòng cho bên A hàng tháng vào ngày ...... + tiền chi phí dịch vụ đã được cung cấp.
+          </p>
+          <p>
+            2.5. Bên B có trách nhiệm thanh toán các khoản phí điện, nước, internet, vệ sinh, bảo trì, bảo dưỡng, khoản phí khác theo đúng thời hạn và phương thức thanh toán đã thỏa thuận.
+          </p>
+        </div>
+      </section>
+
+      <!-- ─── Section 3: Responsibilities ─── -->
+      <section class="section">
+        <h2 class="section-title">Điều 3. Quyền và trách nhiệm của các bên</h2>
+        <div class="section-content">
+          <p>3.1. Bên A có trách nhiệm đảm bảo quyền sử dụng phòng cho Bên B, hỗ trợ đăng ký tạm trú.</p>
+          <p>3.2. Bên B có trách nhiệm sử dụng phòng đúng mục đích, giữ gìn vệ sinh, an ninh và phòng cháy chữa cháy.</p>
+          <p>3.3. Bên B không được tự ý sửa chữa, thay đổi cấu trúc phòng nếu chưa được Bên A đồng ý.</p>
+        </div>
+      </section>
+
+      <!-- ─── Section 4: General Terms ─── -->
+      <section class="section">
+        <h2 class="section-title">Điều 4. Điều khoản chung</h2>
+        <div class="section-content">
+          <p>4.1. Một trong hai bên muốn chấm dứt hợp đồng trước hạn phải thông báo trước ít nhất 30 ngày.</p>
+          <p>4.2. Hợp đồng được lập thành 02 bản có giá trị pháp lý như nhau, mỗi bên giữ 01 bản.</p>
+          <p>4.3. Sau thời hạn cho thuê ...... tháng nếu bên B có nhu cầu hai bên tiếp tục thương lượng giá thuê để gia hạn hợp đồng bằng miệng hoặc thực hiện như sau.</p>
+        </div>
+
+        <!-- Renewal Table -->
+        <div class="renewal-table-wrapper">
+          <table class="renewal-table">
+            <thead>
+              <tr>
+                <th>Lần</th>
+                <th>Thời gian</th>
+                <th>Từ ngày</th>
+                <th>Đến ngày</th>
+                <th>Giá thuê</th>
+                <th>Ký xác nhận</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>1</td><td></td><td></td><td></td><td></td><td></td></tr>
+              <tr><td>2</td><td></td><td></td><td></td><td></td><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ─── Signatures ─── -->
+      <div class="signatures">
+        <div class="signature-block">
+          <p class="signature-role">BÊN CHO THUÊ (BÊN A)</p>
+          <p class="signature-instruction">(Ký và ghi rõ họ tên)</p>
+          <p class="signature-name">................................</p>
+        </div>
+        <div class="signature-block">
+          <p class="signature-role">BÊN THUÊ (BÊN B)</p>
+          <p class="signature-instruction">(Ký và ghi rõ họ tên)</p>
+          <p class="signature-name">................................</p>
+        </div>
+      </div>
+    </article>
+  </body>
+</html>
+<label aria-hidden="true" style="display:none">Hidden</label>
