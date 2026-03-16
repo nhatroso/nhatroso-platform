@@ -2,6 +2,14 @@ import viErrors from './locales/vi/errors.json';
 import enErrors from './locales/en/errors.json';
 import viAuth from './locales/vi/auth.json';
 import enAuth from './locales/en/auth.json';
+import viBuildings from './locales/vi/buildings.json';
+import enBuildings from './locales/en/buildings.json';
+import viServices from './locales/vi/services.json';
+import enServices from './locales/en/services.json';
+import viSidebar from './locales/vi/sidebar.json';
+import enSidebar from './locales/en/sidebar.json';
+import viDashboard from './locales/vi/dashboard.json';
+import enDashboard from './locales/en/dashboard.json';
 
 export const i18nConfig = {
   locales: ['vi', 'en'] as const,
@@ -12,12 +20,20 @@ export type Locale = (typeof i18nConfig.locales)[number];
 
 export const translations = {
   vi: {
-    errors: viErrors,
-    auth: viAuth,
+    Errors: viErrors,
+    Auth: viAuth,
+    Buildings: viBuildings,
+    Services: viServices,
+    Sidebar: viSidebar,
+    Dashboard: viDashboard,
   },
   en: {
-    errors: enErrors,
-    auth: enAuth,
+    Errors: enErrors,
+    Auth: enAuth,
+    Buildings: enBuildings,
+    Services: enServices,
+    Sidebar: enSidebar,
+    Dashboard: enDashboard,
   },
 };
 

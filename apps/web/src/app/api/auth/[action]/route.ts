@@ -42,6 +42,10 @@ export async function POST(
       });
     }
 
+    if (action === 'logout') {
+      res.cookies.delete('token');
+    }
+
     return res;
   } catch (error) {
     console.error('Auth Proxy Error:', error);

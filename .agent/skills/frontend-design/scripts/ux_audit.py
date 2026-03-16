@@ -199,19 +199,19 @@ class UXAuditor:
         if complex_elements > 5:
             has_progressive = re.search(r'step|wizard|stage|accordion|collapsible|tab|more\.\.\.|advanced|show more', content, re.IGNORECASE)
             if not has_progressive:
-                self.warnings.append(f"[Cognitive Load] {filename}: Many form elements without progressive disclosure. Consider accordion, tabs, or 'Advanced' toggle.")
+                self.warnings.append(f"[Cognitive Load] {filepath}: Many form elements without progressive disclosure. Consider accordion, tabs, or 'Advanced' toggle.")
 
         # Visual noise check
         has_many_colors = len(re.findall(r'#[0-9a-fA-F]{3,6}|rgb|hsl', content)) > 15
         has_many_borders = len(re.findall(r'border:|border-', content)) > 10
         if has_many_colors and has_many_borders:
-            self.warnings.append(f"[Cognitive Load] {filename}: High visual noise detected. Many colors and borders increase cognitive load.")
+            self.warnings.append(f"[Cognitive Load] {filepath}: High visual noise detected. Many colors and borders increase cognitive load.")
 
         # Familiar patterns
         if has_form:
             has_standard_labels = bool(re.search(r'<label|placeholder|aria-label', content, re.IGNORECASE))
             if not has_standard_labels:
-                self.issues.append(f"[Cognitive Load] {filename}: Form inputs without labels. Use <label> for accessibility and clarity.")
+                self.issues.append(f"[Cognitive Load] {filepath}: Form inputs without labels. Use <label> for accessibility and clarity.")
 
         # --- 1.8 PERSUASIVE DESIGN (Ethical) ---
 
@@ -674,7 +674,7 @@ class UXAuditor:
     def audit_directory(self, directory: str) -> None:
         extensions = {'.tsx', '.jsx', '.html', '.vue', '.svelte', '.css'}
         for root, dirs, files in os.walk(directory):
-            dirs[:] = [d for d in dirs if d not in {'node_modules', '.git', 'dist', 'build', '.next'}]
+            dirs[:] = [d for d in dirs if d not in {'node_modules', '.git', 'dist', 'build', '.next', 'mobile'}]
             for file in files:
                 if Path(file).suffix in extensions:
                     self.audit_file(os.path.join(root, file))

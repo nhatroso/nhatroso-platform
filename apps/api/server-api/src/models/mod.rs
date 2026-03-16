@@ -1,3 +1,9 @@
 pub mod _entities;
 pub mod refresh_tokens;
 pub mod users;
+pub mod rooms;
+pub mod floors;
+pub mod buildings;
+pub mod blocks;
+pub mod price_rules;
+pub mod services;

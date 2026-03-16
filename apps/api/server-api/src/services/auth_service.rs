@@ -15,7 +15,7 @@ pub async fn generate_tokens(
     user_id: Uuid,
 ) -> ModelResult<AuthTokenPairs> {
     // 15m expiration in seconds
-    let expiration_seconds = 15 * 60;
+    let expiration_seconds = 24 * 60 * 60;
 
     let jwt = JWT::new(jwt_secret);
 

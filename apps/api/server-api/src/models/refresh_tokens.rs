@@ -4,6 +4,16 @@ use loco_rs::model::{ModelError, ModelResult};
 use sea_orm::{entity::prelude::*, ActiveValue};
 use uuid::Uuid;
 
+#[async_trait::async_trait]
+impl ActiveModelBehavior for ActiveModel {
+    async fn before_save<C>(self, _db: &C, _insert: bool) -> std::result::Result<Self, DbErr>
+    where
+        C: ConnectionTrait,
+    {
+        Ok(self)
+    }
+}
+
 impl super::_entities::refresh_tokens::Model {
     pub async fn create(db: &DatabaseConnection, user_id: Uuid) -> ModelResult<(Self, String)> {
         let jti = Uuid::new_v4();

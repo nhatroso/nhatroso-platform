@@ -25,6 +25,8 @@ async fn can_register() {
         let email = "test@loco.com";
         let payload = serde_json::json!({
             "email": email,
+            "phone": "1234567890",
+            "name": "Test User",
             "password": "my_secure_password"
         });
 
@@ -57,6 +59,8 @@ async fn can_login() {
         let password = "12341234";
         let register_payload = serde_json::json!({
             "email": email,
+            "phone": "0987654321",
+            "name": "Test User 2",
             "password": password
         });
 
@@ -74,7 +78,7 @@ async fn can_login() {
         let login_response = request
             .post("/api/auth/login")
             .json(&serde_json::json!({
-                "email": email,
+                "phone": "0987654321",
                 "password": password
             }))
             .await;
