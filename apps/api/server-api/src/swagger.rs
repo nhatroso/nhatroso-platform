@@ -22,9 +22,6 @@ use utoipa::OpenApi;
         crate::controllers::services::list,
         crate::controllers::services::update,
         crate::controllers::services::archive,
-        crate::controllers::price_rules::create,
-        crate::controllers::price_rules::list,
-        crate::controllers::price_rules::update,
         crate::controllers::price_rules::remove,
     ),
     components(

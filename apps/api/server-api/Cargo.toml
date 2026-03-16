@@ -16,7 +16,7 @@ loco-rs = { version = "0.16" }
 loco-rs = { workspace = true  }
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1" }
-rust_decimal = "1"
+rust_decimal = { version = "1", features = ["serde-float"] }
 tokio = { version = "1.45", default-features = false, features = [
   "rt-multi-thread",
 ] }

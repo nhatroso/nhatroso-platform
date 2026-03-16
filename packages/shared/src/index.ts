@@ -12,5 +12,3 @@ export * from './schemas/services';
 export * from './types/services';
 export * from './schemas/price_rules';
 export * from './types/price_rules';
-export * from './schemas/contracts';
-export * from './types/contracts';

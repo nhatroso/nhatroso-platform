@@ -12,7 +12,6 @@ interface SidebarProps {
 const navItems = [
   { key: 'dashboard', href: '/dashboard', icon: 'grid' },
   { key: 'buildings', href: '/dashboard/buildings', icon: 'building' },
-  { key: 'contracts', href: '/dashboard/contracts', icon: 'document' },
   { key: 'services', href: '/dashboard/services', icon: 'cog' },
 ] as const;
 
