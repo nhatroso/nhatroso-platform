@@ -4,8 +4,8 @@ use axum::Json;
 use uuid::Uuid;
 
 use crate::{
-    dto::floors::{CreateFloorParams, UpdateFloorParams},
-    services::floors::FloorService,
+    views::floors::{CreateFloorParams, UpdateFloorParams},
+    models::floors::Model as Floor,
     utils::{auth, error::error_response},
 };
 
@@ -17,7 +17,7 @@ pub async fn create(
 ) -> Result<Response> {
     let owner_id = auth::get_user_id(&auth)?;
 
-    match FloorService::create(&ctx.db, owner_id, building_id, params).await? {
+    match Floor::create_floor(&ctx.db, owner_id, building_id, params).await? {
         Ok(res) => format::json(res),
         Err((status, code)) => error_response(code, status),
     }
@@ -30,7 +30,7 @@ pub async fn list_by_building(
 ) -> Result<Response> {
     let owner_id = auth::get_user_id(&auth)?;
 
-    match FloorService::list_by_building(&ctx.db, owner_id, building_id).await? {
+    match Floor::list_by_building(&ctx.db, owner_id, building_id).await? {
         Ok(items) => format::json(items),
         Err((status, code)) => error_response(code, status),
     }
@@ -44,7 +44,7 @@ pub async fn update(
 ) -> Result<Response> {
     let owner_id = auth::get_user_id(&auth)?;
 
-    match FloorService::update(&ctx.db, owner_id, id, params).await? {
+    match Floor::update_floor(&ctx.db, owner_id, id, params).await? {
         Ok(res) => format::json(res),
         Err((status, code)) => error_response(code, status),
     }

@@ -87,7 +87,7 @@ export function RoomPricingModal({ room, onClose }: RoomPricingModalProps) {
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-700">
           <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-            {t('Pricing')} — {room.code}
+            {t('Pricing')} — {room.room_code}
           </h2>
 
           <button

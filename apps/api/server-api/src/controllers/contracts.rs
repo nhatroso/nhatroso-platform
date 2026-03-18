@@ -4,8 +4,8 @@ use axum::Json;
 use uuid::Uuid;
 
 use crate::{
-    dto::contracts::CreateContractParams,
-    services::contracts::ContractService,
+    views::contracts::CreateContractParams,
+    models::contracts::Model as Contract,
     utils::{auth, error::error_response},
 };
 
@@ -15,7 +15,7 @@ pub async fn create(
     Json(params): Json<CreateContractParams>,
 ) -> Result<Response> {
     let landlord_id = auth::get_user_id(&auth)?;
-    let res = ContractService::create(&ctx.db, landlord_id, params).await?;
+    let res = Contract::create_contract(&ctx.db, landlord_id, params).await?;
     format::json(res)
 }
 
@@ -23,7 +23,7 @@ pub async fn get_by_id(
     Path(id): Path<Uuid>,
     State(ctx): State<AppContext>,
 ) -> Result<Response> {
-    match ContractService::get_by_id(&ctx.db, id).await? {
+    match Contract::get_contract_by_id(&ctx.db, id).await? {
         Ok(res) => format::json(res),
         Err((status, code)) => error_response(code, status),
     }
@@ -32,7 +32,7 @@ pub async fn get_by_id(
 pub async fn list(
     State(ctx): State<AppContext>,
 ) -> Result<Response> {
-    let results = ContractService::list(&ctx.db).await?;
+    let results = Contract::list_contracts(&ctx.db).await?;
     format::json(results)
 }
 

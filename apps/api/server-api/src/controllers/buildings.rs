@@ -4,8 +4,8 @@ use axum::Json;
 use uuid::Uuid;
 
 use crate::{
-    dto::buildings::{CreateBuildingParams, UpdateBuildingParams},
-    services::buildings::BuildingService,
+    views::buildings::{CreateBuildingParams, UpdateBuildingParams},
+    models::buildings::Model as Building,
     utils::{auth, error::error_response},
 };
 
@@ -19,13 +19,13 @@ pub async fn create(
     }
 
     let owner_id = auth::get_user_id(&auth)?;
-    let res = BuildingService::create(&ctx.db, owner_id, params).await?;
+    let res = Building::create(&ctx.db, owner_id, params).await?;
     format::json(res)
 }
 
 pub async fn list(auth: JWT, State(ctx): State<AppContext>) -> Result<Response> {
     let owner_id = auth::get_user_id(&auth)?;
-    let items = BuildingService::list(&ctx.db, owner_id).await?;
+    let items = Building::find_by_owner(&ctx.db, owner_id).await?;
     format::json(items)
 }
 
@@ -37,7 +37,7 @@ pub async fn update(
 ) -> Result<Response> {
     let owner_id = auth::get_user_id(&auth)?;
     
-    match BuildingService::update(&ctx.db, owner_id, id, params).await? {
+    match Building::update_building(&ctx.db, owner_id, id, params).await? {
         Ok(res) => format::json(res),
         Err((status, code)) => error_response(code, status),
     }
@@ -50,7 +50,7 @@ pub async fn archive(
 ) -> Result<Response> {
     let owner_id = auth::get_user_id(&auth)?;
     
-    match BuildingService::archive(&ctx.db, owner_id, id).await? {
+    match Building::archive_building(&ctx.db, owner_id, id).await? {
         Ok(res) => format::json(res),
         Err((status, code)) => error_response(code, status),
     }

@@ -68,25 +68,11 @@ export default function CreateContractPage() {
   } = useForm<CreateContractParams>({
     resolver: zodResolver(CreateContractSchema),
     defaultValues: {
-      room_id: '',
-      owner_name: '',
-      owner_id_card: '',
-      owner_id_card_date: '',
-      owner_address: '',
-      owner_phone: '',
-      tenant_name: '',
-      tenant_id_card: '',
-      tenant_id_card_date: '',
-      tenant_address: '',
-      tenant_phone: '',
-      start_date: '',
-      end_date: '',
+      start_date: new Date().toISOString().split('T')[0],
       monthly_rent: 0,
       deposit_amount: 0,
       payment_day: 5,
       rental_period: 12,
-      room_code: '',
-      room_address: '',
     },
   });
 
@@ -175,8 +161,8 @@ export default function CreateContractPage() {
     if (watchRoomId) {
       const selectedRoom = rooms.find((r) => r.id === watchRoomId);
       if (selectedRoom) {
-        setValue('room_code', selectedRoom.code, { shouldValidate: true });
-        setValue('room_address', selectedRoom.address || '', {
+        setValue('room_code', selectedRoom.room_code, { shouldValidate: true });
+        setValue('room_address', selectedRoom.room_address || '', {
           shouldValidate: true,
         });
       } else {
@@ -271,7 +257,7 @@ export default function CreateContractPage() {
               <option key={room.id} value={room.id}>
                 {room.building_name ? `${room.building_name} - ` : ''}
                 {room.floor_name ? `${room.floor_name} - ` : ''}
-                P.{room.code}
+                P.{room.room_code}
               </option>
             ))}
           </select>

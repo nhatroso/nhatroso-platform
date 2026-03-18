@@ -3,8 +3,8 @@ use loco_rs::controller::extractor::auth::JWT;
 use axum::Json;
 
 use crate::{
-    dto::auth::{RegisterParams, LoginParams, RefreshParams},
-    services::auth_service::AuthService,
+    views::auth::{RegisterParams, LoginParams, RefreshParams},
+    models::{users::Model as User, _entities::refresh_tokens::Model as RefreshTokens},
     utils::{auth, error::error_response},
 };
 
@@ -13,7 +13,7 @@ pub async fn register(
     Json(params): Json<RegisterParams>,
 ) -> Result<Response> {
     let secret = &ctx.config.auth.as_ref().unwrap().jwt.as_ref().unwrap().secret;
-    match AuthService::register(&ctx.db, secret, params).await? {
+    match User::register(&ctx.db, secret, params).await? {
         Ok(res) => format::json(res),
         Err((status, code)) => error_response(code, status),
     }
@@ -24,7 +24,7 @@ pub async fn login(
     Json(params): Json<LoginParams>,
 ) -> Result<Response> {
     let secret = &ctx.config.auth.as_ref().unwrap().jwt.as_ref().unwrap().secret;
-    match AuthService::login(&ctx.db, secret, params).await? {
+    match User::login(&ctx.db, secret, params).await? {
         Ok(res) => format::json(res),
         Err((status, code)) => error_response(code, status),
     }
@@ -35,7 +35,7 @@ pub async fn refresh(
     Json(params): Json<RefreshParams>,
 ) -> Result<Response> {
     let secret = &ctx.config.auth.as_ref().unwrap().jwt.as_ref().unwrap().secret;
-    let tokens_res = AuthService::rotate_refresh_token(&ctx.db, secret, &params.refresh_token).await;
+    let tokens_res = User::rotate_refresh_token(&ctx.db, secret, &params.refresh_token).await;
 
     match tokens_res {
         Ok(tokens) => format::json(serde_json::json!({
@@ -51,14 +51,17 @@ pub async fn logout(
     State(ctx): State<AppContext>,
     Json(params): Json<RefreshParams>,
 ) -> Result<Response> {
-    AuthService::revoke_token(&ctx.db, &params.refresh_token).await?;
+    RefreshTokens::revoke(&ctx.db, &params.refresh_token).await?;
     format::empty()
 }
 
 pub async fn current_user(auth: JWT, State(ctx): State<AppContext>) -> Result<Response> {
     let user_id = auth::get_user_id(&auth)?;
-    match AuthService::get_current_user(&ctx.db, user_id).await? {
-        Ok(user) => format::json(user),
+    match User::get_current_user(&ctx.db, user_id).await? {
+        Ok(user) => format::json(serde_json::json!({
+            "status": "ok",
+            "user": user
+        })),
         Err((status, code)) => error_response(code, status),
     }
 }

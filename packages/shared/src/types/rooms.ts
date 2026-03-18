@@ -3,9 +3,10 @@ export interface Room {
   building_id: string; // uuid
   block_id: string; // uuid
   floor_id: string | null; // uuid
+  room_code: string;
   code: string;
   building_name?: string;
-  address?: string;
+  room_address?: string;
   floor_name?: string;
   status: string; // e.g. "VACANT", "OCCUPIED", "ARCHIVED", etc.
   created_at: string;

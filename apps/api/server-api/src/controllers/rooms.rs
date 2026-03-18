@@ -3,8 +3,8 @@ use loco_rs::controller::extractor::auth::JWT;
 use uuid::Uuid;
 
 use crate::{
-    dto::rooms::{CreateRoomParams, UpdateRoomParams},
-    services::rooms::RoomService,
+    views::rooms::{CreateRoomParams, UpdateRoomParams},
+    models::rooms::{Model as Room, Entity as Rooms},
     utils::{auth, error::error_response},
 };
 
@@ -16,7 +16,7 @@ pub async fn create(
 ) -> Result<Response> {
     let owner_id = auth::get_user_id(&auth)?;
 
-    match RoomService::create(&ctx.db, owner_id, floor_id, params).await? {
+    match Room::create(&ctx.db, owner_id, floor_id, params).await? {
         Ok(res) => format::json(res),
         Err((status, code)) => error_response(code, status),
     }
@@ -29,7 +29,7 @@ pub async fn list_by_floor(
 ) -> Result<Response> {
     let owner_id = auth::get_user_id(&auth)?;
 
-    match RoomService::list_by_floor(&ctx.db, owner_id, floor_id).await? {
+    match Room::list_by_floor(&ctx.db, owner_id, floor_id).await? {
         Ok(items) => format::json(items),
         Err((status, code)) => error_response(code, status),
     }
@@ -43,7 +43,7 @@ pub async fn update(
 ) -> Result<Response> {
     let owner_id = auth::get_user_id(&auth)?;
 
-    match RoomService::update(&ctx.db, owner_id, id, params).await? {
+    match Room::update_room(&ctx.db, owner_id, id, params).await? {
         Ok(res) => format::json(res),
         Err((status, code)) => error_response(code, status),
     }
@@ -54,7 +54,7 @@ pub async fn list_available(
     State(ctx): State<AppContext>,
 ) -> Result<Response> {
     let owner_id = auth::get_user_id(&auth)?;
-    let items = RoomService::list_available(&ctx.db, owner_id).await?;
+    let items = Rooms::list_available(&ctx.db, owner_id).await?;
     format::json(items)
 }
 
@@ -65,7 +65,7 @@ pub async fn get_by_id(
 ) -> Result<Response> {
     let owner_id = auth::get_user_id(&auth)?;
 
-    match RoomService::get_by_id(&ctx.db, owner_id, id).await? {
+    match Room::get_by_id(&ctx.db, owner_id, id).await? {
         Ok(item) => format::json(item),
         Err((status, code)) => error_response(code, status),
     }

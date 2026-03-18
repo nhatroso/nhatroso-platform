@@ -83,7 +83,7 @@ pub async fn lookup(
                     name: user.name.clone(),
                     phone: user.phone.clone(),
                     id_card: user.id_card.clone(),
-                    id_card_date: user.id_card_date.clone(),
+                    id_card_date: user.id_card_date,
                     address: user.address.clone(),
                 }),
                 has_active_contract,

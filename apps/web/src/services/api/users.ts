@@ -42,6 +42,7 @@ export const usersService = {
 
     return res.json();
   },
+
   getCurrentUser: async (): Promise<UserProfile> => {
     const res = await apiFetch(`${API_BASE_URL}/auth/me`, {
       method: 'GET',
@@ -52,6 +53,7 @@ export const usersService = {
       throw new Error('Failed to fetch current user profile');
     }
 
-    return res.json();
+    const data = await res.json();
+    return data.user;
   },
 };
