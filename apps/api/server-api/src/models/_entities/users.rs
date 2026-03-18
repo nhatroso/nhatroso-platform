@@ -18,12 +18,19 @@ pub struct Model {
     pub created_at: DateTimeWithTimeZone,
     pub updated_at: DateTimeWithTimeZone,
     pub name: String,
+    pub id_card: Option<String>,
+    pub id_card_date: Option<Date>,
+    pub address: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
     #[sea_orm(has_many = "super::buildings::Entity")]
     Buildings,
+    #[sea_orm(has_many = "super::contract_tenants::Entity")]
+    ContractTenants,
+    #[sea_orm(has_many = "super::contracts::Entity")]
+    Contracts,
     #[sea_orm(has_many = "super::price_rules::Entity")]
     PriceRules,
     #[sea_orm(has_many = "super::refresh_tokens::Entity")]
@@ -35,6 +42,12 @@ pub enum Relation {
 impl Related<super::buildings::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Buildings.def()
+    }
+}
+
+impl Related<super::contract_tenants::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::ContractTenants.def()
     }
 }
 
@@ -53,5 +66,14 @@ impl Related<super::refresh_tokens::Entity> for Entity {
 impl Related<super::services::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Services.def()
+    }
+}
+
+impl Related<super::contracts::Entity> for Entity {
+    fn to() -> RelationDef {
+        super::contract_tenants::Relation::Contracts.def()
+    }
+    fn via() -> Option<RelationDef> {
+        Some(super::contract_tenants::Relation::Users.def().rev())
     }
 }

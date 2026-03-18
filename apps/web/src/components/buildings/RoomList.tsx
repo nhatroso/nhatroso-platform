@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { useTranslations } from 'next-intl';
 import { Room, CreateRoomInput } from '@nhatroso/shared';
-import { getRooms, createRoom } from '@/services/api/buildings';
+import { getRooms, createRoom } from '@/services/api/rooms';
+
 import { RoomPricingModal } from './RoomPricingModal';
 import { priceRulesApi } from '@/services/api/price-rules';
 import { servicesApi } from '@/services/api/services';
@@ -134,6 +135,7 @@ export function RoomList({ floorId }: RoomListProps) {
                   <span className="text-sm font-bold text-gray-900 dark:text-white">
                     {rm.code}
                   </span>
+
                   <div className="flex flex-col items-end">
                     {prices[rm.id] ? (
                       <span className="text-[10px] font-medium text-blue-600 dark:text-blue-400">

@@ -4,6 +4,7 @@ pub mod users;
 pub mod rooms;
 pub mod floors;
 pub mod buildings;
-pub mod blocks;
 pub mod price_rules;
 pub mod services;
+pub mod contract_tenants;
+pub mod contracts;

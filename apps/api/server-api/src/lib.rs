@@ -1,11 +1,12 @@
 pub mod app;
 pub mod controllers;
 pub mod data;
-pub mod initializers;
-pub mod mailers;
+pub mod dto;
 pub mod models;
+pub mod repositories;
 pub mod services;
-pub mod swagger;
 pub mod tasks;
+
+pub mod utils;
 pub mod views;
-pub mod workers;
+

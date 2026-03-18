@@ -1,6 +1,6 @@
 use sea_orm::entity::prelude::*;
-pub use super::_entities::blocks::{ActiveModel, Model, Entity};
-pub type Blocks = Entity;
+pub use super::_entities::contract_tenants::{ActiveModel, Model, Entity};
+pub type ContractTenants = Entity;
 
 #[async_trait::async_trait]
 impl ActiveModelBehavior for ActiveModel {

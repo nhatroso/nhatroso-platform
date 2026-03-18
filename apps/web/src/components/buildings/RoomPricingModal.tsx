@@ -89,6 +89,7 @@ export function RoomPricingModal({ room, onClose }: RoomPricingModalProps) {
           <h2 className="text-lg font-bold text-gray-900 dark:text-white">
             {t('Pricing')} — {room.code}
           </h2>
+
           <button
             onClick={onClose}
             className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-700 dark:hover:text-white"

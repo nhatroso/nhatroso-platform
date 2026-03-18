@@ -10,7 +10,7 @@ pub struct Model {
     pub id: Uuid,
     pub owner_id: Uuid,
     pub name: String,
-    pub address: Option<String>,
+    pub address: String,
     pub status: String,
     pub created_at: DateTimeWithTimeZone,
     pub updated_at: DateTimeWithTimeZone,
@@ -18,8 +18,6 @@ pub struct Model {
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(has_many = "super::blocks::Entity")]
-    Blocks,
     #[sea_orm(has_many = "super::floors::Entity")]
     Floors,
     #[sea_orm(has_many = "super::rooms::Entity")]
@@ -32,12 +30,6 @@ pub enum Relation {
         on_delete = "Cascade"
     )]
     Users,
-}
-
-impl Related<super::blocks::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Blocks.def()
-    }
 }
 
 impl Related<super::floors::Entity> for Entity {
@@ -57,3 +49,4 @@ impl Related<super::users::Entity> for Entity {
         Relation::Users.def()
     }
 }
+

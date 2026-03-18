@@ -2,8 +2,9 @@
 
 pub mod prelude;
 
-pub mod blocks;
 pub mod buildings;
+pub mod contract_tenants;
+pub mod contracts;
 pub mod floors;
 pub mod price_rules;
 pub mod refresh_tokens;
