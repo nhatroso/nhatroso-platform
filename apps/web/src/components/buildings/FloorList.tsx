@@ -121,7 +121,7 @@ export function FloorList({ buildingId }: FloorListProps) {
 
                 {isExpanded && (
                   <div className="border-t border-gray-100 bg-gray-50/80 p-3 dark:border-gray-700 dark:bg-gray-900/80">
-                    <RoomList floorId={fl.id} />
+                    <RoomList floorId={fl.id} buildingId={buildingId} />
                   </div>
                 )}
               </div>

@@ -18,7 +18,7 @@ pub struct AvailableRoomResponse {
     pub building_id: Uuid,
     pub building_name: String,
     pub room_address: String,
-    pub room_code: String,
+    pub code: String,
     pub status: String,
     pub floor_name: Option<String>,
 }

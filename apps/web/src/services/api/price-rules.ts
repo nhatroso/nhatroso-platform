@@ -1,50 +1,65 @@
 import {
   PriceRule,
-  CreatePriceRuleParams,
-  UpdatePriceRuleParams,
+  CreatePriceRuleInput,
+  UpdatePriceRuleInput,
 } from '@nhatroso/shared';
 import { apiFetch, API_BASE_URL } from './base';
 
 export const priceRulesApi = {
   listByRoom: async (roomId: string): Promise<PriceRule[]> => {
-    const res = await apiFetch(`${API_BASE_URL}/rooms/${roomId}/price_rules`);
-    if (!res.ok) throw new Error('Failed to fetch price rules');
-    const json = await res.json();
-    return json.data || [];
+    const res = await apiFetch(`${API_BASE_URL}/price-rules/room/${roomId}`);
+    if (!res.ok) throw new Error('Failed to fetch room price rules');
+    return res.json();
   },
 
-  create: async (
-    roomId: string,
-    data: CreatePriceRuleParams,
-  ): Promise<PriceRule> => {
-    const res = await apiFetch(`${API_BASE_URL}/rooms/${roomId}/price_rules`, {
+  listByBuilding: async (buildingId: string): Promise<PriceRule[]> => {
+    const res = await apiFetch(`${API_BASE_URL}/price-rules/building/${buildingId}`);
+    if (!res.ok) throw new Error('Failed to fetch building price rules');
+    return res.json();
+  },
+
+  listDefaults: async (): Promise<PriceRule[]> => {
+    const res = await apiFetch(`${API_BASE_URL}/price-rules/defaults`);
+    if (!res.ok) throw new Error('Failed to fetch default price rules');
+    return res.json();
+  },
+
+  create: async (data: CreatePriceRuleInput): Promise<PriceRule> => {
+    const res = await apiFetch(`${API_BASE_URL}/price-rules`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
-    if (!res.ok) throw new Error('Failed to create price rule');
-    const json = await res.json();
-    return json.data;
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error?.code || 'Failed to create price rule');
+    }
+    return res.json();
   },
 
   update: async (
     id: string,
-    data: UpdatePriceRuleParams,
+    data: UpdatePriceRuleInput,
   ): Promise<PriceRule> => {
-    const res = await apiFetch(`${API_BASE_URL}/price_rules/${id}`, {
+    const res = await apiFetch(`${API_BASE_URL}/price-rules/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
-    if (!res.ok) throw new Error('Failed to update price rule');
-    const json = await res.json();
-    return json.data;
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error?.code || 'Failed to update price rule');
+    }
+    return res.json();
   },
 
   remove: async (id: string): Promise<void> => {
-    const res = await apiFetch(`${API_BASE_URL}/price_rules/${id}`, {
+    const res = await apiFetch(`${API_BASE_URL}/price-rules/${id}`, {
       method: 'DELETE',
     });
-    if (!res.ok) throw new Error('Failed to remove price rule');
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error?.code || 'Failed to remove price rule');
+    }
   },
 };

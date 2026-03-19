@@ -19,6 +19,7 @@ mod m20260317_071311_add_rental_period_to_contracts;
 mod m20260317_141521_remove_blocks;
 mod m20260318_103000_add_building_address_to_contracts;
 mod m20260318_103600_replace_building_address_with_room_details;
+mod m20260319_033311_modify_price_rules_schema;
 pub struct Migrator;
 
 #[async_trait::async_trait]
@@ -41,6 +42,7 @@ impl MigratorTrait for Migrator {
             Box::new(m20260317_141521_remove_blocks::Migration),
             Box::new(m20260318_103000_add_building_address_to_contracts::Migration),
             Box::new(m20260318_103600_replace_building_address_with_room_details::Migration),
+            Box::new(m20260319_033311_modify_price_rules_schema::Migration),
         ]
     }
 }

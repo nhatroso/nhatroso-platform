@@ -185,7 +185,7 @@ impl Entity {
             .column(super::_entities::rooms::Column::BuildingId)
             .column_as(crate::models::_entities::buildings::Column::Name, "building_name")
             .column_as(crate::models::_entities::buildings::Column::Address, "room_address")
-            .column_as(super::_entities::rooms::Column::Code, "room_code")
+            .column_as(super::_entities::rooms::Column::Code, "code")
             .column(super::_entities::rooms::Column::Status)
             .column_as(crate::models::_entities::floors::Column::Identifier, "floor_name")
             .join(JoinType::InnerJoin, super::_entities::rooms::Relation::Buildings.def())

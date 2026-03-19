@@ -10,7 +10,7 @@ pub struct Model {
     pub id: Uuid,
     pub owner_id: Uuid,
     pub name: String,
-    pub address: String,
+    pub address: Option<String>,
     pub status: String,
     pub created_at: DateTimeWithTimeZone,
     pub updated_at: DateTimeWithTimeZone,
@@ -20,6 +20,8 @@ pub struct Model {
 pub enum Relation {
     #[sea_orm(has_many = "super::floors::Entity")]
     Floors,
+    #[sea_orm(has_many = "super::price_rules::Entity")]
+    PriceRules,
     #[sea_orm(has_many = "super::rooms::Entity")]
     Rooms,
     #[sea_orm(
@@ -38,6 +40,12 @@ impl Related<super::floors::Entity> for Entity {
     }
 }
 
+impl Related<super::price_rules::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::PriceRules.def()
+    }
+}
+
 impl Related<super::rooms::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Rooms.def()
@@ -49,4 +57,3 @@ impl Related<super::users::Entity> for Entity {
         Relation::Users.def()
     }
 }
-

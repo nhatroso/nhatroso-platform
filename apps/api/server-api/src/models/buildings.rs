@@ -50,7 +50,7 @@ impl Model {
             id: ActiveValue::Set(Uuid::new_v4()),
             owner_id: ActiveValue::Set(owner_id),
             name: ActiveValue::Set(params.name),
-            address: ActiveValue::Set(params.address.unwrap_or_default()),
+            address: ActiveValue::Set(params.address),
             status: ActiveValue::Set("ACTIVE".to_string()),
             created_at: ActiveValue::Set(chrono::Utc::now().into()),
             updated_at: ActiveValue::Set(chrono::Utc::now().into()),
@@ -75,7 +75,7 @@ impl Model {
             }
         }
         if let Some(address) = params.address {
-            active_model.address = ActiveValue::Set(address);
+            active_model.address = ActiveValue::Set(Some(address));
         }
         active_model.updated_at = ActiveValue::Set(chrono::Utc::now().into());
         Ok(Ok(active_model.update(db).await.map_err(Error::from)?))

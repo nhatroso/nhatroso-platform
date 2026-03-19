@@ -9,9 +9,10 @@ import { servicesApi } from '@/services/api/services';
 
 interface RoomListProps {
   floorId: string;
+  buildingId: string;
 }
 
-export function RoomList({ floorId }: RoomListProps) {
+export function RoomList({ floorId, buildingId }: RoomListProps) {
   const t = useTranslations('Buildings');
   const tErrors = useTranslations('Errors');
   const [rooms, setRooms] = React.useState<Room[]>([]);
@@ -206,6 +207,7 @@ export function RoomList({ floorId }: RoomListProps) {
       {managingRoomPrice && (
         <RoomPricingModal
           room={managingRoomPrice}
+          buildingId={buildingId}
           onClose={() => setManagingRoomPrice(null)}
         />
       )}

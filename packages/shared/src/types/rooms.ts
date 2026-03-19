@@ -3,7 +3,6 @@ export interface Room {
   building_id: string; // uuid
   block_id: string; // uuid
   floor_id: string | null; // uuid
-  room_code: string;
   code: string;
   building_name?: string;
   room_address?: string;
