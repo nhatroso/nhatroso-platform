@@ -1,7 +1,7 @@
 use axum::http::{HeaderName, HeaderValue};
 use loco_rs::{app::AppContext, TestServer};
 use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
-use server_api::{controllers::auth::AuthResponse, models::_entities::users};
+use server_api::{views::auth::AuthResponse, models::_entities::users};
 
 const USER_PASSWORD: &str = "12341234";
 

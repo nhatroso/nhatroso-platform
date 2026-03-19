@@ -1,37 +1,12 @@
-  import {
+import {
   Building,
   CreateBuildingInput,
   UpdateBuildingInput,
   Floor,
   CreateFloorInput,
   UpdateFloorInput,
-  Room,
-  CreateRoomInput,
-  UpdateRoomInput,
 } from '@nhatroso/shared';
-
-const API_BASE_URL = '/api/proxy';
-
-/**
- * Universal wrapper for API calls that auto-redirects to login on 401
- */
-async function apiFetch(
-  input: RequestInfo | URL,
-  init?: RequestInit,
-): Promise<Response> {
-  const res = await fetch(input, init);
-
-  if (res.status === 401) {
-    if (typeof window !== 'undefined') {
-      const pathname = window.location.pathname;
-      const localeMatch = pathname.match(/^\/(vi|en)/);
-      const locale = localeMatch ? localeMatch[1] : '';
-      window.location.href = locale ? `/${locale}/login` : '/login';
-    }
-  }
-
-  return res;
-}
+import { apiFetch, API_BASE_URL } from './base';
 
 export async function getBuildings(): Promise<Building[]> {
   const res = await apiFetch(`${API_BASE_URL}/buildings`, {
@@ -145,47 +120,3 @@ export async function updateFloor(
   return res.json();
 }
 
-// ==========================================
-// ROOMS
-// ==========================================
-
-export async function getRooms(floorId: string): Promise<Room[]> {
-  const res = await apiFetch(`${API_BASE_URL}/floors/${floorId}/rooms`, {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' },
-  });
-  if (!res.ok) throw new Error('Failed to fetch rooms');
-  return res.json();
-}
-
-export async function createRoom(
-  floorId: string,
-  data: CreateRoomInput,
-): Promise<Room> {
-  const res = await apiFetch(`${API_BASE_URL}/floors/${floorId}/rooms`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) {
-    const errBody = await res.json().catch(() => null);
-    throw new Error(errBody?.error?.code || 'Failed to create room');
-  }
-  return res.json();
-}
-
-export async function updateRoom(
-  id: string,
-  data: UpdateRoomInput,
-): Promise<Room> {
-  const res = await apiFetch(`${API_BASE_URL}/rooms/${id}`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) {
-    const errBody = await res.json().catch(() => null);
-    throw new Error(errBody?.error?.code || 'Failed to update room');
-  }
-  return res.json();
-}

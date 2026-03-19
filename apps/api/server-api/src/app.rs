@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use loco_rs::{
     app::{AppContext, Hooks, Initializer},
-    bgworker::{BackgroundWorker, Queue},
+    bgworker::{Queue},
     boot::{create_app, BootResult, StartMode},
     config::Config,
     controller::AppRoutes,
@@ -13,7 +13,7 @@ use migration::Migrator;
 use std::path::Path;
 
 #[allow(unused_imports)]
-use crate::{controllers, tasks, workers::downloader::DownloadWorker};
+use crate::{controllers, tasks};
 
 pub struct App;
 
@@ -46,29 +46,28 @@ impl Hooks for App {
     }
 
     fn routes(_ctx: &AppContext) -> AppRoutes {
-        AppRoutes::with_default_routes()
+        AppRoutes::empty()
             .add_route(controllers::auth::routes())
             .add_route(controllers::buildings::routes())
             .add_route(controllers::floors::routes())
             .add_route(controllers::rooms::routes())
             .add_route(controllers::services::routes())
             .add_route(controllers::price_rules::routes())
+            .add_route(controllers::contracts::routes())
+            .add_route(controllers::users::routes())
     }
 
     async fn after_routes(router: axum::Router, _ctx: &AppContext) -> Result<axum::Router> {
-        use utoipa::OpenApi;
-        Ok(router.merge(
-            utoipa_swagger_ui::SwaggerUi::new("/swagger")
-                .url("/api-doc/openapi.json", crate::swagger::ApiDoc::openapi()),
-        ))
+        Ok(router)
     }
 
-    async fn connect_workers(ctx: &AppContext, queue: &Queue) -> Result<()> {
-        queue.register(DownloadWorker::build(ctx)).await?;
+    async fn connect_workers(_ctx: &AppContext, _queue: &Queue) -> Result<()> {
         Ok(())
     }
 
-    fn register_tasks(_tasks: &mut Tasks) {}
+    fn register_tasks(tasks: &mut Tasks) {
+        tasks.register(tasks::seed_data::SeedData);
+    }
 
     async fn truncate(_ctx: &AppContext) -> Result<()> {
         Ok(())

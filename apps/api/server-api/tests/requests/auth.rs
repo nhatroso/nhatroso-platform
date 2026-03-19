@@ -51,6 +51,52 @@ async fn can_register() {
 
 #[tokio::test]
 #[serial]
+async fn can_register_with_empty_email() {
+    configure_insta!();
+
+    request::<App, _, _>(|request, ctx| async move {
+        let phone1 = "1122334455";
+        let payload1 = serde_json::json!({
+            "email": "",
+            "phone": phone1,
+            "name": "User 1",
+            "password": "my_secure_password"
+        });
+
+        let response1 = request.post("/api/auth/register").json(&payload1).await;
+        assert_eq!(response1.status_code(), 200);
+
+        // Try to register another user with empty email
+        let phone2 = "5544332211";
+        let payload2 = serde_json::json!({
+            "email": "",
+            "phone": phone2,
+            "name": "User 2",
+            "password": "my_secure_password"
+        });
+
+        let response2 = request.post("/api/auth/register").json(&payload2).await;
+        assert_eq!(
+            response2.status_code(),
+            200,
+            "Registration should succeed for second user with empty email, but got: {}",
+            response2.text()
+        );
+
+        let saved_user2 = users::Entity::find()
+            .filter(users::Column::Phone.eq(phone2))
+            .one(&ctx.db)
+            .await
+            .unwrap()
+            .unwrap();
+
+        assert!(saved_user2.email.is_none(), "Email should be saved as NULL");
+    })
+    .await;
+}
+
+#[tokio::test]
+#[serial]
 async fn can_login() {
     configure_insta!();
 

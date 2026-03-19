@@ -16,7 +16,7 @@ loco-rs = { version = "0.16" }
 loco-rs = { workspace = true  }
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1" }
-rust_decimal = "1"
+rust_decimal = { version = "1", features = ["serde-float"] }
 tokio = { version = "1.45", default-features = false, features = [
   "rt-multi-thread",
 ] }
@@ -37,8 +37,6 @@ validator = { version = "0.20" }
 uuid = { version = "1.6", features = ["v4"] }
 include_dir = { version = "0.7" }
 anyhow = "1.0.102"
-utoipa = { version = "5.4.0", features = ["axum_extras", "uuid", "chrono", "decimal"] }
-utoipa-swagger-ui = { version = "9.0.2", features = ["axum"] }
 
 [[bin]]
 name = "server_api-cli"

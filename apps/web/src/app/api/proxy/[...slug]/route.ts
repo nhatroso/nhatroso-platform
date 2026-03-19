@@ -8,9 +8,7 @@ async function handleProxy(
 ) {
   const { slug } = await params;
   const path = slug.join('/');
-
-  // Notice we are prefixing the path with /api/v1/
-  const endpoint = `/api/v1/${path}`;
+  const endpoint = slug[0] === 'auth' ? `/api/${path}` : `/api/v1/${path}`;
 
   const token = request.cookies.get('token')?.value;
 

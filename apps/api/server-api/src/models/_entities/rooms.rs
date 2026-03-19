@@ -9,7 +9,6 @@ pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
     pub building_id: Uuid,
-    pub block_id: Uuid,
     pub floor_id: Option<Uuid>,
     pub code: String,
     pub status: String,
@@ -20,14 +19,6 @@ pub struct Model {
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
     #[sea_orm(
-        belongs_to = "super::blocks::Entity",
-        from = "Column::BlockId",
-        to = "super::blocks::Column::Id",
-        on_update = "Cascade",
-        on_delete = "Cascade"
-    )]
-    Blocks,
-    #[sea_orm(
         belongs_to = "super::buildings::Entity",
         from = "Column::BuildingId",
         to = "super::buildings::Column::Id",
@@ -35,6 +26,8 @@ pub enum Relation {
         on_delete = "Cascade"
     )]
     Buildings,
+    #[sea_orm(has_many = "super::contracts::Entity")]
+    Contracts,
     #[sea_orm(
         belongs_to = "super::floors::Entity",
         from = "Column::FloorId",
@@ -43,19 +36,17 @@ pub enum Relation {
         on_delete = "SetNull"
     )]
     Floors,
-    #[sea_orm(has_many = "super::price_rules::Entity")]
-    PriceRules,
-}
-
-impl Related<super::blocks::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Blocks.def()
-    }
 }
 
 impl Related<super::buildings::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Buildings.def()
+    }
+}
+
+impl Related<super::contracts::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Contracts.def()
     }
 }
 
@@ -65,8 +56,3 @@ impl Related<super::floors::Entity> for Entity {
     }
 }
 
-impl Related<super::price_rules::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::PriceRules.def()
-    }
-}

@@ -1,0 +1,123 @@
+warning: unused import: `schema::*`
+ --> migration/src/m20260317_064357_create_contract_tenants.rs:1:37
+  |
+1 | use sea_orm_migration::{prelude::*, schema::*};
+  |                                     ^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `schema::*`
+ --> migration/src/m20260317_064844_move_identity_to_users.rs:1:37
+  |
+1 | use sea_orm_migration::{prelude::*, schema::*};
+  |                                     ^^^^^^^^^
+
+warning: `migration` (lib) generated 2 warnings (run `cargo fix --lib -p migration` to apply 2 suggestions)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.68s
+     Running unittests src/lib.rs (target/debug/deps/server_api-2ce625d73b844a04)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/main.rs (target/debug/deps/server_api_cli-990959a606ff56a8)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/mod.rs (target/debug/deps/mod-3e9c7228557199c2)
+
+running 1 test
+REGISTER RESPONSE: {"token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJwaWQiOiI5NTViM2NlZS04OWRjLTQ5YzQtODhhMi1mMDQ0YmQxZTI2YzkiLCJleHAiOjE3NzM4MTc2ODN9.DgdZFqYpzoMaKcapphcW-klkadHWTJq2tjUB7_9NBw-yRRIe6WH-OdUFx3I5DQ6ZLZi6tEkwg4snk1HDoTeRuA","refresh_token":"70470ffe-bc55-4d27-bbe7-fed3438f6600","id":"955b3cee-89dc-49c4-88a2-f044bd1e26c9"}
+LOGIN RESPONSE: {"token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJwaWQiOiI5NTViM2NlZS04OWRjLTQ5YzQtODhhMi1mMDQ0YmQxZTI2YzkiLCJleHAiOjE3NzM4MTc2ODN9.DgdZFqYpzoMaKcapphcW-klkadHWTJq2tjUB7_9NBw-yRRIe6WH-OdUFx3I5DQ6ZLZi6tEkwg4snk1HDoTeRuA","refresh_token":"ae43748f-f56c-4b6e-b167-23862c2d98ff","id":"955b3cee-89dc-49c4-88a2-f044bd1e26c9"}
+
+thread 'requests::contracts::can_create_contract_and_update_tenant_identity' (3912381) panicked at tests/requests/contracts.rs:77:9:
+assertion `left == right` failed: Contract creation failed: {"id":"272928f2-2c67-4d84-a82c-fec7739ace5b","user_id":"955b3cee-89dc-49c4-88a2-f044bd1e26c9","room_id":"d0efc7d3-0fa0-4318-a651-f966a9f429d9","start_date":"2024-03-17","end_date":"2025-03-17","monthly_rent":5000000,"deposit_amount":10000000,"payment_day":5,"status":"ACTIVE","created_at":"2026-03-17T07:08:03.739309Z","updated_at":"2026-03-17T07:08:03.739309Z"}
+  left: 200
+ right: 201
+stack backtrace:
+   0: __rustc::rust_begin_unwind
+             at /rustc/254b59607d4417e9dffbc307138ae5c86280fe4c/library/std/src/panicking.rs:689:5
+   1: core::panicking::panic_fmt
+             at /rustc/254b59607d4417e9dffbc307138ae5c86280fe4c/library/core/src/panicking.rs:80:14
+   2: core::panicking::assert_failed_inner
+   3: core::panicking::assert_failed
+             at /rustc/254b59607d4417e9dffbc307138ae5c86280fe4c/library/core/src/panicking.rs:394:5
+   4: mod::requests::contracts::can_create_contract_and_update_tenant_identity::{{closure}}::{{closure}}::{{closure}}::{{closure}}
+             at ./tests/requests/contracts.rs:77:9
+   5: loco_rs::testing::request::request_internal::{{closure}}
+             at /Users/kasperdinh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/loco-rs-0.16.4/src/testing/request.rs:271:48
+   6: loco_rs::testing::request::request_with_config::{{closure}}
+             at /Users/kasperdinh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/loco-rs-0.16.4/src/testing/request.rs:361:57
+   7: loco_rs::testing::request::request::{{closure}}
+             at /Users/kasperdinh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/loco-rs-0.16.4/src/testing/request.rs:307:74
+   8: mod::requests::contracts::can_create_contract_and_update_tenant_identity::{{closure}}::{{closure}}
+             at ./tests/requests/contracts.rs:104:6
+   9: <core::pin::Pin<P> as core::future::future::Future>::poll
+             at /rustc/254b59607d4417e9dffbc307138ae5c86280fe4c/library/core/src/future/future.rs:133:9
+  10: <core::pin::Pin<P> as core::future::future::Future>::poll
+             at /rustc/254b59607d4417e9dffbc307138ae5c86280fe4c/library/core/src/future/future.rs:133:9
+  11: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}::{{closure}}::{{closure}}
+             at /Users/kasperdinh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.50.0/src/runtime/scheduler/current_thread/mod.rs:769:70
+  12: tokio::task::coop::with_budget
+             at /Users/kasperdinh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.50.0/src/task/coop/mod.rs:167:5
+  13: tokio::task::coop::budget
+             at /Users/kasperdinh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.50.0/src/task/coop/mod.rs:133:5
+  14: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}::{{closure}}
+             at /Users/kasperdinh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.50.0/src/runtime/scheduler/current_thread/mod.rs:769:25
+  15: tokio::runtime::scheduler::current_thread::Context::enter
+             at /Users/kasperdinh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.50.0/src/runtime/scheduler/current_thread/mod.rs:446:19
+  16: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}
+             at /Users/kasperdinh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.50.0/src/runtime/scheduler/current_thread/mod.rs:768:44
+  17: tokio::runtime::scheduler::current_thread::CoreGuard::enter::{{closure}}
+             at /Users/kasperdinh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.50.0/src/runtime/scheduler/current_thread/mod.rs:856:68
+  18: tokio::runtime::context::scoped::Scoped<T>::set
+             at /Users/kasperdinh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.50.0/src/runtime/context/scoped.rs:40:9
+  19: tokio::runtime::context::set_scheduler::{{closure}}
+             at /Users/kasperdinh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.50.0/src/runtime/context.rs:176:38
+  20: std::thread::local::LocalKey<T>::try_with
+             at /rustc/254b59607d4417e9dffbc307138ae5c86280fe4c/library/std/src/thread/local.rs:513:12
+  21: std::thread::local::LocalKey<T>::with
+             at /rustc/254b59607d4417e9dffbc307138ae5c86280fe4c/library/std/src/thread/local.rs:477:20
+  22: tokio::runtime::context::set_scheduler
+             at /Users/kasperdinh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.50.0/src/runtime/context.rs:176:17
+  23: tokio::runtime::scheduler::current_thread::CoreGuard::enter
+             at /Users/kasperdinh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.50.0/src/runtime/scheduler/current_thread/mod.rs:856:27
+  24: tokio::runtime::scheduler::current_thread::CoreGuard::block_on
+             at /Users/kasperdinh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.50.0/src/runtime/scheduler/current_thread/mod.rs:756:24
+  25: tokio::runtime::scheduler::current_thread::CurrentThread::block_on::{{closure}}
+             at /Users/kasperdinh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.50.0/src/runtime/scheduler/current_thread/mod.rs:200:33
+  26: tokio::runtime::context::runtime::enter_runtime
+             at /Users/kasperdinh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.50.0/src/runtime/context/runtime.rs:65:16
+  27: tokio::runtime::scheduler::current_thread::CurrentThread::block_on
+             at /Users/kasperdinh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.50.0/src/runtime/scheduler/current_thread/mod.rs:188:9
+  28: tokio::runtime::runtime::Runtime::block_on_inner
+             at /Users/kasperdinh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.50.0/src/runtime/runtime.rs:371:52
+  29: tokio::runtime::runtime::Runtime::block_on
+             at /Users/kasperdinh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.50.0/src/runtime/runtime.rs:345:18
+  30: mod::requests::contracts::can_create_contract_and_update_tenant_identity::{{closure}}
+             at ./tests/requests/contracts.rs:104:11
+  31: core::ops::function::FnOnce::call_once
+             at /rustc/254b59607d4417e9dffbc307138ae5c86280fe4c/library/core/src/ops/function.rs:250:5
+  32: serial_test::serial_code_lock::local_serial_core
+             at /Users/kasperdinh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serial_test-3.4.0/src/serial_code_lock.rs:36:5
+  33: mod::requests::contracts::can_create_contract_and_update_tenant_identity
+             at ./tests/requests/contracts.rs:10:1
+  34: mod::requests::contracts::can_create_contract_and_update_tenant_identity::{{closure}}
+             at ./tests/requests/contracts.rs:10:10
+  35: core::ops::function::FnOnce::call_once
+             at /rustc/254b59607d4417e9dffbc307138ae5c86280fe4c/library/core/src/ops/function.rs:250:5
+  36: core::ops::function::FnOnce::call_once
+             at /rustc/254b59607d4417e9dffbc307138ae5c86280fe4c/library/core/src/ops/function.rs:250:5
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+test requests::contracts::can_create_contract_and_update_tenant_identity ... FAILED
+
+failures:
+
+failures:
+    requests::contracts::can_create_contract_and_update_tenant_identity
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.99s
+
+error: test failed, to rerun pass `--test mod`
