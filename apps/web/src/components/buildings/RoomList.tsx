@@ -2,10 +2,7 @@ import * as React from 'react';
 import { useTranslations } from 'next-intl';
 import { Room, CreateRoomInput } from '@nhatroso/shared';
 import { getRooms, createRoom } from '@/services/api/rooms';
-
 import { RoomPricingModal } from './RoomPricingModal';
-import { roomServicesApi } from '@/services/api/room-services';
-import { servicesApi } from '@/services/api/services';
 
 export function RoomList({ floorId }: { floorId: string }) {
   const t = useTranslations('Buildings');

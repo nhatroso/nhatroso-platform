@@ -7,8 +7,6 @@ import { Building, Floor, Room } from '@nhatroso/shared';
 import { getBuildings, getAllFloors } from '@/services/api/buildings';
 import { getAllRooms, createRoom } from '@/services/api/rooms';
 import { RoomPricingModal } from '@/components/buildings/RoomPricingModal';
-import { roomServicesApi } from '@/services/api/room-services';
-import { servicesApi } from '@/services/api/services';
 
 function RoomsPageContent() {
   const t = useTranslations('Buildings');
