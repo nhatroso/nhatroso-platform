@@ -208,7 +208,7 @@ function FloorsPageContent() {
 
                   {isExpanded && (
                     <div className="border-t border-gray-100 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
-                      <RoomList floorId={fl.id} buildingId={fl.building_id} />
+                      <RoomList floorId={fl.id} />
                     </div>
                   )}
                 </div>

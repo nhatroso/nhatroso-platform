@@ -14,7 +14,9 @@ export function FloorList({ buildingId }: FloorListProps) {
   const [loading, setLoading] = React.useState(true);
   const [isCreating, setIsCreating] = React.useState(false);
   const [newIdentifier, setNewIdentifier] = React.useState('');
-  const [expandedFloorId, setExpandedFloorId] = React.useState<string | null>(null);
+  const [expandedFloorId, setExpandedFloorId] = React.useState<string | null>(
+    null,
+  );
 
   React.useEffect(() => {
     fetchFloors();
@@ -51,7 +53,7 @@ export function FloorList({ buildingId }: FloorListProps) {
   };
 
   const toggleFloor = (id: string) => {
-    setExpandedFloorId(prev => prev === id ? null : id);
+    setExpandedFloorId((prev) => (prev === id ? null : id));
   };
 
   if (loading) {
@@ -96,7 +98,9 @@ export function FloorList({ buildingId }: FloorListProps) {
                   className="flex w-full items-center justify-between px-4 py-3 text-left focus:outline-none"
                 >
                   <div className="flex items-center gap-3">
-                    <span className={`text-sm font-medium transition-colors ${isExpanded ? 'text-blue-700 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
+                    <span
+                      className={`text-sm font-medium transition-colors ${isExpanded ? 'text-blue-700 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}
+                    >
                       {fl.identifier}
                     </span>
                     <span
@@ -104,7 +108,7 @@ export function FloorList({ buildingId }: FloorListProps) {
                         fl.status === 'ACTIVE'
                           ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
                           : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
-                       }`}
+                      }`}
                     >
                       {t(`Status_${fl.status}`)}
                     </span>
@@ -115,13 +119,18 @@ export function FloorList({ buildingId }: FloorListProps) {
                     stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
                   </svg>
                 </button>
 
                 {isExpanded && (
                   <div className="border-t border-gray-100 bg-gray-50/80 p-3 dark:border-gray-700 dark:bg-gray-900/80">
-                    <RoomList floorId={fl.id} buildingId={buildingId} />
+                    <RoomList floorId={fl.id} />
                   </div>
                 )}
               </div>

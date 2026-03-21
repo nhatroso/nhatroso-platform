@@ -19,7 +19,6 @@ function RoomsPageContent() {
   const [buildings, setBuildings] = React.useState<Building[]>([]);
   const [floors, setFloors] = React.useState<Floor[]>([]);
   const [rooms, setRooms] = React.useState<Room[]>([]);
-  const [prices, setPrices] = React.useState<Record<string, number>>({});
 
   const [loading, setLoading] = React.useState(true);
   const [selectedBuildingId, setSelectedBuildingId] =
@@ -51,31 +50,6 @@ function RoomsPageContent() {
         setBuildings(bData);
         setFloors(fData);
         setRooms(rData);
-
-        // Fetch prices for all rooms
-        const [allServices, ...allRoomServices] = await Promise.all([
-          servicesApi.list(),
-          ...rData.map((r) => roomServicesApi.listByRoom(r.id)),
-        ]);
-
-        const roomServiceDef = allServices.find(
-          (s) =>
-            s.name.toLowerCase().includes('phòng') ||
-            s.name.toLowerCase().includes('room'),
-        );
-
-        if (roomServiceDef) {
-          const newPrices: Record<string, number> = {};
-          allRoomServices.forEach((services, idx) => {
-            const activeRecord = services.find(
-              (r) => r.service_id === roomServiceDef.id && r.is_active,
-            );
-            if (activeRecord && activeRecord.unit_price) {
-              newPrices[rData[idx].id] = Number(activeRecord.unit_price);
-            }
-          });
-          setPrices(newPrices);
-        }
       } catch (err) {
         console.error('Failed to fetch data', err);
       } finally {
