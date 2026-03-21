@@ -47,6 +47,7 @@ impl Hooks for App {
 
     fn routes(_ctx: &AppContext) -> AppRoutes {
         AppRoutes::empty()
+            .add_route(controllers::room_services::routes())
             .add_route(controllers::auth::routes())
             .add_route(controllers::buildings::routes())
             .add_route(controllers::floors::routes())

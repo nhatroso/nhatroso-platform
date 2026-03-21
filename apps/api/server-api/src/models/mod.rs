@@ -8,3 +8,4 @@ pub mod price_rules;
 pub mod services;
 pub mod contract_tenants;
 pub mod contracts;
+pub mod room_services;

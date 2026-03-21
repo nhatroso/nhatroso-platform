@@ -10,7 +10,7 @@ pub struct Model {
     pub id: Uuid,
     pub owner_id: Uuid,
     pub name: String,
-    pub address: String,
+    pub address: Option<String>,
     pub status: String,
     pub created_at: DateTimeWithTimeZone,
     pub updated_at: DateTimeWithTimeZone,
@@ -49,4 +49,3 @@ impl Related<super::users::Entity> for Entity {
         Relation::Users.def()
     }
 }
-

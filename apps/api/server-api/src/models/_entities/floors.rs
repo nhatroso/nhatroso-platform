@@ -38,4 +38,3 @@ impl Related<super::rooms::Entity> for Entity {
         Relation::Rooms.def()
     }
 }
-

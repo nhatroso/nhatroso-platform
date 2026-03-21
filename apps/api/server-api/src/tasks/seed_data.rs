@@ -69,7 +69,7 @@ impl Task for SeedData {
                 id: ActiveValue::Set(building_id),
                 owner_id: ActiveValue::Set(owner_id),
                 name: ActiveValue::Set("Nha Tro Binh An".to_string()),
-                address: ActiveValue::Set("456 Le Loi, Quan 3, TP.HCM".to_string()),
+                address: ActiveValue::Set(Some("456 Le Loi, Quan 3, TP.HCM".to_string())),
                 status: ActiveValue::Set("ACTIVE".to_string()),
                 created_at: ActiveValue::Set(chrono::Utc::now().into()),
                 updated_at: ActiveValue::Set(chrono::Utc::now().into()),

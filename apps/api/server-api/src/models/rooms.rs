@@ -66,6 +66,16 @@ impl Model {
             .await?)
     }
 
+    pub async fn list_by_owner(db: &DatabaseConnection, owner_id: Uuid) -> Result<Vec<Self>> {
+        Ok(Rooms::find()
+            .join(JoinType::InnerJoin, super::_entities::rooms::Relation::Buildings.def())
+            .filter(crate::models::_entities::buildings::Column::OwnerId.eq(owner_id))
+            .filter(super::_entities::rooms::Column::Status.ne("ARCHIVED"))
+            .order_by_asc(super::_entities::rooms::Column::Code)
+            .all(db)
+            .await?)
+    }
+
     pub async fn list_by_floor(
         db: &DatabaseConnection,
         owner_id: Uuid,
@@ -185,7 +195,7 @@ impl Entity {
             .column(super::_entities::rooms::Column::BuildingId)
             .column_as(crate::models::_entities::buildings::Column::Name, "building_name")
             .column_as(crate::models::_entities::buildings::Column::Address, "room_address")
-            .column_as(super::_entities::rooms::Column::Code, "room_code")
+            .column_as(super::_entities::rooms::Column::Code, "code")
             .column(super::_entities::rooms::Column::Status)
             .column_as(crate::models::_entities::floors::Column::Identifier, "floor_name")
             .join(JoinType::InnerJoin, super::_entities::rooms::Relation::Buildings.def())

@@ -10,7 +10,7 @@ export const servicesApi = {
     const res = await apiFetch(`${API_BASE_URL}/services`);
     if (!res.ok) throw new Error('Failed to fetch services');
     const json = await res.json();
-    return json.data || [];
+    return Array.isArray(json) ? json : json.data || [];
   },
 
   create: async (data: CreateServiceParams): Promise<Service> => {
@@ -21,7 +21,7 @@ export const servicesApi = {
     });
     if (!res.ok) throw new Error('Failed to create service');
     const json = await res.json();
-    return json.data;
+    return json.data !== undefined ? json.data : json;
   },
 
   update: async (id: string, data: UpdateServiceParams): Promise<Service> => {
@@ -32,7 +32,7 @@ export const servicesApi = {
     });
     if (!res.ok) throw new Error('Failed to update service');
     const json = await res.json();
-    return json.data;
+    return json.data !== undefined ? json.data : json;
   },
 
   archive: async (id: string): Promise<Service> => {
@@ -42,6 +42,6 @@ export const servicesApi = {
     });
     if (!res.ok) throw new Error('Failed to archive service');
     const json = await res.json();
-    return json.data;
+    return json.data !== undefined ? json.data : json;
   },
 };

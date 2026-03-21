@@ -1,8 +1,9 @@
 import * as React from 'react';
-import { useTranslations, useFormatter } from 'next-intl';
-import { Room, Service, PriceRule } from '@nhatroso/shared';
+import { useTranslations } from 'next-intl';
+import { Room, Service, PriceRule, RoomService } from '@nhatroso/shared';
 import { servicesApi } from '@/services/api/services';
 import { priceRulesApi } from '@/services/api/price-rules';
+import { roomServicesApi } from '@/services/api/room-services';
 
 interface RoomPricingModalProps {
   room: Room;
@@ -12,18 +13,21 @@ interface RoomPricingModalProps {
 export function RoomPricingModal({ room, onClose }: RoomPricingModalProps) {
   const t = useTranslations('Buildings');
   const tServices = useTranslations('Services');
-  const format = useFormatter();
 
   const [services, setServices] = React.useState<Service[]>([]);
-  const [rules, setRules] = React.useState<PriceRule[]>([]);
-  const [loading, setLoading] = React.useState(true);
+  const [roomServices, setRoomServices] = React.useState<RoomService[]>([]);
+  const [serviceTemplates, setServiceTemplates] = React.useState<PriceRule[]>(
+    [],
+  );
 
+  const [loading, setLoading] = React.useState(true);
   const [selectedServiceId, setSelectedServiceId] = React.useState<
     string | null
   >(null);
-  const [unitPrice, setUnitPrice] = React.useState('');
-  const [effectiveStart, setEffectiveStart] = React.useState('');
-  const [errorMsg, setErrorMsg] = React.useState('');
+
+  const [stagedIsActive, setStagedIsActive] = React.useState(false);
+  const [stagedPriceRuleId, setStagedPriceRuleId] = React.useState('');
+  const [errorMsg, setErrorMsg] = React.useState<string>('');
   const [isSaving, setIsSaving] = React.useState(false);
 
   React.useEffect(() => {
@@ -34,14 +38,15 @@ export function RoomPricingModal({ room, onClose }: RoomPricingModalProps) {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [allServices, allRules] = await Promise.all([
+      const [allServices, assignedServices] = await Promise.all([
         servicesApi.list(),
-        priceRulesApi.listByRoom(room.id),
+        roomServicesApi.listByRoom(room.id),
       ]);
-      setServices(allServices.filter((s) => s.status === 'ACTIVE'));
-      setRules(allRules);
 
       const activeServices = allServices.filter((s) => s.status === 'ACTIVE');
+      setServices(activeServices);
+      setRoomServices(assignedServices);
+
       if (activeServices.length > 0 && !selectedServiceId) {
         setSelectedServiceId(activeServices[0].id);
       }
@@ -52,87 +57,177 @@ export function RoomPricingModal({ room, onClose }: RoomPricingModalProps) {
     }
   };
 
-  const handleCreateRule = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedServiceId || !unitPrice || !effectiveStart) return;
+  const fetchTemplates = async (serviceId: string) => {
+    try {
+      const templates = await priceRulesApi.listByService(serviceId);
+      setServiceTemplates(
+        templates.sort((a, b) => a.name.localeCompare(b.name)),
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  React.useEffect(() => {
+    if (selectedServiceId) {
+      fetchTemplates(selectedServiceId);
+
+      const assigned = roomServices.find(
+        (rs) => rs.service_id === selectedServiceId,
+      );
+
+      if (assigned) {
+        setStagedIsActive(assigned.is_active);
+        setStagedPriceRuleId(assigned.price_rule_id || '');
+      } else {
+        setStagedIsActive(false);
+        setStagedPriceRuleId('');
+      }
+
+      setErrorMsg('');
+    }
+  }, [selectedServiceId, roomServices]);
+
+  const handleSave = async () => {
+    if (!selectedServiceId) return;
+
+    // Validation: If enabled, must have a template
+    if (stagedIsActive && !stagedPriceRuleId) {
+      setErrorMsg('Vui lòng chọn hoặc tạo giá cho dịch vụ này.');
+      return;
+    }
 
     setErrorMsg('');
     setIsSaving(true);
 
     try {
-      await priceRulesApi.create(room.id, {
-        service_id: selectedServiceId,
-        unit_price: Number(unitPrice),
-        effective_start: effectiveStart,
-      });
-      setUnitPrice('');
-      setEffectiveStart('');
-      await fetchData();
+      const assigned = roomServices.find(
+        (rs) => rs.service_id === selectedServiceId,
+      );
+
+      if (stagedIsActive) {
+        if (!assigned) {
+          // New assignment
+          await roomServicesApi.assign(room.id, {
+            service_id: selectedServiceId,
+            price_rule_id: stagedPriceRuleId,
+          });
+        } else {
+          // Update existing assignment
+          await roomServicesApi.update(room.id, assigned.id, {
+            price_rule_id: stagedPriceRuleId,
+            is_active: true,
+          });
+        }
+      } else {
+        // Disabling
+        if (assigned) {
+          // Remove or set inactive. User previous flow used remove.
+          await roomServicesApi.remove(room.id, assigned.id);
+        }
+      }
+
+      // Reload room services
+      const assignedServices = await roomServicesApi.listByRoom(room.id);
+      setRoomServices(assignedServices);
+      setErrorMsg('');
+      alert('Cấu hình dịch vụ đã được lưu thành công!');
     } catch (err: unknown) {
       setErrorMsg(
-        err instanceof Error ? err.message : 'Failed to create price rule',
+        err instanceof Error ? err.message : 'Failed to save configuration',
       );
     } finally {
       setIsSaving(false);
     }
   };
 
-  const currentRules = rules.filter((r) => r.service_id === selectedServiceId);
   const activeService = services.find((s) => s.id === selectedServiceId);
-  const unit = activeService?.unit || 'unit';
+  const assignedRecord = roomServices.find(
+    (rs) => rs.service_id === selectedServiceId,
+  );
+  const isActuallyEnabled = !!assignedRecord;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4">
-      <div className="flex h-full max-h-[700px] w-full max-w-4xl flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-sm">
+      <div className="flex h-full max-h-[750px] w-full max-w-5xl flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-700">
-          <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-            {t('Pricing')} — {room.room_code}
-          </h2>
+          <div>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+              {t('Pricing')} — {room.code}
+            </h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {tServices('ManagePricingForThisRoom')}
+            </p>
+          </div>
 
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-700 dark:hover:text-white"
+            className="inline-flex items-center rounded-lg bg-transparent p-1.5 text-sm text-gray-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-600 dark:hover:text-white"
           >
-            <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
 
         <div className="flex flex-1 overflow-hidden">
-          {/* Left: Services */}
-          <div className="w-1/3 overflow-y-auto border-r border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-900">
+          {/* Left: Services Navigation */}
+          <div className="w-1/4 min-w-[200px] overflow-y-auto border-r border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800">
             {loading ? (
-              <div className="flex items-center justify-center p-8">
-                <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-200 border-t-blue-600" />
+              <div className="space-y-4 p-4">
+                {[1, 2, 3, 4].map((i) => (
+                  <div
+                    key={i}
+                    className="h-12 animate-pulse rounded bg-gray-200 dark:bg-gray-700"
+                  />
+                ))}
               </div>
             ) : services.length === 0 ? (
-              <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
+              <div className="p-6 text-center text-sm italic text-gray-500 dark:text-gray-400">
                 {tServices('NoActiveServices')}
               </div>
             ) : (
-              <ul>
+              <ul className="space-y-2 p-3 font-medium">
                 {services.map((s) => {
                   const isActive = s.id === selectedServiceId;
+                  const hasAssigned = roomServices.some(
+                    (rs) => rs.service_id === s.id,
+                  );
+
                   return (
-                    <li
-                      key={s.id}
-                      className="border-b border-gray-200 last:border-0 dark:border-gray-700"
-                    >
+                    <li key={s.id}>
                       <button
                         onClick={() => {
                           setSelectedServiceId(s.id);
-                          setErrorMsg('');
                         }}
-                        className={`w-full px-4 py-3 text-left text-sm transition-colors ${
-                          isActive
-                            ? 'bg-blue-50 font-semibold text-blue-700 dark:bg-gray-700 dark:text-blue-400'
-                            : 'text-gray-900 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700'
+                        className={`group flex w-full items-center rounded-lg p-2 text-gray-900 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 ${
+                          isActive ? 'bg-gray-100 dark:bg-gray-700' : ''
                         }`}
                       >
-                        {s.name}{' '}
-                        <span className="text-xs text-gray-400">({s.unit})</span>
+                        <div className="flex flex-1 flex-col text-left">
+                          <span
+                            className={`text-sm ${isActive ? 'font-bold' : ''}`}
+                          >
+                            {s.name}
+                          </span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                            {s.unit}
+                          </span>
+                        </div>
+                        {hasAssigned && (
+                          <span className="inline-flex h-2 w-2 items-center justify-center rounded-full bg-blue-600 ms-3" />
+                        )}
                       </button>
                     </li>
                   );
@@ -141,120 +236,145 @@ export function RoomPricingModal({ room, onClose }: RoomPricingModalProps) {
             )}
           </div>
 
-          {/* Right: Rules & Form */}
-          <div className="flex flex-1 flex-col overflow-y-auto bg-white p-6 dark:bg-gray-800">
+          {/* Right: Content Area */}
+          <div className="flex flex-1 flex-col overflow-y-auto bg-white p-6 dark:bg-gray-900">
             {!selectedServiceId ? (
-              <div className="flex h-full items-center justify-center text-sm text-gray-400 dark:text-gray-500">
-                {tServices('SelectAService')}
+              <div className="flex h-full flex-col items-center justify-center text-center">
+                <p className="text-gray-500 dark:text-gray-400">
+                  {tServices('SelectAServiceToManagePricing')}
+                </p>
               </div>
             ) : (
-              <div className="flex h-full flex-col gap-6">
-                {/* Create Rule Form */}
-                <div className="rounded-lg border border-gray-200 bg-gray-50 p-5 dark:border-gray-700 dark:bg-gray-900">
-                  <h3 className="mb-4 text-sm font-bold text-gray-900 dark:text-white">
-                    {tServices('SetNewPrice')}
-                  </h3>
+              <div className="space-y-6">
+                {/* Status Toggle Area */}
+                <div className="rounded-lg border border-gray-200 bg-white px-6 py-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-base font-semibold text-gray-900 dark:text-white">
+                        {tServices('EnableServiceForRoom')}
+                      </h3>
+                      <p className="text-sm text-gray-500 mt-1 dark:text-gray-400">
+                        Turn off to completely disable {activeService?.name} for
+                        this room.
+                      </p>
+                    </div>
+
+                    <label className="inline-flex cursor-pointer items-center">
+                      <input
+                        type="checkbox"
+                        checked={stagedIsActive}
+                        onChange={(e) => setStagedIsActive(e.target.checked)}
+                        disabled={isSaving}
+                        className="peer sr-only"
+                      />
+                      <div className="peer relative h-6 w-11 rounded-full bg-gray-200 after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-700 dark:peer-focus:ring-blue-800 rtl:peer-checked:after:-translate-x-full" />
+                    </label>
+                  </div>
+
+                  {!stagedIsActive && (
+                    <div
+                      className="mt-4 p-4 text-sm text-gray-800 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-gray-300"
+                      role="alert"
+                    >
+                      <span className="font-medium">Chưa áp dụng!</span> Dịch vụ
+                      này đang tắt cho phòng này. Bật lên và chọn giá để áp
+                      dụng.
+                    </div>
+                  )}
+
                   {errorMsg && (
-                    <div className="mb-3 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800 dark:border-red-800 dark:bg-gray-800 dark:text-red-400">
+                    <div
+                      className="mt-4 rounded-lg bg-red-50 p-4 text-sm text-red-800 dark:bg-gray-800 dark:text-red-400"
+                      role="alert"
+                    >
                       {errorMsg}
                     </div>
                   )}
-                  <form onSubmit={handleCreateRule} className="flex flex-col gap-4 sm:flex-row sm:items-end">
-                    <div className="flex-1">
-                      <label className="mb-2 block text-xs font-medium text-gray-700 dark:text-gray-300">
-                        {tServices('UnitPrice')}
-                      </label>
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={unitPrice}
-                        onChange={(e) => setUnitPrice(e.target.value)}
-                        placeholder={tServices('PlaceholderPrice')}
-                        className="block w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
-                        required
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <label className="mb-2 block text-xs font-medium text-gray-700 dark:text-gray-300">
-                        {tServices('EffectiveFrom')}
-                      </label>
-                      <input
-                        type="date"
-                        value={effectiveStart}
-                        onChange={(e) => setEffectiveStart(e.target.value)}
-                        className="block w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                        required
-                      />
-                    </div>
-                    <button
-                      type="submit"
-                      disabled={isSaving}
-                      className="shrink-0 rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 disabled:opacity-50 dark:bg-blue-600 dark:hover:bg-blue-700"
-                    >
-                      {isSaving ? '...' : tServices('AddPriceRule')}
-                    </button>
-                  </form>
                 </div>
 
-                {/* Price History Table */}
-                <div>
-                  <h3 className="mb-3 text-sm font-bold text-gray-500 dark:text-gray-400">
-                    {tServices('PriceHistory')}
-                  </h3>
-                  {currentRules.length === 0 ? (
-                    <p className="text-sm text-gray-400 dark:text-gray-500">
-                      {tServices('NoRulesConfigured')}
-                    </p>
-                  ) : (
-                    <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
-                      <table className="w-full text-left text-sm">
-                        <thead className="bg-gray-50 text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-400">
-                          <tr>
-                            <th className="px-4 py-3">{tServices('Price')}</th>
-                            <th className="px-4 py-3">{tServices('StartDate')}</th>
-                            <th className="px-4 py-3">{tServices('EndDate')}</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                          {currentRules.map((rule, idx) => (
-                            <tr
-                              key={rule.id}
-                              className={`${
-                                idx === 0 && !rule.effective_end
-                                  ? 'bg-green-50 dark:bg-green-900/20'
-                                  : 'bg-white dark:bg-gray-800'
-                              }`}
-                            >
-                              <td className="whitespace-nowrap px-4 py-3 font-medium text-gray-900 dark:text-white">
-                                {rule.unit_price} / {unit}
-                              </td>
-                              <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
-                                {format.dateTime(new Date(rule.effective_start), {
-                                  year: 'numeric',
-                                  month: 'short',
-                                  day: 'numeric',
-                                })}
-                              </td>
-                              <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
-                                {rule.effective_end
-                                  ? format.dateTime(
-                                      new Date(rule.effective_end),
-                                      {
-                                        year: 'numeric',
-                                        month: 'short',
-                                        day: 'numeric',
-                                      },
-                                    )
-                                  : tServices('NoEndDate')}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                </div>
+                {/* Price Template Options */}
+                {stagedIsActive && (
+                  <div className="rounded-lg border border-gray-200 bg-white px-6 py-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                    <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-4">
+                      Thiết lập giá cho phòng
+                    </h3>
+
+                    {serviceTemplates.length === 0 ? (
+                      <div className="rounded-lg border border-dashed border-gray-300 p-8 text-center dark:border-gray-700">
+                        <p className="text-sm italic text-gray-500 dark:text-gray-400">
+                          Chưa có bảng giá nào cho dịch vụ này. Vui lòng vào cài
+                          đặt Dịch vụ để thêm.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <div className="max-w-md">
+                          <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            Chọn bảng giá áp dụng
+                          </label>
+                          <select
+                            value={stagedPriceRuleId}
+                            onChange={(e) =>
+                              setStagedPriceRuleId(e.target.value)
+                            }
+                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                          >
+                            {serviceTemplates.map((template) => (
+                              <option key={template.id} value={template.id}>
+                                {template.name} ({template.unit_price} /{' '}
+                                {activeService?.unit})
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        {/* Display Current Selected Template Details */}
+                        {stagedPriceRuleId && (
+                          <div className="p-4 rounded-lg bg-blue-50 dark:bg-gray-800/50 border border-blue-100 dark:border-gray-700">
+                            {serviceTemplates
+                              .filter((t) => t.id === stagedPriceRuleId)
+                              .map((t) => (
+                                <div key={t.id}>
+                                  <p className="text-sm font-medium text-blue-900 dark:text-blue-300">
+                                    Đang chọn: {t.name}
+                                  </p>
+                                  <p className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white mt-1">
+                                    {Number(t.unit_price).toLocaleString()}đ{' '}
+                                    <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
+                                      / {activeService?.unit}
+                                    </span>
+                                  </p>
+                                </div>
+                              ))}
+                          </div>
+                        )}
+
+                        <div className="pt-2">
+                          <button
+                            onClick={handleSave}
+                            disabled={isSaving}
+                            className="rounded-lg bg-blue-700 px-8 py-3 text-center text-sm font-bold text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 disabled:opacity-50 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 shadow-lg shadow-blue-500/20 active:scale-95"
+                          >
+                            {isSaving ? 'Đang lưu...' : 'Lưu cấu hình'}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Show Save button even if toggling OFF, to apply the removal */}
+                {!stagedIsActive && isActuallyEnabled && (
+                  <div className="flex justify-end pt-4 border-t border-gray-100 dark:border-gray-700">
+                    <button
+                      onClick={handleSave}
+                      disabled={isSaving}
+                      className="inline-flex items-center px-6 py-2.5 text-sm font-bold text-center text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 shadow-md shadow-red-500/20 active:scale-95 disabled:opacity-50"
+                    >
+                      {isSaving ? 'Đang lưu...' : 'Hủy áp dụng dịch vụ'}
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>

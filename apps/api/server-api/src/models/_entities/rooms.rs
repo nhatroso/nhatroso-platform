@@ -36,6 +36,8 @@ pub enum Relation {
         on_delete = "SetNull"
     )]
     Floors,
+    #[sea_orm(has_many = "super::room_services::Entity")]
+    RoomServices,
 }
 
 impl Related<super::buildings::Entity> for Entity {
@@ -56,3 +58,8 @@ impl Related<super::floors::Entity> for Entity {
     }
 }
 
+impl Related<super::room_services::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::RoomServices.def()
+    }
+}

@@ -1,6 +1,9 @@
 {
   "dashboard": "Dashboard",
-  "buildings": "Properties",
+  "buildings": "Buildings",
+  "contracts": "Contracts",
   "services": "Services",
-  "contracts": "Contracts"
+  "properties": "Properties",
+  "floors": "Floors",
+  "rooms": "Rooms"
 }

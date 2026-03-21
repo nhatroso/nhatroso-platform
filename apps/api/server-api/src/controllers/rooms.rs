@@ -22,6 +22,15 @@ pub async fn create(
     }
 }
 
+pub async fn list_owner_rooms(
+    auth: JWT,
+    State(ctx): State<AppContext>,
+) -> Result<Response> {
+    let owner_id = auth::get_user_id(&auth)?;
+    let items = Room::list_by_owner(&ctx.db, owner_id).await?;
+    format::json(items)
+}
+
 pub async fn list_by_floor(
     auth: JWT,
     Path(floor_id): Path<Uuid>,
@@ -75,6 +84,7 @@ pub fn routes() -> Routes {
     Routes::new()
         .prefix("api/v1")
         .add("/floors/{floor_id}/rooms", post(create).get(list_by_floor))
+        .add("/rooms", get(list_owner_rooms))
         .add("/rooms/{id}", get(get_by_id).patch(update))
         .add("/rooms/available", get(list_available))
 }

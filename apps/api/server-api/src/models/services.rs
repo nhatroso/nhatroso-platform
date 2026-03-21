@@ -50,8 +50,17 @@ impl Model {
         }
 
         let existing = Self::find_by_owner_and_name(db, owner_id, params.name.trim()).await?;
-        if existing.is_some() {
-            return Ok(Err((StatusCode::CONFLICT, "DUPLICATE_SERVICE_NAME")));
+        if let Some(ext) = existing {
+            if ext.status == "ARCHIVED" {
+                let mut active_model = ext.into_active_model();
+                active_model.status = ActiveValue::Set("ACTIVE".to_string());
+                active_model.unit = ActiveValue::Set(params.unit.trim().to_string());
+                active_model.updated_at = ActiveValue::Set(chrono::Utc::now().into());
+                let updated = active_model.update(db).await?;
+                return Ok(Ok(ServiceResponse::from(updated)));
+            } else {
+                return Ok(Err((StatusCode::CONFLICT, "DUPLICATE_SERVICE_NAME")));
+            }
         }
 
         let service = ActiveModel {

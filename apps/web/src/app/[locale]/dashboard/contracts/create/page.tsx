@@ -108,6 +108,7 @@ export default function CreateContractPage() {
     if (!watchPhone || watchPhone.trim().length < 8) {
       setUserExists(false);
       setHasActiveContract(false);
+      setFoundUser(null);
       return;
     }
 
@@ -143,7 +144,13 @@ export default function CreateContractPage() {
             setValue('tenant_id_card_date', dateStr, { shouldValidate: true });
           }
         } else {
+          setUserExists(false);
           setFoundUser(null);
+          // Only clear if it was previously filled from a lookup
+          setValue('tenant_name', '');
+          setValue('tenant_id_card', '');
+          setValue('tenant_id_card_date', '');
+          setValue('tenant_address', '');
         }
       } catch (e) {
         console.warn('Lookup error', e);
@@ -161,7 +168,7 @@ export default function CreateContractPage() {
     if (watchRoomId) {
       const selectedRoom = rooms.find((r) => r.id === watchRoomId);
       if (selectedRoom) {
-        setValue('room_code', selectedRoom.room_code, { shouldValidate: true });
+        setValue('room_code', selectedRoom.code, { shouldValidate: true });
         setValue('room_address', selectedRoom.room_address || '', {
           shouldValidate: true,
         });
@@ -257,7 +264,7 @@ export default function CreateContractPage() {
               <option key={room.id} value={room.id}>
                 {room.building_name ? `${room.building_name} - ` : ''}
                 {room.floor_name ? `${room.floor_name} - ` : ''}
-                P.{room.room_code}
+                P.{room.code}
               </option>
             ))}
           </select>

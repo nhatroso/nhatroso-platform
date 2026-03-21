@@ -85,6 +85,15 @@ export async function archiveBuilding(id: string): Promise<Building> {
 // FLOORS
 // ==========================================
 
+export async function getAllFloors(): Promise<Floor[]> {
+  const res = await apiFetch(`${API_BASE_URL}/floors`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (!res.ok) throw new Error('Failed to fetch all floors');
+  return res.json();
+}
+
 export async function getFloors(buildingId: string): Promise<Floor[]> {
   const res = await apiFetch(`${API_BASE_URL}/buildings/${buildingId}/floors`, {
     method: 'GET',
@@ -119,4 +128,3 @@ export async function updateFloor(
   if (!res.ok) throw new Error('Failed to update floor');
   return res.json();
 }
-

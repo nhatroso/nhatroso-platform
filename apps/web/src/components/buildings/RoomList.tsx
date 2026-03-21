@@ -2,20 +2,12 @@ import * as React from 'react';
 import { useTranslations } from 'next-intl';
 import { Room, CreateRoomInput } from '@nhatroso/shared';
 import { getRooms, createRoom } from '@/services/api/rooms';
-
 import { RoomPricingModal } from './RoomPricingModal';
-import { priceRulesApi } from '@/services/api/price-rules';
-import { servicesApi } from '@/services/api/services';
 
-interface RoomListProps {
-  floorId: string;
-}
-
-export function RoomList({ floorId }: RoomListProps) {
+export function RoomList({ floorId }: { floorId: string }) {
   const t = useTranslations('Buildings');
   const tErrors = useTranslations('Errors');
   const [rooms, setRooms] = React.useState<Room[]>([]);
-  const [prices, setPrices] = React.useState<Record<string, number>>({});
   const [loading, setLoading] = React.useState(true);
   const [isCreating, setIsCreating] = React.useState(false);
   const [newCode, setNewCode] = React.useState('');
@@ -34,33 +26,8 @@ export function RoomList({ floorId }: RoomListProps) {
       setLoading(true);
       const data = await getRooms(floorId);
       setRooms(data);
-
-      // Fetch prices for all rooms
-      const [allServices, ...allRules] = await Promise.all([
-        servicesApi.list(),
-        ...data.map((r) => priceRulesApi.listByRoom(r.id)),
-      ]);
-
-      const roomService = allServices.find(
-        (s) =>
-          s.name.toLowerCase().includes('phòng') ||
-          s.name.toLowerCase().includes('room'),
-      );
-
-      if (roomService) {
-        const newPrices: Record<string, number> = {};
-        allRules.forEach((rules, idx) => {
-          const activeRule = rules.find(
-            (r) => r.service_id === roomService.id && !r.effective_end,
-          );
-          if (activeRule) {
-            newPrices[data[idx].id] = Number(activeRule.unit_price);
-          }
-        });
-        setPrices(newPrices);
-      }
     } catch (err) {
-      console.error(err);
+      console.error('Failed to fetch data', err);
     } finally {
       setLoading(false);
     }
@@ -132,43 +99,16 @@ export function RoomList({ floorId }: RoomListProps) {
                 className="group relative flex flex-col justify-between overflow-hidden rounded bg-white p-2.5 shadow-sm ring-1 ring-inset ring-gray-200 transition-all hover:shadow-md dark:bg-gray-800 dark:ring-gray-700"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-bold text-gray-900 dark:text-white">
+                  <h3 className="text-sm font-bold text-gray-900 dark:text-white">
                     {rm.code}
-                  </span>
-
-                  <div className="flex flex-col items-end">
-                    {prices[rm.id] ? (
-                      <span className="text-[10px] font-medium text-blue-600 dark:text-blue-400">
-                        {prices[rm.id].toLocaleString()}
-                      </span>
-                    ) : (
-                      <span className="text-[10px] text-gray-400 dark:text-gray-500 italic">
-                        -
-                      </span>
-                    )}
-                    <button
-                      onClick={() => setManagingRoomPrice(rm)}
-                      className="rounded p-1 text-gray-400 opacity-0 transition-opacity hover:bg-gray-100 hover:text-gray-600 focus:opacity-100 group-hover:opacity-100 dark:hover:bg-gray-700 dark:hover:text-gray-300"
-                      title={t('Pricing') || 'Pricing'}
-                    >
-                      <svg
-                        className="h-3.5 w-3.5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
-                    </button>
-                  </div>
+                  </h3>
+                  <div></div>
                 </div>
-                <div className="mt-2 text-left">
-                  <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wider ring-1 ring-inset ${statusColor(rm.status)}`}>
+
+                <div className="flex items-center justify-between">
+                  <span
+                    className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold ${statusColor(rm.status)}`}
+                  >
                     {t(`Status_${rm.status}`)}
                   </span>
                 </div>

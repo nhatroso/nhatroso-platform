@@ -2,6 +2,8 @@ import { z } from 'zod';
 
 export const CreatePriceRuleSchema = z.object({
   service_id: z.string().uuid(),
+  room_id: z.string().uuid().optional(),
+  building_id: z.string().uuid().optional(),
   // Can be number or generic input coercible to number for decimal
   unit_price: z
     .union([z.number(), z.string().transform(Number)])
