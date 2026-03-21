@@ -3,18 +3,34 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { useState } from 'react';
 
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const navItems = [
+type NavItem = {
+  key: string;
+  href?: string;
+  icon?: string;
+  children?: { key: string; href: string }[];
+};
+
+const navItems: NavItem[] = [
   { key: 'dashboard', href: '/dashboard', icon: 'grid' },
-  { key: 'buildings', href: '/dashboard/buildings', icon: 'building' },
+  {
+    key: 'properties',
+    icon: 'building',
+    children: [
+      { key: 'buildings', href: '/dashboard/buildings' },
+      { key: 'floors', href: '/dashboard/floors' },
+      { key: 'rooms', href: '/dashboard/rooms' },
+    ],
+  },
   { key: 'contracts', href: '/dashboard/contracts', icon: 'document' },
   { key: 'services', href: '/dashboard/services', icon: 'server' },
-] as const;
+];
 
 function NavIcon({ type }: { type: string }) {
   switch (type) {
@@ -47,7 +63,12 @@ function NavIcon({ type }: { type: string }) {
       );
     case 'server':
       return (
-        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg
+          className="h-5 w-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -64,8 +85,16 @@ function NavIcon({ type }: { type: string }) {
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const t = useTranslations('Sidebar');
+  const [openGroups, setOpenGroups] = useState<string[]>(['properties']); // default open
 
-  const isActive = (href: string) => {
+  const toggleGroup = (key: string) => {
+    setOpenGroups((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
+    );
+  };
+
+  const isActive = (href?: string) => {
+    if (!href) return false;
     // Strip locale prefix for comparison
     const pathWithoutLocale = pathname.replace(/^\/[a-z]{2}/, '');
     if (href === '/dashboard') {
@@ -93,11 +122,73 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         <div className="h-full overflow-y-auto px-3 pb-4 pt-5">
           <ul className="space-y-2 font-medium">
             {navItems.map((item) => {
+              if (item.children) {
+                const isGroupOpen = openGroups.includes(item.key);
+                const isAnyChildActive = item.children.some((child) =>
+                  isActive(child.href),
+                );
+                return (
+                  <li key={item.key}>
+                    <button
+                      type="button"
+                      onClick={() => toggleGroup(item.key)}
+                      className={`group flex w-full items-center rounded-lg p-2 transition-colors ${
+                        isAnyChildActive && !isGroupOpen
+                          ? 'bg-blue-50/50 text-blue-700 dark:bg-gray-700/50 dark:text-blue-400'
+                          : 'text-gray-900 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700'
+                      }`}
+                    >
+                      <span className="text-gray-500 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white">
+                        <NavIcon type={item.icon!} />
+                      </span>
+                      <span className="ms-3 flex-1 text-left">
+                        {t(item.key)}
+                      </span>
+                      <svg
+                        className={`h-4 w-4 transition-transform ${isGroupOpen ? 'rotate-180' : ''}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
+                    </button>
+                    {isGroupOpen && (
+                      <ul className="mt-2 space-y-1 py-1 px-2 border-l-2 ml-4 border-gray-100 dark:border-gray-700">
+                        {item.children.map((child) => {
+                          const active = isActive(child.href);
+                          return (
+                            <li key={child.key}>
+                              <Link
+                                href={child.href}
+                                onClick={onClose}
+                                className={`flex items-center rounded-lg p-2 text-sm transition-colors ${
+                                  active
+                                    ? 'bg-blue-50 text-blue-700 font-bold dark:bg-gray-700 dark:text-blue-400'
+                                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white'
+                                }`}
+                              >
+                                <span className="ms-2">{t(child.key)}</span>
+                              </Link>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
+                  </li>
+                );
+              }
+
               const active = isActive(item.href);
               return (
                 <li key={item.key}>
                   <Link
-                    href={item.href}
+                    href={item.href!}
                     onClick={onClose}
                     className={`group flex items-center rounded-lg p-2 transition-colors ${
                       active
@@ -112,7 +203,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                           : 'text-gray-500 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white'
                       }`}
                     >
-                      <NavIcon type={item.icon} />
+                      <NavIcon type={item.icon!} />
                     </span>
                     <span className="ms-3">{t(item.key)}</span>
                   </Link>

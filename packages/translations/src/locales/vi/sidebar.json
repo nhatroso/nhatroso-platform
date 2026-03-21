@@ -2,5 +2,8 @@
   "dashboard": "Bảng điều khiển",
   "buildings": "Tòa nhà",
   "contracts": "Hợp đồng",
-  "services": "Dịch vụ"
+  "services": "Dịch vụ",
+  "properties": "Bất động sản",
+  "floors": "Tầng",
+  "rooms": "Phòng"
 }

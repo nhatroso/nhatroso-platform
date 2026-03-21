@@ -23,7 +23,7 @@ export function BuildingStream({
   }
 
   return (
-    <ul className="flex flex-col gap-1 p-2">
+    <ul className="flex flex-col gap-2">
       {buildings.map((b) => {
         const isSelected = b.id === selectedId;
 
@@ -31,10 +31,10 @@ export function BuildingStream({
           <li key={b.id}>
             <button
               onClick={() => onSelect(b.id)}
-              className={`w-full rounded-lg px-3 py-3 text-left transition-all duration-200 ${
+              className={`w-full rounded-lg px-4 py-3 text-left transition-all duration-200 border ${
                 isSelected
-                  ? 'bg-blue-50 ring-1 ring-inset ring-blue-600 dark:bg-blue-900/20 dark:ring-blue-500'
-                  : 'hover:bg-gray-100 dark:hover:bg-gray-700/50'
+                  ? 'bg-blue-50 border-blue-600 dark:bg-blue-900/30 dark:border-blue-500 shadow-sm'
+                  : 'bg-white border-transparent hover:border-gray-300 hover:shadow-sm dark:bg-gray-800 dark:hover:border-gray-600'
               }`}
             >
               <div className="flex items-start justify-between gap-3">
@@ -53,10 +53,10 @@ export function BuildingStream({
                   </p>
                 </div>
                 <span
-                  className={`mt-0.5 shrink-0 rounded-md px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider ${
+                  className={`shrink-0 rounded-md px-2.5 py-0.5 text-xs font-semibold ${
                     b.status === 'ACTIVE'
-                      ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                      : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                      : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
                   }`}
                 >
                   {t(`Status_${b.status}`)}

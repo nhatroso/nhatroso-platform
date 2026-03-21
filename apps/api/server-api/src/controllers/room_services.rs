@@ -1,42 +1,47 @@
 use loco_rs::prelude::*;
 use loco_rs::controller::extractor::auth::JWT;
-use axum::Json;
+use axum::{Json, extract::Path};
 use uuid::Uuid;
 
 use crate::{
-    views::price_rules::{CreatePriceRuleParams, UpdatePriceRuleParams},
-    models::price_rules::Model as PriceRule,
+    views::room_services::{AssignServiceParams, UpdateAssignedServiceParams},
+    models::room_services::Model as RoomService,
     utils::{auth, error::error_response},
 };
 
-pub async fn create(
+pub async fn assign(
     auth: JWT,
+    Path(room_id): Path<Uuid>,
     State(ctx): State<AppContext>,
-    Json(params): Json<CreatePriceRuleParams>,
+    Json(params): Json<AssignServiceParams>,
 ) -> Result<Response> {
     let owner_id = auth::get_user_id(&auth)?;
-    match PriceRule::create_rule(&ctx.db, owner_id, params).await? {
+    match RoomService::assign(&ctx.db, owner_id, room_id, params).await? {
         Ok(res) => format::json(res),
         Err((status, code)) => error_response(code, status),
     }
 }
 
-pub async fn list_by_service(
-    Path(service_id): Path<Uuid>,
+pub async fn list_by_room(
+    auth: JWT,
+    Path(room_id): Path<Uuid>,
     State(ctx): State<AppContext>,
 ) -> Result<Response> {
-    let response = PriceRule::list_by_service(&ctx.db, service_id).await?;
-    format::json(response)
+    let owner_id = auth::get_user_id(&auth)?;
+    match RoomService::list_by_room(&ctx.db, owner_id, room_id).await? {
+        Ok(res) => format::json(res),
+        Err((status, code)) => error_response(code, status),
+    }
 }
 
 pub async fn update(
     auth: JWT,
-    Path(id): Path<Uuid>,
+    Path((_room_id, service_id)): Path<(Uuid, Uuid)>,
     State(ctx): State<AppContext>,
-    Json(params): Json<UpdatePriceRuleParams>,
+    Json(params): Json<UpdateAssignedServiceParams>,
 ) -> Result<Response> {
     let owner_id = auth::get_user_id(&auth)?;
-    match PriceRule::update_rule(&ctx.db, owner_id, id, params).await? {
+    match RoomService::update_assignment(&ctx.db, owner_id, service_id, params).await? {
         Ok(res) => format::json(res),
         Err((status, code)) => error_response(code, status),
     }
@@ -44,11 +49,11 @@ pub async fn update(
 
 pub async fn remove(
     auth: JWT,
-    Path(id): Path<Uuid>,
+    Path((_room_id, service_id)): Path<(Uuid, Uuid)>,
     State(ctx): State<AppContext>,
 ) -> Result<Response> {
     let owner_id = auth::get_user_id(&auth)?;
-    match PriceRule::remove_rule(&ctx.db, owner_id, id).await? {
+    match RoomService::remove_assignment(&ctx.db, owner_id, service_id).await? {
         Ok(deleted) => format::json(serde_json::json!({ "success": true, "deleted": deleted })),
         Err((status, code)) => error_response(code, status),
     }
@@ -56,8 +61,7 @@ pub async fn remove(
 
 pub fn routes() -> Routes {
     Routes::new()
-        .prefix("/api/v1/price-rules")
-        .add("/", post(create))
-        .add("/service/{service_id}", get(list_by_service))
+        .prefix("/api/v1/rooms/{room_id}/services")
+        .add("/", get(list_by_room).post(assign))
         .add("/{id}", patch(update).delete(remove))
 }

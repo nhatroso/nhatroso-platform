@@ -44,5 +44,8 @@
   "NoCustomRulesForThisRoom": "Chưa có giá riêng cho phòng này. Đang sử dụng giá kế thừa.",
   "Actions": "Thao tác",
   "ConfirmDeletePriceRule": "Bạn có chắc chắn muốn xóa quy tắc giá này?",
+  "EnableServiceForRoom": "Áp dụng dịch vụ cho phòng này",
+  "Edit": "Sửa",
+  "Delete": "Xóa",
   "ConfirmArchive": "Bạn có chắc chắn muốn ngừng áp dụng dịch vụ này?"
 }

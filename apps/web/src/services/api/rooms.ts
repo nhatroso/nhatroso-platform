@@ -1,5 +1,13 @@
 import { Room, CreateRoomInput, UpdateRoomInput } from '@nhatroso/shared';
 import { apiFetch, API_BASE_URL } from './base';
+export async function getAllRooms(): Promise<Room[]> {
+  const res = await apiFetch(`${API_BASE_URL}/rooms`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (!res.ok) throw new Error('Failed to fetch all rooms');
+  return res.json();
+}
 
 export async function getRooms(floorId: string): Promise<Room[]> {
   const res = await apiFetch(`${API_BASE_URL}/floors/${floorId}/rooms`, {

@@ -44,5 +44,8 @@
   "NoCustomRulesForThisRoom": "No custom rules for this room. Using inherited price.",
   "Actions": "Actions",
   "ConfirmDeletePriceRule": "Are you sure you want to delete this price rule?",
+  "EnableServiceForRoom": "Enable Service for Room",
+  "Edit": "Edit",
+  "Delete": "Delete",
   "ConfirmArchive": "Are you sure you want to archive this service? It will no longer be available for new rooms."
 }

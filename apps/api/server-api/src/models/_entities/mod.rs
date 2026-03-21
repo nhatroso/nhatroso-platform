@@ -8,6 +8,7 @@ pub mod contracts;
 pub mod floors;
 pub mod price_rules;
 pub mod refresh_tokens;
+pub mod room_services;
 pub mod rooms;
 pub mod services;
 pub mod users;

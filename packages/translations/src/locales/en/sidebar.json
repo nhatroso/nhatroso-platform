@@ -2,5 +2,8 @@
   "dashboard": "Dashboard",
   "buildings": "Buildings",
   "contracts": "Contracts",
-  "services": "Services"
+  "services": "Services",
+  "properties": "Properties",
+  "floors": "Floors",
+  "rooms": "Rooms"
 }

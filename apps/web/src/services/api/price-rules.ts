@@ -6,21 +6,11 @@ import {
 import { apiFetch, API_BASE_URL } from './base';
 
 export const priceRulesApi = {
-  listByRoom: async (roomId: string): Promise<PriceRule[]> => {
-    const res = await apiFetch(`${API_BASE_URL}/price-rules/room/${roomId}`);
-    if (!res.ok) throw new Error('Failed to fetch room price rules');
-    return res.json();
-  },
-
-  listByBuilding: async (buildingId: string): Promise<PriceRule[]> => {
-    const res = await apiFetch(`${API_BASE_URL}/price-rules/building/${buildingId}`);
-    if (!res.ok) throw new Error('Failed to fetch building price rules');
-    return res.json();
-  },
-
-  listDefaults: async (): Promise<PriceRule[]> => {
-    const res = await apiFetch(`${API_BASE_URL}/price-rules/defaults`);
-    if (!res.ok) throw new Error('Failed to fetch default price rules');
+  listByService: async (serviceId: string): Promise<PriceRule[]> => {
+    const res = await apiFetch(
+      `${API_BASE_URL}/price-rules/service/${serviceId}`,
+    );
+    if (!res.ok) throw new Error('Failed to fetch service price rules');
     return res.json();
   },
 

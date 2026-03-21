@@ -4,7 +4,7 @@ import { Room, CreateRoomInput } from '@nhatroso/shared';
 import { getRooms, createRoom } from '@/services/api/rooms';
 
 import { RoomPricingModal } from './RoomPricingModal';
-import { priceRulesApi } from '@/services/api/price-rules';
+import { roomServicesApi } from '@/services/api/room-services';
 import { servicesApi } from '@/services/api/services';
 
 interface RoomListProps {
@@ -37,25 +37,25 @@ export function RoomList({ floorId, buildingId }: RoomListProps) {
       setRooms(data);
 
       // Fetch prices for all rooms
-      const [allServices, ...allRules] = await Promise.all([
+      const [allServices, ...allRoomServices] = await Promise.all([
         servicesApi.list(),
-        ...data.map((r) => priceRulesApi.listByRoom(r.id)),
+        ...data.map((r) => roomServicesApi.listByRoom(r.id)),
       ]);
 
-      const roomService = allServices.find(
+      const roomServiceDef = allServices.find(
         (s) =>
           s.name.toLowerCase().includes('phòng') ||
           s.name.toLowerCase().includes('room'),
       );
 
-      if (roomService) {
+      if (roomServiceDef) {
         const newPrices: Record<string, number> = {};
-        allRules.forEach((rules, idx) => {
-          const activeRule = rules.find(
-            (r) => r.service_id === roomService.id && !r.effective_end,
+        allRoomServices.forEach((services, idx) => {
+          const activeRecord = services.find(
+            (r) => r.service_id === roomServiceDef.id && r.is_active,
           );
-          if (activeRule) {
-            newPrices[data[idx].id] = Number(activeRule.unit_price);
+          if (activeRecord && activeRecord.unit_price) {
+            newPrices[data[idx].id] = Number(activeRecord.unit_price);
           }
         });
         setPrices(newPrices);
@@ -169,7 +169,9 @@ export function RoomList({ floorId, buildingId }: RoomListProps) {
                   </div>
                 </div>
                 <div className="mt-2 text-left">
-                  <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wider ring-1 ring-inset ${statusColor(rm.status)}`}>
+                  <span
+                    className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wider ring-1 ring-inset ${statusColor(rm.status)}`}
+                  >
                     {t(`Status_${rm.status}`)}
                   </span>
                 </div>
@@ -207,7 +209,6 @@ export function RoomList({ floorId, buildingId }: RoomListProps) {
       {managingRoomPrice && (
         <RoomPricingModal
           room={managingRoomPrice}
-          buildingId={buildingId}
           onClose={() => setManagingRoomPrice(null)}
         />
       )}

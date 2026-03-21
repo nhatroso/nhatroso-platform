@@ -20,6 +20,10 @@ mod m20260317_141521_remove_blocks;
 mod m20260318_103000_add_building_address_to_contracts;
 mod m20260318_103600_replace_building_address_with_room_details;
 mod m20260319_033311_modify_price_rules_schema;
+mod m20260320_034905_add_is_active_to_price_rules;
+mod m20260321_024654_drop_legacy_columns_from_price_rules;
+mod m20260321_024704_create_room_services_table;
+mod m20260321_031739_allow_null_price_rule_in_room_services;
 pub struct Migrator;
 
 #[async_trait::async_trait]
@@ -43,6 +47,10 @@ impl MigratorTrait for Migrator {
             Box::new(m20260318_103000_add_building_address_to_contracts::Migration),
             Box::new(m20260318_103600_replace_building_address_with_room_details::Migration),
             Box::new(m20260319_033311_modify_price_rules_schema::Migration),
+            Box::new(m20260320_034905_add_is_active_to_price_rules::Migration),
+            Box::new(m20260321_024654_drop_legacy_columns_from_price_rules::Migration),
+            Box::new(m20260321_024704_create_room_services_table::Migration),
+            Box::new(m20260321_031739_allow_null_price_rule_in_room_services::Migration),
         ]
     }
 }

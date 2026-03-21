@@ -20,8 +20,6 @@ pub struct Model {
 pub enum Relation {
     #[sea_orm(has_many = "super::floors::Entity")]
     Floors,
-    #[sea_orm(has_many = "super::price_rules::Entity")]
-    PriceRules,
     #[sea_orm(has_many = "super::rooms::Entity")]
     Rooms,
     #[sea_orm(
@@ -37,12 +35,6 @@ pub enum Relation {
 impl Related<super::floors::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Floors.def()
-    }
-}
-
-impl Related<super::price_rules::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::PriceRules.def()
     }
 }
 

@@ -9,34 +9,17 @@ pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
     pub owner_id: Uuid,
-    pub room_id: Option<Uuid>,
     pub service_id: Uuid,
     pub unit_price: Decimal,
-    pub effective_start: Date,
-    pub effective_end: Option<Date>,
     pub created_at: DateTimeWithTimeZone,
     pub updated_at: DateTimeWithTimeZone,
-    pub building_id: Option<Uuid>,
+    pub name: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(
-        belongs_to = "super::buildings::Entity",
-        from = "Column::BuildingId",
-        to = "super::buildings::Column::Id",
-        on_update = "Cascade",
-        on_delete = "Cascade"
-    )]
-    Buildings,
-    #[sea_orm(
-        belongs_to = "super::rooms::Entity",
-        from = "Column::RoomId",
-        to = "super::rooms::Column::Id",
-        on_update = "Cascade",
-        on_delete = "Cascade"
-    )]
-    Rooms,
+    #[sea_orm(has_many = "super::room_services::Entity")]
+    RoomServices,
     #[sea_orm(
         belongs_to = "super::services::Entity",
         from = "Column::ServiceId",
@@ -55,15 +38,9 @@ pub enum Relation {
     Users,
 }
 
-impl Related<super::buildings::Entity> for Entity {
+impl Related<super::room_services::Entity> for Entity {
     fn to() -> RelationDef {
-        Relation::Buildings.def()
-    }
-}
-
-impl Related<super::rooms::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Rooms.def()
+        Relation::RoomServices.def()
     }
 }
 

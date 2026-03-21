@@ -1,5 +1,5 @@
 use loco_rs::prelude::*;
-use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter, ActiveValue};
+use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter, ActiveValue, QuerySelect};
 use uuid::Uuid;
 use axum::http::StatusCode;
 
@@ -28,6 +28,16 @@ impl Model {
             .all(db)
             .await
             .map_err(Error::from)
+    }
+
+    pub async fn list_by_owner(db: &DatabaseConnection, owner_id: Uuid) -> Result<Vec<Self>> {
+        use sea_orm::RelationTrait;
+        Ok(Floors::find()
+            .join(sea_orm::JoinType::InnerJoin, super::_entities::floors::Relation::Buildings.def())
+            .filter(crate::models::_entities::buildings::Column::OwnerId.eq(owner_id))
+            .filter(super::_entities::floors::Column::Status.ne("ARCHIVED"))
+            .all(db)
+            .await?)
     }
 
     pub async fn find_by_id(db: &DatabaseConnection, id: Uuid) -> Result<Option<Self>> {
