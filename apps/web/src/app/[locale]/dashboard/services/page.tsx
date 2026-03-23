@@ -2,19 +2,37 @@
 
 import * as React from 'react';
 import { useTranslations } from 'next-intl';
-import { Service, PriceRule } from '@nhatroso/shared';
+import {
+  Service,
+  PriceRule,
+  PREDEFINED_SERVICES,
+  PREDEFINED_SERVICE_IDS,
+  PREDEFINED_UNIT_IDS,
+} from '@nhatroso/shared';
 import { servicesApi } from '@/services/api/services';
 import { priceRulesApi } from '@/services/api/price-rules';
 
-const PREDEFINED_SERVICES = [
-  { id_key: 'electricity', name: 'Điện (Electricity)', unit: 'kWh' },
-  { id_key: 'water', name: 'Nước (Water)', unit: 'm3' },
-  { id_key: 'internet', name: 'Internet', unit: 'Tháng' },
-  { id_key: 'trash', name: 'Rác (Trash)', unit: 'Tháng' },
-  { id_key: 'management', name: 'Phí dịch vụ chung', unit: 'Tháng' },
-  { id_key: 'parking_moto', name: 'Gửi xe máy', unit: 'Tháng' },
-  { id_key: 'parking_car', name: 'Gửi ô tô', unit: 'Tháng' },
-];
+function getServiceDisplayName(name: string, t: (key: string) => string) {
+  if (name.startsWith('service_')) {
+    const key = name.replace('service_', '');
+    return t(`Predefined_${key}`);
+  }
+  if (PREDEFINED_SERVICE_IDS.includes(name)) {
+    return t(`Predefined_${name}`);
+  }
+  return name;
+}
+
+function getUnitDisplayName(unit: string, t: (key: string) => string) {
+  if (unit.startsWith('unit_')) {
+    const key = unit.replace('unit_', '');
+    return t(`Unit_${key}`);
+  }
+  if (PREDEFINED_UNIT_IDS.includes(unit)) {
+    return t(`Unit_${unit}`);
+  }
+  return unit;
+}
 
 export default function ServicesPage() {
   const t = useTranslations('Services');
@@ -27,15 +45,16 @@ export default function ServicesPage() {
   >(null);
 
   // Template Form
-  const [templateName, setTemplateName] = React.useState('Standard Price');
+  const [templateName, setTemplateName] = React.useState(t('StandardPrice'));
   const [templatePrice, setTemplatePrice] = React.useState('');
   const [isSavingTemplate, setIsSavingTemplate] = React.useState(false);
   const [editingRuleId, setEditingRuleId] = React.useState<string | null>(null);
   const [quickAddData, setQuickAddData] = React.useState<{
-    name: string;
-    unit: string;
+    id_key: string;
+    unit_key: string;
   } | null>(null);
   const [quickAddPrice, setQuickAddPrice] = React.useState('');
+  const [predefinedSearch, setPredefinedSearch] = React.useState('');
 
   const fetchServices = React.useCallback(async () => {
     setIsLoading(true);
@@ -67,11 +86,12 @@ export default function ServicesPage() {
     if (selectedServiceId) {
       fetchRulesForService(selectedServiceId);
       setTemplatePrice('');
-      setTemplateName('Standard Price');
+      setTemplateName(t('StandardPrice'));
       setEditingRuleId(null);
     } else {
       setServiceRules([]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedServiceId, fetchRulesForService]);
 
   const selectedService = React.useMemo(
@@ -102,13 +122,11 @@ export default function ServicesPage() {
         });
       }
       setTemplatePrice('');
-      setTemplateName('Standard Price');
+      setTemplateName(t('StandardPrice'));
       setEditingRuleId(null);
       await fetchRulesForService(selectedServiceId);
     } catch (err: unknown) {
-      alert(
-        err instanceof Error ? err.message : 'Failed to save price template',
-      );
+      alert(err instanceof Error ? err.message : t('ErrorSavingPriceTemplate'));
     } finally {
       setIsSavingTemplate(false);
     }
@@ -116,12 +134,7 @@ export default function ServicesPage() {
 
   const handleArchive = async () => {
     if (!selectedServiceId) return;
-    if (
-      !confirm(
-        t('ConfirmArchive') || 'Are you sure you want to disable this service?',
-      )
-    )
-      return;
+    if (!confirm(t('ConfirmArchive'))) return;
     try {
       await servicesApi.archive(selectedServiceId);
       setSelectedServiceId(null);
@@ -131,8 +144,8 @@ export default function ServicesPage() {
     }
   };
 
-  const handleQuickAdd = (name: string, unit: string) => {
-    setQuickAddData({ name, unit });
+  const handleQuickAdd = (id_key: string, unit_key: string) => {
+    setQuickAddData({ id_key, unit_key });
     setQuickAddPrice('');
     setSelectedServiceId(null);
   };
@@ -144,15 +157,15 @@ export default function ServicesPage() {
     try {
       setIsLoading(true);
       const srv = await servicesApi.create({
-        name: quickAddData.name,
-        unit: quickAddData.unit,
+        name: quickAddData.id_key,
+        unit: quickAddData.unit_key,
       });
 
       // Create initial price rule
       await priceRulesApi.create({
         service_id: srv.id,
         unit_price: Number(quickAddPrice),
-        name: 'Standard Price',
+        name: t('StandardPrice'),
       });
 
       setQuickAddData(null);
@@ -161,9 +174,7 @@ export default function ServicesPage() {
       setSelectedServiceId(srv.id);
     } catch (err: unknown) {
       console.error('Quick add failed', err);
-      alert(
-        err instanceof Error ? err.message : 'Failed to add predefined service',
-      );
+      alert(err instanceof Error ? err.message : t('ErrorQuickAdd'));
     } finally {
       setIsLoading(false);
     }
@@ -175,10 +186,20 @@ export default function ServicesPage() {
 
   const availablePredefined = React.useMemo(() => {
     return PREDEFINED_SERVICES.filter((ps) => {
-      const existing = services.find((s) => s.name === ps.name);
-      return !existing || existing.status === 'ARCHIVED';
+      const existing = services.find(
+        (s) => s.name === ps.id_key || s.name === `service_${ps.id_key}`,
+      );
+      if (existing && existing.status === 'ACTIVE') return false;
+
+      // Search filter
+      if (predefinedSearch) {
+        const translatedName = t('Predefined_' + ps.id_key).toLowerCase();
+        return translatedName.includes(predefinedSearch.toLowerCase());
+      }
+
+      return true;
     });
-  }, [services]);
+  }, [services, predefinedSearch, t]);
 
   return (
     <div className="flex h-[calc(100vh-112px)] w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
@@ -196,7 +217,9 @@ export default function ServicesPage() {
               {t('Title')}
             </h1>
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              {activeServices.length} active services
+              {t('ActiveServicesCount', {
+                count: activeServices.length,
+              })}
             </p>
           </div>
         </div>
@@ -211,7 +234,7 @@ export default function ServicesPage() {
               {activeServices.length > 0 && (
                 <li className="px-1 pt-1 pb-2">
                   <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">
-                    Active Services
+                    {t('Active')}
                   </span>
                 </li>
               )}
@@ -238,11 +261,12 @@ export default function ServicesPage() {
                                 : 'text-gray-900 dark:text-white'
                             }`}
                           >
-                            {srv.name}
+                            {getServiceDisplayName(srv.name, t)}
                           </h3>
                           <div className="mt-1 flex items-center justify-between">
                             <span className="truncate text-xs text-gray-500 dark:text-gray-400">
-                              Unit: {srv.unit}
+                              {t('UnitLabel')}:{' '}
+                              {getUnitDisplayName(srv.unit, t)}
                             </span>
                           </div>
                         </div>
@@ -252,29 +276,65 @@ export default function ServicesPage() {
                 );
               })}
 
-              {availablePredefined.length > 0 && (
+              {availablePredefined.length > 0 || predefinedSearch ? (
                 <>
                   <li className="px-1 pt-6 pb-2 border-t border-gray-200 mt-2 dark:border-gray-700">
-                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">
-                      Add Predefined Service
-                    </span>
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                          {t('AddPredefinedService')}
+                        </span>
+                      </div>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                          <svg
+                            className="w-4 h-4 text-gray-500 dark:text-gray-400"
+                            aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              stroke="currentColor"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
+                            />
+                          </svg>
+                        </div>
+                        <input
+                          type="search"
+                          value={predefinedSearch}
+                          onChange={(e) => setPredefinedSearch(e.target.value)}
+                          className="block w-full p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                          placeholder={t('SearchService')}
+                        />
+                      </div>
+                    </div>
                   </li>
                   <div className="space-y-2">
-                    {availablePredefined.map((ps) => (
-                      <button
-                        key={ps.id_key}
-                        onClick={() => handleQuickAdd(ps.name, ps.unit)}
-                        className="w-full rounded-lg border border-gray-200 bg-white p-3 text-left text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 hover:text-blue-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 transition-colors flex justify-between items-center"
-                      >
-                        <span>{ps.name}</span>
-                        <span className="text-xs text-gray-400 bg-gray-100 px-2 rounded-full dark:bg-gray-700">
-                          /{ps.unit}
-                        </span>
-                      </button>
-                    ))}
+                    {availablePredefined.length > 0 ? (
+                      availablePredefined.map((ps) => (
+                        <button
+                          key={ps.id_key}
+                          onClick={() => handleQuickAdd(ps.id_key, ps.unit_key)}
+                          className="w-full rounded-lg border border-gray-200 bg-white p-3 text-left text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 hover:text-blue-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 transition-colors flex justify-between items-center"
+                        >
+                          <span>{t('Predefined_' + ps.id_key)}</span>
+                          <span className="text-xs text-gray-400 bg-gray-100 px-2 rounded-full dark:bg-gray-700">
+                            /{t('Unit_' + ps.unit_key)}
+                          </span>
+                        </button>
+                      ))
+                    ) : (
+                      <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400 italic">
+                        No services found
+                      </div>
+                    )}
                   </div>
                 </>
-              )}
+              ) : null}
             </ul>
           )}
         </div>
@@ -306,8 +366,7 @@ export default function ServicesPage() {
                 {t('SelectFirst')}
               </h3>
               <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 max-w-sm">
-                Select a predefined service from the list on the left to start
-                configuring price templates.
+                {t('SelectFirst')}
               </p>
             </div>
           </div>
@@ -315,9 +374,13 @@ export default function ServicesPage() {
           <div className="w-full p-6 max-w-2xl mx-auto flex items-center justify-center h-full">
             <div className="w-full rounded-2xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800 overflow-hidden">
               <div className="bg-blue-600 px-6 py-8 text-white">
-                <h3 className="text-2xl font-bold">Add {quickAddData.name}</h3>
+                <h3 className="text-2xl font-bold">
+                  {t('QuickAddTitle', {
+                    name: t('Predefined_' + quickAddData.id_key),
+                  })}
+                </h3>
                 <p className="mt-2 text-blue-100 italic">
-                  Please set an initial standard price to enable this service.
+                  {t('QuickAddDescription')}
                 </p>
               </div>
 
@@ -325,16 +388,17 @@ export default function ServicesPage() {
                 <div className="space-y-6">
                   <div>
                     <label className="block mb-2 text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">
-                      Pricing Unit
+                      {t('PricingUnit')}
                     </label>
                     <div className="bg-gray-50 border border-gray-200 text-gray-500 text-sm rounded-xl block w-full p-4 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 font-medium">
-                      {quickAddData.unit}
+                      {t('Unit_' + quickAddData.unit_key)}
                     </div>
                   </div>
 
                   <div>
                     <label className="block mb-2 text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">
-                      Initial Price (VND/{quickAddData.unit})
+                      {t('InitialPrice')} (VND/
+                      {t('Unit_' + quickAddData.unit_key)})
                     </label>
                     <div className="relative">
                       <input
@@ -356,14 +420,14 @@ export default function ServicesPage() {
                     onClick={() => setQuickAddData(null)}
                     className="py-3 px-6 text-sm font-bold text-gray-600 hover:text-gray-900 focus:outline-none bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
                   >
-                    Cancel
+                    {t('Cancel')}
                   </button>
                   <button
                     type="submit"
                     disabled={isLoading}
                     className="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-bold rounded-xl text-sm px-8 py-3 dark:bg-blue-600 dark:hover:bg-blue-700 shadow-lg shadow-blue-500/30 active:scale-95 disabled:opacity-50"
                   >
-                    {isLoading ? 'Creating...' : 'Enable Service & Save Price'}
+                    {isLoading ? t('Saving') : t('EnableServiceAndSavePrice')}
                   </button>
                 </div>
               </form>
@@ -398,10 +462,10 @@ export default function ServicesPage() {
                 <div className="border-b border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-800 flex items-center justify-between">
                   <div>
                     <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                      {selectedService?.name}
+                      {getServiceDisplayName(selectedService?.name || '', t)}
                     </h3>
                     <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                      Basic Predefined Service
+                      {t('BasicPredefinedService')}
                     </p>
                   </div>
                   {selectedService?.status !== 'ARCHIVED' && (
@@ -409,7 +473,7 @@ export default function ServicesPage() {
                       onClick={handleArchive}
                       className="text-red-700 hover:text-white border border-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2 text-center dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900"
                     >
-                      Disable Service
+                      {t('DisableService')}
                     </button>
                   )}
                 </div>
@@ -418,7 +482,7 @@ export default function ServicesPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                        Service Name
+                        {t('NameLabel')}
                       </label>
                       <div className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white opacity-70">
                         {selectedService?.name}
@@ -427,7 +491,7 @@ export default function ServicesPage() {
 
                     <div>
                       <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                        Pricing Unit
+                        {t('PricingUnit')}
                       </label>
                       <div className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white opacity-70">
                         {selectedService?.unit}
@@ -435,9 +499,7 @@ export default function ServicesPage() {
                     </div>
                   </div>
                   <p className="mt-4 text-xs text-gray-500 dark:text-gray-400 italic">
-                    Predefined services cannot be renamed or have their unit
-                    changed. To stop using this service, click &quot;Disable
-                    Service&quot;.
+                    {t('PredefinedServiceNote')}
                   </p>
                 </div>
               </div>
@@ -449,12 +511,11 @@ export default function ServicesPage() {
                     <div>
                       <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                         {editingRuleId
-                          ? 'Edit Price Template'
-                          : 'Create Price Template'}
+                          ? t('EditPriceTemplate')
+                          : t('CreatePriceTemplate')}
                       </h3>
                       <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        Define price templates which can be applied to different
-                        rooms or properties.
+                        {t('DefinePriceTemplatesDescription')}
                       </p>
                     </div>
                   </div>
@@ -466,26 +527,27 @@ export default function ServicesPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                       <div>
                         <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                          Template Name
+                          {t('TemplateName')}
                         </label>
                         <input
                           type="text"
                           value={templateName}
                           onChange={(e) => setTemplateName(e.target.value)}
-                          placeholder="e.g. Standard Price"
+                          placeholder={t('PlaceholderName')}
                           className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 disabled:opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 shadow-sm"
                           required
                         />
                       </div>
                       <div>
                         <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                          Unit Price (VND/{selectedService.unit})
+                          {t('UnitPrice')} (VND/
+                          {getUnitDisplayName(selectedService.unit, t)})
                         </label>
                         <input
                           type="number"
                           value={templatePrice}
                           onChange={(e) => setTemplatePrice(e.target.value)}
-                          placeholder="e.g. 3500"
+                          placeholder={t('PlaceholderPrice')}
                           className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 disabled:opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 shadow-sm"
                           required
                         />
@@ -499,11 +561,11 @@ export default function ServicesPage() {
                           onClick={() => {
                             setEditingRuleId(null);
                             setTemplatePrice('');
-                            setTemplateName('Standard Price');
+                            setTemplateName(t('StandardPrice'));
                           }}
                           className="py-2.5 px-5 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
                         >
-                          Cancel
+                          {t('Cancel')}
                         </button>
                       )}
                       <button
@@ -514,8 +576,8 @@ export default function ServicesPage() {
                         {isSavingTemplate
                           ? '...'
                           : editingRuleId
-                            ? 'Update Template'
-                            : 'Create Template'}
+                            ? t('Edit')
+                            : t('CreateNew')}
                       </button>
                     </div>
                   </form>
@@ -523,20 +585,20 @@ export default function ServicesPage() {
                   <div className="p-0 overflow-x-auto">
                     {serviceRules.length === 0 ? (
                       <div className="px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
-                        No price templates defined yet.
+                        {t('NoTemplatesDefined')}
                       </div>
                     ) : (
                       <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                         <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                           <tr>
                             <th scope="col" className="px-6 py-4">
-                              Template Name
+                              {t('TemplateName')}
                             </th>
                             <th scope="col" className="px-6 py-4">
-                              Price
+                              {t('Price')}
                             </th>
                             <th scope="col" className="px-6 py-4 text-right">
-                              Actions
+                              {t('Actions')}
                             </th>
                           </tr>
                         </thead>
@@ -551,7 +613,8 @@ export default function ServicesPage() {
                                   {rule.name}
                                 </td>
                                 <td className="px-6 py-5 text-gray-900 dark:text-white">
-                                  {rule.unit_price} /{selectedService.unit}
+                                  {rule.unit_price} /
+                                  {getUnitDisplayName(selectedService.unit, t)}
                                 </td>
                                 <td className="px-6 py-5 text-right">
                                   <div className="flex justify-end gap-3">
@@ -565,14 +628,12 @@ export default function ServicesPage() {
                                       }}
                                       className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
                                     >
-                                      Edit
+                                      {t('Edit')}
                                     </button>
                                     <button
                                       onClick={async () => {
                                         if (
-                                          confirm(
-                                            'Delete this template? Note: This might affect rooms currently using this template.',
-                                          )
+                                          confirm(t('ConfirmDeleteTemplate'))
                                         ) {
                                           await priceRulesApi.remove(rule.id);
                                           fetchRulesForService(
@@ -582,7 +643,7 @@ export default function ServicesPage() {
                                       }}
                                       className="font-medium text-red-600 dark:text-red-500 hover:underline"
                                     >
-                                      Delete
+                                      {t('Delete')}
                                     </button>
                                   </div>
                                 </td>

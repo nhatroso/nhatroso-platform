@@ -1,6 +1,13 @@
 import * as React from 'react';
 import { useTranslations } from 'next-intl';
-import { Room, Service, PriceRule, RoomService } from '@nhatroso/shared';
+import {
+  Room,
+  Service,
+  PriceRule,
+  RoomService,
+  PREDEFINED_SERVICE_IDS,
+  PREDEFINED_UNIT_IDS,
+} from '@nhatroso/shared';
 import { servicesApi } from '@/services/api/services';
 import { priceRulesApi } from '@/services/api/price-rules';
 import { roomServicesApi } from '@/services/api/room-services';
@@ -8,6 +15,28 @@ import { roomServicesApi } from '@/services/api/room-services';
 interface RoomPricingModalProps {
   room: Room;
   onClose: () => void;
+}
+
+function getServiceDisplayName(name: string, t: (key: string) => string) {
+  if (name.startsWith('service_')) {
+    const key = name.replace('service_', '');
+    return t(`Predefined_${key}`);
+  }
+  if (PREDEFINED_SERVICE_IDS.includes(name)) {
+    return t(`Predefined_${name}`);
+  }
+  return name;
+}
+
+function getUnitDisplayName(unit: string, t: (key: string) => string) {
+  if (unit.startsWith('unit_')) {
+    const key = unit.replace('unit_', '');
+    return t(`Unit_${key}`);
+  }
+  if (PREDEFINED_UNIT_IDS.includes(unit)) {
+    return t(`Unit_${unit}`);
+  }
+  return unit;
 }
 
 export function RoomPricingModal({ room, onClose }: RoomPricingModalProps) {
@@ -93,7 +122,7 @@ export function RoomPricingModal({ room, onClose }: RoomPricingModalProps) {
 
     // Validation: If enabled, must have a template
     if (stagedIsActive && !stagedPriceRuleId) {
-      setErrorMsg('Vui lòng chọn hoặc tạo giá cho dịch vụ này.');
+      setErrorMsg(tServices('ErrorSelectPriceRule'));
       return;
     }
 
@@ -131,7 +160,7 @@ export function RoomPricingModal({ room, onClose }: RoomPricingModalProps) {
       const assignedServices = await roomServicesApi.listByRoom(room.id);
       setRoomServices(assignedServices);
       setErrorMsg('');
-      alert('Cấu hình dịch vụ đã được lưu thành công!');
+      alert(tServices('SuccessSaveConfig'));
     } catch (err: unknown) {
       setErrorMsg(
         err instanceof Error ? err.message : 'Failed to save configuration',
@@ -219,10 +248,10 @@ export function RoomPricingModal({ room, onClose }: RoomPricingModalProps) {
                           <span
                             className={`text-sm ${isActive ? 'font-bold' : ''}`}
                           >
-                            {s.name}
+                            {getServiceDisplayName(s.name, tServices)}
                           </span>
                           <span className="text-xs text-gray-500 dark:text-gray-400">
-                            {s.unit}
+                            {getUnitDisplayName(s.unit, tServices)}
                           </span>
                         </div>
                         {hasAssigned && (
@@ -254,8 +283,12 @@ export function RoomPricingModal({ room, onClose }: RoomPricingModalProps) {
                         {tServices('EnableServiceForRoom')}
                       </h3>
                       <p className="text-sm text-gray-500 mt-1 dark:text-gray-400">
-                        Turn off to completely disable {activeService?.name} for
-                        this room.
+                        {tServices('DisableServiceDescription', {
+                          name: getServiceDisplayName(
+                            activeService?.name || '',
+                            tServices,
+                          ),
+                        })}
                       </p>
                     </div>
 
@@ -276,9 +309,10 @@ export function RoomPricingModal({ room, onClose }: RoomPricingModalProps) {
                       className="mt-4 p-4 text-sm text-gray-800 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-gray-300"
                       role="alert"
                     >
-                      <span className="font-medium">Chưa áp dụng!</span> Dịch vụ
-                      này đang tắt cho phòng này. Bật lên và chọn giá để áp
-                      dụng.
+                      <span className="font-medium">
+                        {tServices('NotAppliedYet')}
+                      </span>{' '}
+                      {tServices('NotAppliedDescription')}
                     </div>
                   )}
 
@@ -296,21 +330,20 @@ export function RoomPricingModal({ room, onClose }: RoomPricingModalProps) {
                 {stagedIsActive && (
                   <div className="rounded-lg border border-gray-200 bg-white px-6 py-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
                     <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-4">
-                      Thiết lập giá cho phòng
+                      {tServices('SetRoomPricing')}
                     </h3>
 
                     {serviceTemplates.length === 0 ? (
                       <div className="rounded-lg border border-dashed border-gray-300 p-8 text-center dark:border-gray-700">
                         <p className="text-sm italic text-gray-500 dark:text-gray-400">
-                          Chưa có bảng giá nào cho dịch vụ này. Vui lòng vào cài
-                          đặt Dịch vụ để thêm.
+                          {tServices('NoTemplatesForThisService')}
                         </p>
                       </div>
                     ) : (
                       <div className="space-y-4">
                         <div className="max-w-md">
                           <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                            Chọn bảng giá áp dụng
+                            {tServices('PriceRuleLabel')}
                           </label>
                           <select
                             value={stagedPriceRuleId}
@@ -322,7 +355,11 @@ export function RoomPricingModal({ room, onClose }: RoomPricingModalProps) {
                             {serviceTemplates.map((template) => (
                               <option key={template.id} value={template.id}>
                                 {template.name} ({template.unit_price} /{' '}
-                                {activeService?.unit})
+                                {getUnitDisplayName(
+                                  activeService?.unit || '',
+                                  tServices,
+                                )}
+                                )
                               </option>
                             ))}
                           </select>
@@ -336,12 +373,18 @@ export function RoomPricingModal({ room, onClose }: RoomPricingModalProps) {
                               .map((t) => (
                                 <div key={t.id}>
                                   <p className="text-sm font-medium text-blue-900 dark:text-blue-300">
-                                    Đang chọn: {t.name}
+                                    {tServices('CurrentlySelecting', {
+                                      name: t.name,
+                                    })}
                                   </p>
                                   <p className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white mt-1">
                                     {Number(t.unit_price).toLocaleString()}đ{' '}
                                     <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
-                                      / {activeService?.unit}
+                                      /{' '}
+                                      {getUnitDisplayName(
+                                        activeService?.unit || '',
+                                        tServices,
+                                      )}
                                     </span>
                                   </p>
                                 </div>
@@ -355,7 +398,9 @@ export function RoomPricingModal({ room, onClose }: RoomPricingModalProps) {
                             disabled={isSaving}
                             className="rounded-lg bg-blue-700 px-8 py-3 text-center text-sm font-bold text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 disabled:opacity-50 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 shadow-lg shadow-blue-500/20 active:scale-95"
                           >
-                            {isSaving ? 'Đang lưu...' : 'Lưu cấu hình'}
+                            {isSaving
+                              ? tServices('Saving')
+                              : tServices('SaveConfig')}
                           </button>
                         </div>
                       </div>
@@ -371,7 +416,9 @@ export function RoomPricingModal({ room, onClose }: RoomPricingModalProps) {
                       disabled={isSaving}
                       className="inline-flex items-center px-6 py-2.5 text-sm font-bold text-center text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 shadow-md shadow-red-500/20 active:scale-95 disabled:opacity-50"
                     >
-                      {isSaving ? 'Đang lưu...' : 'Hủy áp dụng dịch vụ'}
+                      {isSaving
+                        ? tServices('Saving')
+                        : tServices('DisableServiceForRoom')}
                     </button>
                   </div>
                 )}
