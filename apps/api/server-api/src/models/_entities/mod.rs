@@ -6,6 +6,8 @@ pub mod buildings;
 pub mod contract_tenants;
 pub mod contracts;
 pub mod floors;
+pub mod meter_readings;
+pub mod meters;
 pub mod price_rules;
 pub mod refresh_tokens;
 pub mod room_services;

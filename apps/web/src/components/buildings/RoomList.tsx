@@ -3,6 +3,8 @@ import { useTranslations } from 'next-intl';
 import { Room, CreateRoomInput } from '@nhatroso/shared';
 import { getRooms, createRoom } from '@/services/api/rooms';
 import { RoomPricingModal } from './RoomPricingModal';
+import { MeterManagementModal } from './MeterManagementModal';
+import { RoomCard } from './RoomCard';
 
 export function RoomList({ floorId }: { floorId: string }) {
   const t = useTranslations('Buildings');
@@ -15,6 +17,8 @@ export function RoomList({ floorId }: { floorId: string }) {
   const [managingRoomPrice, setManagingRoomPrice] = React.useState<Room | null>(
     null,
   );
+  const [managingRoomMeters, setManagingRoomMeters] =
+    React.useState<Room | null>(null);
 
   React.useEffect(() => {
     fetchRooms();
@@ -57,26 +61,14 @@ export function RoomList({ floorId }: { floorId: string }) {
 
   if (loading) {
     return (
-      <div className="flex w-full items-center justify-center py-4">
+      <div
+        className="flex w-full items-center justify-center py-4"
+        role="progressbar"
+      >
         <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-200 border-t-teal-600" />
       </div>
     );
   }
-
-  const statusColor = (status: string) => {
-    switch (status) {
-      case 'VACANT':
-        return 'bg-green-100 text-green-800 ring-green-600/20 dark:bg-green-900/40 dark:text-green-300 dark:ring-green-500/20';
-      case 'OCCUPIED':
-        return 'bg-blue-100 text-blue-800 ring-blue-600/20 dark:bg-blue-900/40 dark:text-blue-300 dark:ring-blue-500/20';
-      case 'DEPOSITED':
-        return 'bg-yellow-100 text-yellow-800 ring-yellow-600/20 dark:bg-yellow-900/40 dark:text-yellow-300 dark:ring-yellow-500/20';
-      case 'MAINTENANCE':
-        return 'bg-red-100 text-red-800 ring-red-600/20 dark:bg-red-900/40 dark:text-red-300 dark:ring-red-500/20';
-      default:
-        return 'bg-gray-100 text-gray-800 ring-gray-600/20 dark:bg-gray-700/40 dark:text-gray-300 dark:ring-gray-500/20';
-    }
-  };
 
   return (
     <div className="space-y-3">
@@ -92,27 +84,15 @@ export function RoomList({ floorId }: { floorId: string }) {
             {t('EmptyRooms')}
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
             {rooms.map((rm) => (
-              <div
+              <RoomCard
                 key={rm.id}
-                className="group relative flex flex-col justify-between overflow-hidden rounded bg-white p-2.5 shadow-sm ring-1 ring-inset ring-gray-200 transition-all hover:shadow-md dark:bg-gray-800 dark:ring-gray-700"
-              >
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-bold text-gray-900 dark:text-white">
-                    {rm.code}
-                  </h3>
-                  <div></div>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <span
-                    className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold ${statusColor(rm.status)}`}
-                  >
-                    {t(`Status_${rm.status}`)}
-                  </span>
-                </div>
-              </div>
+                room={rm}
+                onManagePrice={setManagingRoomPrice}
+                onManageMeters={setManagingRoomMeters}
+                compact
+              />
             ))}
           </div>
         )}
@@ -147,6 +127,13 @@ export function RoomList({ floorId }: { floorId: string }) {
         <RoomPricingModal
           room={managingRoomPrice}
           onClose={() => setManagingRoomPrice(null)}
+        />
+      )}
+
+      {managingRoomMeters && (
+        <MeterManagementModal
+          room={managingRoomMeters}
+          onClose={() => setManagingRoomMeters(null)}
         />
       )}
     </div>

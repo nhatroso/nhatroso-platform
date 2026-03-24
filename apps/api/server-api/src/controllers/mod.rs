@@ -8,3 +8,4 @@ pub mod services;
 pub mod users;
 
 pub mod room_services;
+pub mod meters;

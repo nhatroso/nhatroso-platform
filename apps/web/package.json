@@ -2,13 +2,13 @@
   "name": "web",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "typecheck": "tsc --noEmit",
-    "check": "pnpm lint && pnpm typecheck"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -16,6 +16,7 @@
     "@nhatroso/translations": "workspace:*",
     "clsx": "^2.1.1",
     "flowbite": "^4.0.1",
+    "lucide-react": "^1.0.1",
     "next": "16.1.6",
     "next-intl": "^4.8.3",
     "react": "19.2.3",
@@ -25,17 +26,18 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.29.2",
+    "@babel/preset-react": "^7.28.5",
+    "@babel/preset-typescript": "^7.28.5",
     "@tailwindcss/postcss": "^4",
-    "@testing-library/react": "^16.3.2",
     "@types/node": "^20",
-    "@types/react": "^19",
+    "@types/react": "^19.2.0",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^5.1.4",
-    "eslint": "^9",
+    "eslint": "^9.21.0",
     "eslint-config-next": "16.1.6",
-    "jsdom": "^28.1.0",
     "tailwindcss": "^4",
-    "typescript": "^5",
-    "vitest": "^4.0.18"
+    "ts-node": "^10.9.2",
+    "typescript": "^5"
   }
 }

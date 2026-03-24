@@ -24,6 +24,8 @@ mod m20260320_034905_add_is_active_to_price_rules;
 mod m20260321_024654_drop_legacy_columns_from_price_rules;
 mod m20260321_024704_create_room_services_table;
 mod m20260321_031739_allow_null_price_rule_in_room_services;
+mod m20260324_021448_meters;
+mod m20260324_021458_create_meter_readings;
 pub struct Migrator;
 
 #[async_trait::async_trait]
@@ -51,6 +53,8 @@ impl MigratorTrait for Migrator {
             Box::new(m20260321_024654_drop_legacy_columns_from_price_rules::Migration),
             Box::new(m20260321_024704_create_room_services_table::Migration),
             Box::new(m20260321_031739_allow_null_price_rule_in_room_services::Migration),
+            Box::new(m20260324_021448_meters::Migration),
+            Box::new(m20260324_021458_create_meter_readings::Migration),
         ]
     }
 }
