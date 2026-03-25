@@ -8,10 +8,11 @@
     "build": "next build",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "check": "pnpm lint && pnpm typecheck"
   },
   "dependencies": {
-    "@hookform/resolvers": "^5.2.2",
+    "@hookform/resolvers": "^3.9.0",
     "@nhatroso/shared": "workspace:*",
     "@nhatroso/translations": "workspace:*",
     "clsx": "^2.1.1",
@@ -19,25 +20,21 @@
     "lucide-react": "^1.0.1",
     "next": "16.1.6",
     "next-intl": "^4.8.3",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
     "react-hook-form": "^7.71.2",
     "tailwind-merge": "^3.0.2",
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.29.2",
-    "@babel/preset-react": "^7.28.5",
-    "@babel/preset-typescript": "^7.28.5",
-    "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
-    "@types/react": "^19.2.0",
+    "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@vitejs/plugin-react": "^5.1.4",
-    "eslint": "^9.21.0",
-    "eslint-config-next": "16.1.6",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^9",
+    "eslint-config-next": "^16.2.1",
+    "postcss": "^8.5.1",
     "tailwindcss": "^4",
-    "ts-node": "^10.9.2",
     "typescript": "^5"
   }
 }

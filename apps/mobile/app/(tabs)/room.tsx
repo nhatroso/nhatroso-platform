@@ -1,5 +1,5 @@
 import { View, Text, ScrollView } from 'react-native';
-import { Bed, MapPin, Hash, Ruler } from '@/src/lib/icons';
+import { Bed, MapPin, Hash, Ruler } from '@/lib/icons';
 
 export default function RoomScreen() {
   return (

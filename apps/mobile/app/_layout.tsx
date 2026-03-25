@@ -1,8 +1,7 @@
 import { Stack } from 'expo-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import '../global.css';
-
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import '../global.css';
 
 const queryClient = new QueryClient();
 
@@ -13,9 +12,9 @@ export default function RootLayout() {
         <Stack
           screenOptions={{
             headerStyle: {
-              backgroundColor: '#1c64f2',
+              backgroundColor: '',
             },
-            headerTintColor: '#ffffff',
+            headerTintColor: '',
             headerTitleStyle: {
               fontWeight: '800',
               fontSize: 20,

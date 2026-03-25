@@ -5,7 +5,7 @@ import {
   MessageSquare,
   ChevronRight,
   Zap,
-} from '@/src/lib/icons';
+} from '@/lib/icons';
 
 export default function DashboardScreen() {
   return (
@@ -15,7 +15,7 @@ export default function DashboardScreen() {
           Good morning, Kasper
         </Text>
         <Text className="text-lg font-medium text-muted mt-1">
-          Here's what's happening today
+          Here&apos;s what&apos;s happening today
         </Text>
       </View>
 

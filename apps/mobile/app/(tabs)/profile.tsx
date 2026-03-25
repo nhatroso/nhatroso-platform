@@ -1,12 +1,6 @@
-import { View, Text, ScrollView, Pressable, Image } from 'react-native';
+import { View, Text, ScrollView, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
-import {
-  User,
-  Settings,
-  LogOut,
-  ChevronRight,
-  HelpCircle,
-} from '@/src/lib/icons';
+import { User, Settings, LogOut, ChevronRight, HelpCircle } from '@/lib/icons';
 
 export default function ProfileScreen() {
   const router = useRouter();
