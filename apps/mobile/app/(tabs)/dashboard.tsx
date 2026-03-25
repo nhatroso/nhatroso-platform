@@ -5,7 +5,7 @@ import {
   MessageSquare,
   ChevronRight,
   Zap,
-} from '@/lib/icons';
+} from '@/src/lib/icons';
 
 export default function DashboardScreen() {
   return (

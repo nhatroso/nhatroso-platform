@@ -9,12 +9,7 @@ import {
   Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Home, Mail, Lock, ArrowRight } from '@/lib/icons';
-import { cssInterop } from 'react-native-css-interop';
-
-cssInterop(KeyboardAvoidingView, {
-  className: 'style',
-});
+import { Home, Mail, Lock, ArrowRight } from '@/src/lib/icons';
 
 export default function LoginScreen() {
   const [identifier, setIdentifier] = useState('');
