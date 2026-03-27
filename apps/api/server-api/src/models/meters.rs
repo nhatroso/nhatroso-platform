@@ -36,6 +36,57 @@ impl Model {
         Meters::find_by_id(id).one(db).await.map_err(Error::from)
     }
 
+    pub async fn find_by_tenant(db: &DatabaseConnection, tenant_id: Uuid) -> Result<Vec<MeterResponse>> {
+        use crate::models::_entities::{contracts, contract_tenants, rooms, meters};
+        use sea_orm::{RelationTrait, QuerySelect};
+
+        let meters = Meters::find()
+            .join(
+                sea_orm::JoinType::InnerJoin,
+                meters::Relation::Rooms.def(),
+            )
+            .join(
+                sea_orm::JoinType::InnerJoin,
+                rooms::Relation::Contracts.def(),
+            )
+            .join(
+                sea_orm::JoinType::InnerJoin,
+                contracts::Relation::ContractTenants.def(),
+            )
+            .filter(contract_tenants::Column::TenantId.eq(tenant_id))
+            .filter(contracts::Column::Status.eq("ACTIVE"))
+            .all(db)
+            .await?;
+
+        Ok(meters.into_iter().map(MeterResponse::from).collect())
+    }
+
+    pub async fn validate_meter_access(db: &DatabaseConnection, meter_id: Uuid, tenant_id: Uuid) -> Result<bool> {
+        use crate::models::_entities::{contracts, contract_tenants, rooms, meters};
+        use sea_orm::{RelationTrait, QuerySelect, PaginatorTrait};
+
+        let count = Meters::find()
+            .filter(meters::Column::Id.eq(meter_id))
+            .join(
+                sea_orm::JoinType::InnerJoin,
+                meters::Relation::Rooms.def(),
+            )
+            .join(
+                sea_orm::JoinType::InnerJoin,
+                rooms::Relation::Contracts.def(),
+            )
+            .join(
+                sea_orm::JoinType::InnerJoin,
+                contracts::Relation::ContractTenants.def(),
+            )
+            .filter(contract_tenants::Column::TenantId.eq(tenant_id))
+            .filter(contracts::Column::Status.eq("ACTIVE"))
+            .count(db)
+            .await?;
+
+        Ok(count > 0)
+    }
+
     pub async fn create_meter(db: &DatabaseConnection, params: CreateMeterParams) -> Result<std::result::Result<MeterResponse, (StatusCode, &'static str)>> {
         // Check for duplicate meter for room + service
         let existing = Meters::find()

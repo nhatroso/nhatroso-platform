@@ -9,6 +9,8 @@ export interface Meter {
   updated_at: string;
 }
 
+export type MeterResponse = Meter;
+
 export interface MeterReading {
   id: string;
   meter_id: string;
@@ -18,6 +20,8 @@ export interface MeterReading {
   created_at: string;
 }
 
+export type MeterReadingResponse = MeterReading;
+
 export interface CreateMeterInput {
   room_id: string;
   service_id: string;
@@ -25,8 +29,10 @@ export interface CreateMeterInput {
   initial_reading?: string;
 }
 
-export interface RecordReadingInput {
+export interface RecordReadingParams {
   reading_value: string;
   reading_date?: string;
   image_url?: string | null;
 }
+
+export type RecordReadingInput = RecordReadingParams;

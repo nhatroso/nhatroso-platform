@@ -117,6 +117,13 @@ export function RoomPricingModal({ room, onClose }: RoomPricingModalProps) {
     }
   }, [selectedServiceId, roomServices]);
 
+  // Auto-select first template if active but no template selected
+  React.useEffect(() => {
+    if (stagedIsActive && !stagedPriceRuleId && serviceTemplates.length > 0) {
+      setStagedPriceRuleId(serviceTemplates[0].id);
+    }
+  }, [stagedIsActive, stagedPriceRuleId, serviceTemplates]);
+
   const handleSave = async () => {
     if (!selectedServiceId) return;
 

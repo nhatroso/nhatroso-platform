@@ -7,9 +7,14 @@ import {
   ChevronRight,
   HelpCircle,
 } from '@/src/lib/icons';
+import { useAuth } from '@/src/context/AuthContext';
 
 export default function ProfileScreen() {
-  const router = useRouter();
+  const { logout, user } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+  };
 
   return (
     <ScrollView className="flex-1 bg-background">
@@ -18,10 +23,10 @@ export default function ProfileScreen() {
           <User size={64} className="text-icon" />
         </View>
         <Text className="text-3xl font-extrabold text-text tracking-tight">
-          Guest Tenant
+          {user ? user.name : 'Guest'}
         </Text>
         <Text className="text-muted font-medium text-base mt-1">
-          guest@nhatroso.com
+          {user ? `Phone: ${user.phone}` : '0909090909'}
         </Text>
         <Pressable className="mt-6 rounded-xl border border-border px-8 py-2.5 active:bg-input">
           <Text className="text-sm font-bold text-text">Edit Profile</Text>
@@ -55,7 +60,7 @@ export default function ProfileScreen() {
 
         <Pressable
           className="flex-row items-center justify-between rounded-2xl bg-background p-5 shadow-sm border border-border active:bg-input"
-          onPress={() => router.replace('/')}
+          onPress={handleLogout}
         >
           <View className="flex-row items-center">
             <View className="mr-4 h-12 w-12 items-center justify-center rounded-xl bg-error/10">

@@ -9,8 +9,15 @@ pub type Rooms = Entity;
 use crate::models::_entities::{
     buildings::Entity as Buildings,
     floors::Entity as Floors,
+    contracts::Entity as Contracts,
+    room_services::Entity as RoomServices,
+    price_rules::Entity as PriceRules,
+    services::Entity as Services,
 };
-use crate::views::rooms::{CreateRoomParams, UpdateRoomParams, AvailableRoomResponse};
+use crate::views::rooms::{
+    CreateRoomParams, UpdateRoomParams, AvailableRoomResponse,
+    TenantRoomResponse, TenantRoomServiceResponse
+};
 
 #[async_trait::async_trait]
 impl ActiveModelBehavior for ActiveModel {
@@ -180,6 +187,73 @@ impl Model {
         active_model.updated_at = ActiveValue::Set(chrono::Utc::now().into());
 
         Ok(Ok(active_model.update(db).await?))
+    }
+
+    pub async fn get_my_room(
+        db: &DatabaseConnection,
+        tenant_id: Uuid,
+    ) -> Result<std::result::Result<TenantRoomResponse, (StatusCode, &'static str)>> {
+        let contract = Contracts::find()
+            .join(
+                JoinType::InnerJoin,
+                crate::models::_entities::contracts::Relation::ContractTenants.def(),
+            )
+            .filter(crate::models::_entities::contract_tenants::Column::TenantId.eq(tenant_id))
+            .filter(crate::models::_entities::contracts::Column::Status.eq("ACTIVE"))
+            .one(db)
+            .await?;
+
+        let Some(contract) = contract else {
+            return Ok(Err((StatusCode::NOT_FOUND, "NO_ACTIVE_CONTRACT")));
+        };
+
+        let room_with_building = Self::find_by_id(db, contract.room_id).await?;
+        let (room, building) = match room_with_building {
+            Some((r, b)) => (r, b),
+            _ => return Ok(Err((StatusCode::NOT_FOUND, "ROOM_NOT_FOUND"))),
+        };
+
+        let floor = if let Some(floor_id) = room.floor_id {
+            Floors::find_by_id(floor_id).one(db).await?
+        } else {
+            None
+        };
+
+        let services = RoomServices::find()
+            .filter(crate::models::_entities::room_services::Column::RoomId.eq(contract.room_id))
+            .filter(crate::models::_entities::room_services::Column::IsActive.eq(true))
+            .find_also_related(Services)
+            .all(db)
+            .await?;
+
+        let mut service_responses = Vec::new();
+        for (rs, s) in services {
+            if let Some(s) = s {
+                let unit_price = if let Some(price_rule_id) = rs.price_rule_id {
+                    PriceRules::find_by_id(price_rule_id).one(db).await?
+                        .map(|p| p.unit_price)
+                        .unwrap_or_default()
+                } else {
+                    Default::default()
+                };
+
+                service_responses.push(TenantRoomServiceResponse {
+                    name: s.name,
+                    unit: s.unit,
+                    unit_price,
+                });
+            }
+        }
+
+        Ok(Ok(TenantRoomResponse {
+            id: room.id,
+            building_name: building.name.clone(),
+            room_address: building.address.unwrap_or_default(),
+            code: room.code.clone(),
+            floor_name: floor.map(|f| f.identifier),
+            monthly_rent: contract.monthly_rent.into(),
+            services: service_responses,
+        }))
     }
 }
 

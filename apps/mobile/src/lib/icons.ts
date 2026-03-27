@@ -17,6 +17,11 @@ import {
   Settings,
   HelpCircle,
   LogOut,
+  Info,
+  Droplets,
+  Camera,
+  ChevronLeft,
+  CheckCircle2,
 } from 'lucide-react-native';
 
 const iconList = [
@@ -37,6 +42,11 @@ const iconList = [
   Settings,
   HelpCircle,
   LogOut,
+  Info,
+  Droplets,
+  Camera,
+  ChevronLeft,
+  CheckCircle2,
 ];
 
 iconList.forEach((icon) => {
@@ -68,4 +78,9 @@ export {
   Settings,
   HelpCircle,
   LogOut,
+  Info,
+  Droplets,
+  Camera,
+  ChevronLeft,
+  CheckCircle2,
 };

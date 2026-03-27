@@ -139,6 +139,8 @@ impl Model {
             token: tokens.access_token,
             refresh_token: tokens.refresh_token,
             id: db_res.id,
+            name: db_res.name,
+            phone: db_res.phone,
         }))
     }
 
@@ -151,7 +153,7 @@ impl Model {
             .filter(super::_entities::users::Column::Phone.eq(&params.phone))
             .one(db)
             .await?;
-        
+
         let Some(user) = user else {
             return Ok(Err((StatusCode::UNAUTHORIZED, "AUTH_INVALID_CREDENTIALS")));
         };
@@ -166,6 +168,8 @@ impl Model {
             token: tokens.access_token,
             refresh_token: tokens.refresh_token,
             id: user.id,
+            name: user.name,
+            phone: user.phone,
         }))
     }
 
@@ -180,7 +184,7 @@ impl Model {
         // Generate new pair for the same user
         let user = Entity::find_by_id(token.user_id).one(db).await?
             .ok_or_else(|| ModelError::EntityNotFound)?;
-        
+
         user.generate_tokens(db, jwt_secret).await
     }
 
