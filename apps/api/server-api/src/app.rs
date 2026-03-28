@@ -57,10 +57,12 @@ impl Hooks for App {
             .add_route(controllers::price_rules::routes())
             .add_route(controllers::contracts::routes())
             .add_route(controllers::users::routes())
+            .add_route(controllers::reading_requests::routes())
+            .add_route(controllers::uploads::routes())
     }
 
     async fn after_routes(router: axum::Router, _ctx: &AppContext) -> Result<axum::Router> {
-        Ok(router)
+        Ok(router.nest_service("/static", tower_http::services::ServeDir::new("static")))
     }
 
     async fn connect_workers(_ctx: &AppContext, _queue: &Queue) -> Result<()> {

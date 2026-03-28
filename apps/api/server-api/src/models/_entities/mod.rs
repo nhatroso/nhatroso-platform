@@ -9,6 +9,7 @@ pub mod floors;
 pub mod meter_readings;
 pub mod meters;
 pub mod price_rules;
+pub mod reading_requests;
 pub mod refresh_tokens;
 pub mod room_services;
 pub mod rooms;

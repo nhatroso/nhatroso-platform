@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use rust_decimal::Decimal;
 use chrono::{DateTime, Utc};
-use crate::models::_entities::{meters, meter_readings};
+use crate::models::_entities::{meters, meter_readings, services};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct CreateMeterParams {
@@ -24,8 +24,12 @@ pub struct MeterResponse {
     pub id: Uuid,
     pub room_id: Uuid,
     pub service_id: Uuid,
+    pub service_name: Option<String>,
+    pub service_unit: Option<String>,
     pub serial_number: Option<String>,
     pub initial_reading: Decimal,
+    pub latest_reading: Option<Decimal>,
+    pub latest_reading_date: Option<DateTime<Utc>>,
     pub status: String,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
@@ -41,14 +45,37 @@ pub struct MeterReadingResponse {
     pub created_at: DateTime<Utc>,
 }
 
+impl MeterResponse {
+    pub fn from_model(m: meters::Model, s: Option<services::Model>) -> Self {
+        Self {
+            id: m.id,
+            room_id: m.room_id,
+            service_id: m.service_id,
+            service_name: s.as_ref().map(|x| x.name.clone()),
+            service_unit: s.as_ref().map(|x| x.unit.clone()),
+            serial_number: m.serial_number,
+            initial_reading: m.initial_reading,
+            latest_reading: None,
+            latest_reading_date: None,
+            status: m.status,
+            created_at: m.created_at.into(),
+            updated_at: m.updated_at.into(),
+        }
+    }
+}
+
 impl From<meters::Model> for MeterResponse {
     fn from(m: meters::Model) -> Self {
         Self {
             id: m.id,
             room_id: m.room_id,
             service_id: m.service_id,
+            service_name: None,
+            service_unit: None,
             serial_number: m.serial_number,
             initial_reading: m.initial_reading,
+            latest_reading: None,
+            latest_reading_date: None,
             status: m.status,
             created_at: m.created_at.into(),
             updated_at: m.updated_at.into(),

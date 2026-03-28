@@ -1,19 +1,43 @@
-import { View, Text, ScrollView, Pressable } from 'react-native';
-import { useRouter } from 'expo-router';
+import { View, Text, ScrollView, Pressable, Alert } from 'react-native';
 import {
   User,
   Settings,
   LogOut,
   ChevronRight,
   HelpCircle,
+  Globe,
 } from '@/src/lib/icons';
 import { useAuth } from '@/src/context/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 export default function ProfileScreen() {
   const { logout, user } = useAuth();
+  const { t, i18n } = useTranslation();
 
   const handleLogout = async () => {
     await logout();
+  };
+
+  const handleLanguageToggle = () => {
+    Alert.alert(
+      t('Dashboard.profile.selectLanguage'),
+      '',
+      [
+        {
+          text: 'English',
+          onPress: () => i18n.changeLanguage('en'),
+        },
+        {
+          text: 'Tiếng Việt',
+          onPress: () => i18n.changeLanguage('vi'),
+        },
+        {
+          text: t('Dashboard.profile.cancel'),
+          style: 'cancel',
+        },
+      ],
+      { cancelable: true },
+    );
   };
 
   return (
@@ -23,13 +47,17 @@ export default function ProfileScreen() {
           <User size={64} className="text-icon" />
         </View>
         <Text className="text-3xl font-extrabold text-text tracking-tight">
-          {user ? user.name : 'Guest'}
+          {user ? user.name : t('Dashboard.profile.guest')}
         </Text>
         <Text className="text-muted font-medium text-base mt-1">
-          {user ? `Phone: ${user.phone}` : '0909090909'}
+          {user
+            ? `${t('Dashboard.profile.phonePrefix')}${user.phone}`
+            : '0909090909'}
         </Text>
         <Pressable className="mt-6 rounded-xl border border-border px-8 py-2.5 active:bg-input">
-          <Text className="text-sm font-bold text-text">Edit Profile</Text>
+          <Text className="text-sm font-bold text-text">
+            {t('Dashboard.profile.editProfile')}
+          </Text>
         </Pressable>
       </View>
 
@@ -40,10 +68,29 @@ export default function ProfileScreen() {
               <Settings size={24} className="text-primary" />
             </View>
             <Text className="font-bold text-text text-base">
-              Account Settings
+              {t('Dashboard.profile.accountSettings')}
             </Text>
           </View>
           <ChevronRight size={20} className="text-icon" />
+        </Pressable>
+
+        {/* Language Toggler */}
+        <Pressable
+          className="flex-row items-center justify-between rounded-2xl bg-background p-5 shadow-sm border border-border active:bg-input"
+          onPress={handleLanguageToggle}
+        >
+          <View className="flex-row items-center">
+            <View className="mr-4 h-12 w-12 items-center justify-center rounded-xl bg-orange-500/10">
+              <Globe size={24} className="text-orange-500" />
+            </View>
+            <Text className="font-bold">{t('Dashboard.profile.language')}</Text>
+          </View>
+          <View className="flex-row items-center">
+            <Text className="text-muted font-medium mr-2">
+              {i18n.language === 'en' ? 'English' : 'Tiếng Việt'}
+            </Text>
+            <ChevronRight size={20} className="text-icon" />
+          </View>
         </Pressable>
 
         <Pressable className="flex-row items-center justify-between rounded-2xl bg-background p-5 shadow-sm border border-border active:bg-input">
@@ -52,7 +99,7 @@ export default function ProfileScreen() {
               <HelpCircle size={24} className="text-success" />
             </View>
             <Text className="font-bold text-text text-base">
-              Help & Support
+              {t('Dashboard.profile.helpSupport')}
             </Text>
           </View>
           <ChevronRight size={20} className="text-icon" />
@@ -66,14 +113,16 @@ export default function ProfileScreen() {
             <View className="mr-4 h-12 w-12 items-center justify-center rounded-xl bg-error/10">
               <LogOut size={24} className="text-error" />
             </View>
-            <Text className="font-bold text-error text-base">Sign Out</Text>
+            <Text className="font-bold text-error text-base">
+              {t('Dashboard.profile.signOut')}
+            </Text>
           </View>
         </Pressable>
       </View>
 
       <View className="mt-12 items-center pb-12">
         <Text className="text-xs font-bold text-secondary uppercase tracking-widest">
-          Version 1.0.0 (Flowbite)
+          {t('Dashboard.profile.version')}
         </Text>
       </View>
     </ScrollView>

@@ -14,8 +14,10 @@ import { Home, Mail, Lock, ArrowRight, AlertCircle } from '@/src/lib/icons';
 import { useAuth } from '@/src/context/AuthContext';
 import { authService } from '@/src/api/auth';
 import { LoginSchema } from '@nhatroso/shared';
+import { useTranslation } from 'react-i18next';
 
 export default function LoginScreen() {
+  const { t } = useTranslation();
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -73,10 +75,10 @@ export default function LoginScreen() {
               <Home size={40} color="white" />
             </View>
             <Text className="text-4xl font-extrabold text-text tracking-tight">
-              Sign in
+              {t('Auth.login.title')}
             </Text>
             <Text className="mt-2 text-lg font-medium text-muted">
-              to the Nhatroso Platform
+              {t('Auth.login.subtitle')}
             </Text>
           </View>
 
@@ -93,12 +95,12 @@ export default function LoginScreen() {
 
             <View>
               <Text className="mb-2 ml-1 text-sm font-semibold text-text">
-                Phone Number
+                {t('Auth.login.phoneLabel')}
               </Text>
               <View className="flex-row items-center rounded-2xl bg-input border border-border px-4 py-4 focus:border-primary">
                 <Mail size={20} className="text-icon" />
                 <TextInput
-                  placeholder="Enter your phone number"
+                  placeholder={t('Auth.login.phonePlaceholder')}
                   className="flex-1 ml-3 text-base text-text"
                   value={identifier}
                   onChangeText={setIdentifier}
@@ -111,12 +113,12 @@ export default function LoginScreen() {
 
             <View>
               <Text className="mb-2 ml-1 text-sm font-semibold text-text">
-                Password
+                {t('Auth.login.passwordLabel')}
               </Text>
               <View className="flex-row items-center rounded-2xl bg-input border border-border px-4 py-4 focus:border-primary">
                 <Lock size={20} className="text-icon" />
                 <TextInput
-                  placeholder="Enter your password"
+                  placeholder={t('Auth.login.passwordPlaceholder')}
                   className="flex-1 ml-3 text-base text-text"
                   value={password}
                   onChangeText={setPassword}
@@ -126,7 +128,7 @@ export default function LoginScreen() {
               </View>
               <TouchableOpacity className="mt-4 self-end">
                 <Text className="text-sm font-semibold text-primary">
-                  Forgot Password?
+                  {t('Auth.login.forgotPassword')}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -145,7 +147,7 @@ export default function LoginScreen() {
               ) : (
                 <>
                   <Text className="text-xl font-bold text-white mr-2">
-                    Login
+                    {t('Auth.login.submitBtn')}
                   </Text>
                   <ArrowRight size={24} color="white" />
                 </>
@@ -154,7 +156,7 @@ export default function LoginScreen() {
           </View>
 
           <Text className="mt-auto pt-8 text-center text-xs font-semibold text-muted opacity-50">
-            © 2026 NHATROSO PLATFORM
+            {t('Auth.login.footer')}
           </Text>
         </View>
       </ScrollView>

@@ -64,5 +64,12 @@
   "EnterCurrentReading": "Nhập chỉ số hiện tại",
   "NoReadingsYet": "Chưa có bản ghi nào",
   "Save": "Lưu",
-  "Cancel": "Hủy"
+  "Cancel": "Hủy",
+  "RequestReading": "Yêu cầu chốt số",
+  "RequestReadingHeader": "Tạo yêu cầu chốt số",
+  "RequestReadingDescription": "Tạo yêu cầu ghi nhận chỉ số điện nước cho tất cả các phòng thuộc tòa nhà này.",
+  "Month": "Tháng",
+  "Year": "Năm",
+  "SubmitRequest": "Gửi yêu cầu",
+  "RecentRequests": "Yêu cầu gần đây"
 }

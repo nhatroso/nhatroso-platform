@@ -36,6 +36,7 @@ pub struct TenantRoomResponse {
 
 #[derive(Clone, Debug, Serialize)]
 pub struct TenantRoomServiceResponse {
+    pub service_id: Uuid,
     pub name: String,
     pub unit: String,
     pub unit_price: Decimal,

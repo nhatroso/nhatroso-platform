@@ -11,3 +11,4 @@ pub mod contracts;
 pub mod room_services;
 pub mod meters;
 pub mod meter_readings;
+pub mod reading_requests;

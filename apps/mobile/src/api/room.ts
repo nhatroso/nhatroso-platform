@@ -1,6 +1,7 @@
 import { apiClient } from './client';
 
 export interface TenantRoomService {
+  service_id: string;
   name: string;
   unit: string;
   unit_price: string;

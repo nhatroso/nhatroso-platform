@@ -37,6 +37,7 @@ validator = { version = "0.20" }
 uuid = { version = "1.6", features = ["v4"] }
 include_dir = { version = "0.7" }
 anyhow = "1.0.102"
+tower-http = { version = "0.6", features = ["fs"] }
 
 [[bin]]
 name = "server_api-cli"

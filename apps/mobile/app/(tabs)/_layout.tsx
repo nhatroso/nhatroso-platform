@@ -1,7 +1,10 @@
 import { Tabs } from 'expo-router';
 import { Home, Bed, User } from '@/src/lib/icons';
+import { useTranslation } from 'react-i18next';
 
 export default function TabLayout() {
+  const { t } = useTranslation();
+
   return (
     <Tabs
       screenOptions={{
@@ -29,21 +32,21 @@ export default function TabLayout() {
       <Tabs.Screen
         name="dashboard"
         options={{
-          title: 'Dashboard',
+          title: t('Dashboard.tabs.dashboard'),
           tabBarIcon: ({ color }) => <Home size={24} color={color} />,
         }}
       />
       <Tabs.Screen
         name="room"
         options={{
-          title: 'My Room',
+          title: t('Dashboard.tabs.room'),
           tabBarIcon: ({ color }) => <Bed size={24} color={color} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
+          title: t('Dashboard.tabs.profile'),
           tabBarIcon: ({ color }) => <User size={24} color={color} />,
         }}
       />

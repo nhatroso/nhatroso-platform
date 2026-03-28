@@ -238,6 +238,7 @@ impl Model {
                 };
 
                 service_responses.push(TenantRoomServiceResponse {
+                    service_id: s.id,
                     name: s.name,
                     unit: s.unit,
                     unit_price,

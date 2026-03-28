@@ -22,6 +22,10 @@ import {
   Camera,
   ChevronLeft,
   CheckCircle2,
+  X,
+  Globe,
+  Calendar,
+  FileImage,
 } from 'lucide-react-native';
 
 const iconList = [
@@ -47,6 +51,10 @@ const iconList = [
   Camera,
   ChevronLeft,
   CheckCircle2,
+  X,
+  Globe,
+  Calendar,
+  FileImage,
 ];
 
 iconList.forEach((icon) => {
@@ -83,4 +91,8 @@ export {
   Camera,
   ChevronLeft,
   CheckCircle2,
+  X,
+  Globe,
+  Calendar,
+  FileImage,
 };

@@ -7,3 +7,4 @@ pub mod price_rules;
 pub mod contracts;
 pub mod auth;
 pub mod room_services;
+pub mod reading_requests;

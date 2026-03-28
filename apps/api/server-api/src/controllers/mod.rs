@@ -9,3 +9,5 @@ pub mod users;
 
 pub mod room_services;
 pub mod meters;
+pub mod reading_requests;
+pub mod uploads;

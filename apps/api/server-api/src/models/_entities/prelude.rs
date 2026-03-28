@@ -7,6 +7,7 @@ pub use super::floors::Entity as Floors;
 pub use super::meter_readings::Entity as MeterReadings;
 pub use super::meters::Entity as Meters;
 pub use super::price_rules::Entity as PriceRules;
+pub use super::reading_requests::Entity as ReadingRequests;
 pub use super::refresh_tokens::Entity as RefreshTokens;
 pub use super::room_services::Entity as RoomServices;
 pub use super::rooms::Entity as Rooms;

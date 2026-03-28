@@ -25,11 +25,30 @@ impl ActiveModelBehavior for ActiveModel {
 
 impl Model {
     pub async fn list_by_room(db: &DatabaseConnection, room_id: Uuid) -> Result<Vec<MeterResponse>> {
+        use crate::models::_entities::{services, meter_readings};
+        use sea_orm::QueryOrder;
         let meters = Meters::find()
+            .find_also_related(services::Entity)
             .filter(crate::models::_entities::meters::Column::RoomId.eq(room_id))
             .all(db)
             .await?;
-        Ok(meters.into_iter().map(MeterResponse::from).collect())
+
+        let mut results = Vec::new();
+        for (m, s) in meters {
+            let mut response = MeterResponse::from_model(m.clone(), s);
+            let latest = meter_readings::Entity::find()
+                .filter(meter_readings::Column::MeterId.eq(m.id))
+                .order_by_desc(meter_readings::Column::ReadingDate)
+                .one(db)
+                .await?;
+            if let Some(r) = latest {
+                response.latest_reading = Some(r.reading_value);
+                response.latest_reading_date = Some(r.reading_date.into());
+            }
+            results.push(response);
+        }
+
+        Ok(results)
     }
 
     pub async fn find_by_id(db: &DatabaseConnection, id: Uuid) -> Result<Option<Self>> {
@@ -37,10 +56,11 @@ impl Model {
     }
 
     pub async fn find_by_tenant(db: &DatabaseConnection, tenant_id: Uuid) -> Result<Vec<MeterResponse>> {
-        use crate::models::_entities::{contracts, contract_tenants, rooms, meters};
-        use sea_orm::{RelationTrait, QuerySelect};
+        use crate::models::_entities::{contracts, contract_tenants, rooms, meters, services, meter_readings};
+        use sea_orm::{RelationTrait, QuerySelect, QueryOrder};
 
         let meters = Meters::find()
+            .find_also_related(services::Entity)
             .join(
                 sea_orm::JoinType::InnerJoin,
                 meters::Relation::Rooms.def(),
@@ -58,7 +78,22 @@ impl Model {
             .all(db)
             .await?;
 
-        Ok(meters.into_iter().map(MeterResponse::from).collect())
+        let mut results = Vec::new();
+        for (m, s) in meters {
+            let mut response = MeterResponse::from_model(m.clone(), s);
+            let latest = meter_readings::Entity::find()
+                .filter(meter_readings::Column::MeterId.eq(m.id))
+                .order_by_desc(meter_readings::Column::ReadingDate)
+                .one(db)
+                .await?;
+            if let Some(r) = latest {
+                response.latest_reading = Some(r.reading_value);
+                response.latest_reading_date = Some(r.reading_date.into());
+            }
+            results.push(response);
+        }
+
+        Ok(results)
     }
 
     pub async fn validate_meter_access(db: &DatabaseConnection, meter_id: Uuid, tenant_id: Uuid) -> Result<bool> {

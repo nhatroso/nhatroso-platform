@@ -64,5 +64,12 @@
   "EnterCurrentReading": "Enter current reading",
   "NoReadingsYet": "No readings yet",
   "Save": "Save",
-  "Cancel": "Cancel"
+  "Cancel": "Cancel",
+  "RequestReading": "Request Reading",
+  "RequestReadingHeader": "Create Reading Request",
+  "RequestReadingDescription": "Create a request to record electricity and water meter readings for all rooms in this building.",
+  "Month": "Month",
+  "Year": "Year",
+  "SubmitRequest": "Submit Request",
+  "RecentRequests": "Recent Requests"
 }
