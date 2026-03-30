@@ -10,6 +10,8 @@ import viSidebar from './locales/vi/sidebar.json';
 import enSidebar from './locales/en/sidebar.json';
 import viDashboard from './locales/vi/dashboard.json';
 import enDashboard from './locales/en/dashboard.json';
+import viMeters from './locales/vi/meters.json';
+import enMeters from './locales/en/meters.json';
 
 export const i18nConfig = {
   locales: ['vi', 'en'] as const,
@@ -26,6 +28,7 @@ export const translations = {
     Services: viServices,
     Sidebar: viSidebar,
     Dashboard: viDashboard,
+    Meters: viMeters,
   },
   en: {
     Errors: enErrors,
@@ -34,6 +37,7 @@ export const translations = {
     Services: enServices,
     Sidebar: enSidebar,
     Dashboard: enDashboard,
+    Meters: enMeters,
   },
 };
 

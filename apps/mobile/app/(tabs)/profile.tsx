@@ -1,4 +1,12 @@
-import { View, Text, ScrollView, Pressable, Alert } from 'react-native';
+import React from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  Pressable,
+  TouchableOpacity,
+} from 'react-native';
+import { ConfirmModal } from '@/src/components/ui/ConfirmModal';
 import {
   User,
   Settings,
@@ -14,30 +22,21 @@ export default function ProfileScreen() {
   const { logout, user } = useAuth();
   const { t, i18n } = useTranslation();
 
+  const [isLogoutModalVisible, setIsLogoutModalVisible] = React.useState(false);
+
   const handleLogout = async () => {
+    setIsLogoutModalVisible(true);
+  };
+
+  const confirmLogout = async () => {
+    setIsLogoutModalVisible(false);
     await logout();
   };
 
+  const [isLangModalVisible, setIsLangModalVisible] = React.useState(false);
+
   const handleLanguageToggle = () => {
-    Alert.alert(
-      t('Dashboard.profile.selectLanguage'),
-      '',
-      [
-        {
-          text: 'English',
-          onPress: () => i18n.changeLanguage('en'),
-        },
-        {
-          text: 'Tiếng Việt',
-          onPress: () => i18n.changeLanguage('vi'),
-        },
-        {
-          text: t('Dashboard.profile.cancel'),
-          style: 'cancel',
-        },
-      ],
-      { cancelable: true },
-    );
+    setIsLangModalVisible(true);
   };
 
   return (
@@ -125,6 +124,60 @@ export default function ProfileScreen() {
           {t('Dashboard.profile.version')}
         </Text>
       </View>
+
+      <ConfirmModal
+        visible={isLogoutModalVisible}
+        onClose={() => setIsLogoutModalVisible(false)}
+        onConfirm={confirmLogout}
+        title={t('Dashboard.profile.signOut')}
+        description={t(
+          'Dashboard.profile.signOutConfirmation',
+          'Are you sure you want to sign out?',
+        )}
+        confirmText={t('Dashboard.profile.signOut')}
+        cancelText={t('Dashboard.profile.cancel')}
+        isDestructive={true}
+      />
+      <ConfirmModal
+        visible={isLangModalVisible}
+        onClose={() => setIsLangModalVisible(false)}
+        title={t('Dashboard.profile.selectLanguage')}
+        icon={Globe}
+        customActions={
+          <View className="flex-col gap-3 w-full">
+            <TouchableOpacity
+              onPress={() => {
+                i18n.changeLanguage('vi');
+                setIsLangModalVisible(false);
+              }}
+              className="w-full py-3.5 px-5 rounded-xl bg-orange-50 items-center justify-center border border-orange-200"
+            >
+              <Text className="text-orange-600 font-bold text-base">
+                Tiếng Việt
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => {
+                i18n.changeLanguage('en');
+                setIsLangModalVisible(false);
+              }}
+              className="w-full py-3.5 px-5 rounded-xl bg-blue-50 items-center justify-center border border-blue-200"
+            >
+              <Text className="text-blue-600 font-bold text-base">English</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => setIsLangModalVisible(false)}
+              className="w-full py-3.5 px-5 mt-2 rounded-xl bg-white border border-border items-center justify-center"
+            >
+              <Text className="text-muted font-bold text-base">
+                {t('Dashboard.profile.cancel')}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        }
+      />
     </ScrollView>
   );
 }

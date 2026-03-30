@@ -29,6 +29,7 @@ const navItems: NavItem[] = [
     ],
   },
   { key: 'contracts', href: '/dashboard/contracts', icon: 'document' },
+  { key: 'meters', href: '/dashboard/meters', icon: 'activity' },
   { key: 'services', href: '/dashboard/services', icon: 'server' },
 ];
 
@@ -74,6 +75,22 @@ function NavIcon({ type }: { type: string }) {
             strokeLinejoin="round"
             strokeWidth={2}
             d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v4a2 2 0 00-2-2"
+          />
+        </svg>
+      );
+    case 'activity':
+      return (
+        <svg
+          className="h-5 w-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M13 10V3L4 14h7v7l9-11h-7z"
           />
         </svg>
       );

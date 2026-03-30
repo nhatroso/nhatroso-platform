@@ -6,7 +6,6 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
-  Alert,
   Image,
 } from 'react-native';
 import { useRouter, Stack } from 'expo-router';
@@ -16,6 +15,7 @@ import { Zap, Droplets, Camera, CheckCircle2, X } from '@/src/lib/icons';
 import { meterService } from '@/src/api/meter';
 import { roomService } from '@/src/api/room';
 import { useTranslation } from 'react-i18next';
+import { ConfirmModal } from '@/src/components/ui/ConfirmModal';
 
 export default function MeterSubmissionScreen() {
   const { t } = useTranslation();
@@ -28,7 +28,29 @@ export default function MeterSubmissionScreen() {
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isCreatingMeter, setIsCreatingMeter] = useState(false);
+  const [isSubmitModalVisible, setIsSubmitModalVisible] = useState(false);
+  const [alertState, setAlertState] = useState<{
+    visible: boolean;
+    title: string;
+    message: string;
+    type: 'success' | 'error' | 'warning';
+    onConfirm?: () => void;
+  }>({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'error',
+  });
   const [submittedServices, setSubmittedServices] = useState<string[]>([]);
+
+  const showAlert = (
+    title: string,
+    message: string,
+    type: 'success' | 'error' | 'warning' = 'error',
+    onConfirm?: () => void,
+  ) => {
+    setAlertState({ visible: true, title, message, type, onConfirm });
+  };
 
   const { data: meters, isLoading: isLoadingMeters } = useQuery({
     queryKey: ['my-meters'],
@@ -45,10 +67,7 @@ export default function MeterSubmissionScreen() {
     return room?.services
       ? room.services.filter((s: any) => {
           const name = s.name?.toLowerCase() || '';
-          const isElec =
-            name.includes('điện') ||
-            name.includes('elec') ||
-            name.includes('electricity');
+          const isElec = name.includes('điện') || name.includes('electricity');
           const isWater = name.includes('nước') || name.includes('water');
           return isElec || isWater;
         })
@@ -74,9 +93,10 @@ export default function MeterSubmissionScreen() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['my-meters'] });
-      Alert.alert(
+      showAlert(
         t('Services.submission.success'),
         t('Services.submission.successMessage'),
+        'success',
       );
       setSubmittedServices((prev) => [...prev, selectedServiceId!]);
       setReading('');
@@ -96,7 +116,7 @@ export default function MeterSubmissionScreen() {
       }
     },
     onError: (error) => {
-      Alert.alert(
+      showAlert(
         t('Services.submission.errorTitle'),
         t('Services.submission.errorMessage'),
       );
@@ -119,7 +139,7 @@ export default function MeterSubmissionScreen() {
   const takePhoto = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert(
+      showAlert(
         t('Services.submission.permissionDenied'),
         t('Services.submission.cameraPermissionRequired'),
       );
@@ -155,7 +175,7 @@ export default function MeterSubmissionScreen() {
 
   const handleSubmit = async () => {
     if (!selectedServiceId || !reading) {
-      Alert.alert(
+      showAlert(
         t('Services.submission.errorTitle'),
         t('Services.submission.validationReading'),
       );
@@ -164,12 +184,21 @@ export default function MeterSubmissionScreen() {
 
     const val = parseFloat(reading);
     if (isNaN(val)) {
-      Alert.alert(
+      showAlert(
         t('Services.submission.errorTitle'),
         t('Services.submission.validationNumber'),
       );
       return;
     }
+    setIsSubmitModalVisible(true);
+  };
+
+  const confirmSubmit = async () => {
+    setIsSubmitModalVisible(false);
+
+    if (!selectedServiceId) return;
+
+    const val = parseFloat(reading);
 
     let finalImageUrl = null;
     if (imageUri) {
@@ -177,7 +206,7 @@ export default function MeterSubmissionScreen() {
         setIsUploading(true);
         finalImageUrl = await meterService.uploadImage(imageUri);
       } catch {
-        Alert.alert(
+        showAlert(
           t('Services.submission.uploadFailed'),
           t('Services.submission.uploadFailedMessage'),
         );
@@ -201,7 +230,7 @@ export default function MeterSubmissionScreen() {
         submitMeterId = newMeter.id;
       } catch {
         setIsCreatingMeter(false);
-        Alert.alert(
+        showAlert(
           t('Services.submission.errorTitle'),
           t('Services.submission.createMeterError'),
         );
@@ -294,7 +323,7 @@ export default function MeterSubmissionScreen() {
           {requiredServices.map((service: any) => {
             const name = service.name?.toLowerCase() || '';
             const isElectricity =
-              name.includes('điện') || name.includes('elec');
+              name.includes('điện') || name.includes('electricity');
             const bgClass =
               selectedServiceId === service.service_id
                 ? 'bg-primary'
@@ -383,7 +412,10 @@ export default function MeterSubmissionScreen() {
                   className="flex-1 text-4xl font-extrabold text-text mt-2"
                 />
                 <Text className="text-xl font-bold text-muted ml-2 pb-2">
-                  {selectedService?.unit || 'kWh/m³'}
+                  {t(
+                    `Services.Unit_${selectedService?.unit || ''}`,
+                    selectedService?.unit || 'kWh/m³',
+                  )}
                 </Text>
               </View>
 
@@ -484,7 +516,10 @@ export default function MeterSubmissionScreen() {
                     ? selectedMeter.latest_reading ||
                       selectedMeter.initial_reading
                     : '0'}{' '}
-                  {selectedService?.unit || ''}
+                  {t(
+                    `Services.Unit_${selectedService?.unit || ''}`,
+                    selectedService?.unit || '',
+                  )}
                 </Text>
               </View>
 
@@ -502,6 +537,36 @@ export default function MeterSubmissionScreen() {
           </View>
         </View>
       </View>
+
+      <ConfirmModal
+        visible={isSubmitModalVisible}
+        onClose={() => setIsSubmitModalVisible(false)}
+        onConfirm={confirmSubmit}
+        title={t('Services.submission.confirmTitle', 'Xác nhận nộp chỉ số')}
+        description={t(
+          'Services.submission.confirmMessage',
+          `Bạn có chắc chắn muốn nộp chỉ số ${reading} ${t(
+            `Services.Unit_${selectedService?.unit || ''}`,
+            selectedService?.unit || '',
+          )} không?`,
+        )}
+        confirmText={t('Services.submission.submit', 'Nộp')}
+        cancelText={t('Services.submission.cancel', 'Hủy')}
+        isDestructive={false}
+      />
+
+      <ConfirmModal
+        visible={alertState.visible}
+        onClose={() => {
+          setAlertState((prev) => ({ ...prev, visible: false }));
+          if (alertState.onConfirm) alertState.onConfirm();
+        }}
+        title={alertState.title}
+        description={alertState.message}
+        confirmText={t('Services.submission.ok', 'OK')}
+        hideCancel
+        isDestructive={alertState.type === 'error'}
+      />
     </ScrollView>
   );
 }

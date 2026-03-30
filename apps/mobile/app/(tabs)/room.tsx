@@ -104,7 +104,9 @@ export default function RoomScreen() {
                   {service.name}
                 </Text>
                 <Text className="text-xs text-muted/60">
-                  {t('Dashboard.room.perUnit', { unit: service.unit })}
+                  {t('Dashboard.room.perUnit', {
+                    unit: t(`Services.Unit_${service.unit}`, service.unit),
+                  })}
                 </Text>
               </View>
               <Text className="font-bold text-text text-base">

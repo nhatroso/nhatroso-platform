@@ -48,7 +48,7 @@ export default function DashboardScreen() {
   const requiredServices = room?.services
     ? room.services.filter((s: any) => {
         const name = s.name?.toLowerCase() || '';
-        const isElec = name.includes('điện') || name.includes('elec');
+        const isElec = name.includes('điện') || name.includes('electricity');
         const isWater = name.includes('nước') || name.includes('water');
         return isElec || isWater;
       })
@@ -82,7 +82,7 @@ export default function DashboardScreen() {
       </View>
 
       {/* Pending Request Alert */}
-      {activeRequest && !isRequestCompleted && (
+      {activeRequest && requiredServices.length > 0 && !isRequestCompleted && (
         <TouchableOpacity
           onPress={() => router.push('/meter-submission')}
           className="mb-8 bg-primary/10 border border-primary/20 p-5 rounded-3xl flex-row items-center"
@@ -161,8 +161,8 @@ export default function DashboardScreen() {
             {Array.isArray(meters) &&
               meters.map((m) => {
                 const isElectricity =
-                  m.service_id.includes('elec') ||
-                  m.serial_number?.toLowerCase().includes('e');
+                  m.service_name?.toLowerCase().includes('electricity') ||
+                  m.service_name?.toLowerCase().includes('điện');
                 const isSubmittedThisMonth = m.latest_reading_date
                   ? new Date(m.latest_reading_date).getMonth() ===
                       new Date().getMonth() &&
@@ -183,8 +183,10 @@ export default function DashboardScreen() {
                             (isElectricity
                               ? t('Dashboard.tenant.electricity')
                               : t('Dashboard.tenant.water')),
-                          unit:
+                          unit: t(
+                            `Services.Unit_${m.service_unit || (isElectricity ? 'kWh' : 'm³')}`,
                             m.service_unit || (isElectricity ? 'kWh' : 'm³'),
+                          ),
                         },
                       })
                     }
@@ -231,7 +233,10 @@ export default function DashboardScreen() {
                             {m.latest_reading || m.initial_reading}
                           </Text>
                           <Text className="text-muted text-xs font-medium ml-1 mb-0.5">
-                            {m.service_unit || (isElectricity ? 'kWh' : 'm³')}
+                            {t(
+                              `Services.Unit_${m.service_unit || (isElectricity ? 'kWh' : 'm³')}`,
+                              m.service_unit || (isElectricity ? 'kWh' : 'm³'),
+                            )}
                           </Text>
                         </View>
                       </View>

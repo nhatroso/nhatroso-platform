@@ -105,11 +105,14 @@ impl Model {
                 updated.id
             }
             None => {
+                let password_hash = loco_rs::hash::hash_password("password123")
+                    .map_err(|e| sea_orm::DbErr::Custom(e.to_string()))?;
+
                 let new_user = UserActiveModel {
                     id: ActiveValue::Set(Uuid::new_v4()),
                     phone: ActiveValue::Set(params.tenant_phone.clone()),
                     name: ActiveValue::Set(params.tenant_name.clone()),
-                    password_hash: ActiveValue::Set("$argon2id$v=19$m=19456,t=2,p=1$B2yQ1lI8R+4$lM7gP5s2B8W/t1Q/B5T9pP3v2Z8R+4$lM7gP5s2B8W".to_string()),
+                    password_hash: ActiveValue::Set(password_hash),
                     role: ActiveValue::Set("TENANT".to_string()),
                     status: ActiveValue::Set("ACTIVE".to_string()),
                     id_card: ActiveValue::Set(Some(params.tenant_id_card.clone())),

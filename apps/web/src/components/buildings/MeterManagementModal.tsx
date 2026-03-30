@@ -2,12 +2,12 @@ import * as React from 'react';
 import { useTranslations } from 'next-intl';
 import { Room, Meter, MeterReading } from '@nhatroso/shared';
 import { metersApi } from '@/services/api/meters';
+import { getServiceDisplayName } from '@/lib/utils';
 import {
   Activity,
   Calendar,
   Camera,
   History,
-  Plus,
   Zap,
   Droplets,
   ChevronRight,
@@ -136,17 +136,16 @@ export function MeterManagementModal({
                       : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
                   }`}
                 >
-                  {m.service_id.includes('electric') ? (
+                  {m.service_name?.toLowerCase().includes('điện') ||
+                  m.service_name?.toLowerCase().includes('electricity') ||
+                  m.service_id.includes('electric') ? (
                     <Zap size={18} />
                   ) : (
                     <Droplets size={18} />
                   )}
                   <div className="overflow-hidden">
                     <p className="truncate text-sm font-semibold">
-                      {tServices(`Predefined_${m.service_id}`)}
-                    </p>
-                    <p className="text-[10px] opacity-70">
-                      {m.serial_number || t('NoSerial')}
+                      {getServiceDisplayName(m.service_name || '', tServices)}
                     </p>
                   </div>
                 </button>
@@ -172,13 +171,13 @@ export function MeterManagementModal({
                   <h3 className="text-sm font-bold text-gray-900 dark:text-white">
                     {t('UsageHistory')}
                   </h3>
-                  <button
+                  {/* <button
                     onClick={() => setIsRecording(true)}
                     className="flex items-center gap-1.5 rounded-lg bg-teal-600 px-3 py-1.5 text-xs font-semibold text-white transition-all hover:bg-teal-700 active:scale-95 shadow-sm"
                   >
                     <Plus size={14} />
                     {t('NewReading')}
-                  </button>
+                  </button> */}
                 </div>
 
                 {/* Form to record */}

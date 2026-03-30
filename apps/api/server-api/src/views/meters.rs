@@ -95,3 +95,27 @@ impl From<meter_readings::Model> for MeterReadingResponse {
         }
     }
 }
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct LandlordMeterSummary {
+    pub total_meters: u64,
+    pub pending_readings: u64,
+    pub overdue_readings: u64,
+    pub submission_rate: f32, // Percentage
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct LandlordMeterDetail {
+    pub id: Uuid,
+    pub room_id: Uuid,
+    pub room_code: String,
+    pub building_id: Uuid,
+    pub building_name: String,
+    pub service_name: String,
+    pub service_unit: String,
+    pub serial_number: Option<String>,
+    pub status: String, // SUBMITTED, PENDING, OVERDUE
+    pub last_reading: Option<Decimal>,
+    pub last_reading_date: Option<DateTime<Utc>>,
+}
+

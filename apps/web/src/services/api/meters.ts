@@ -3,6 +3,8 @@ import {
   MeterReading,
   CreateMeterInput,
   RecordReadingInput,
+  LandlordMeterSummary,
+  LandlordMeterDetail,
 } from '@nhatroso/shared';
 import { apiFetch, API_BASE_URL } from './base';
 
@@ -39,6 +41,23 @@ export const metersApi = {
       body: JSON.stringify(data),
     });
     if (!res.ok) throw new Error('Failed to record reading');
+    return res.json();
+  },
+
+  getLandlordSummary: async (): Promise<LandlordMeterSummary> => {
+    const res = await apiFetch(`${API_BASE_URL}/meters/landlord/summary`);
+    if (!res.ok) throw new Error('Failed to fetch landlord summary');
+    return res.json();
+  },
+
+  listLandlordMeters: async (
+    buildingId?: string,
+  ): Promise<LandlordMeterDetail[]> => {
+    const url = buildingId
+      ? `${API_BASE_URL}/meters/landlord/list?building_id=${buildingId}`
+      : `${API_BASE_URL}/meters/landlord/list`;
+    const res = await apiFetch(url);
+    if (!res.ok) throw new Error('Failed to list landlord meters');
     return res.json();
   },
 };

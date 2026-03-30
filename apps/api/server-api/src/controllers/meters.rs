@@ -1,6 +1,7 @@
 use loco_rs::prelude::*;
 use loco_rs::controller::extractor::auth::JWT;
-use axum::{Json, http::StatusCode};
+use axum::{Json, http::StatusCode, extract::Query};
+use serde::Deserialize;
 use uuid::Uuid;
 
 use crate::{
@@ -66,11 +67,37 @@ pub async fn list_readings(
     format::json(readings)
 }
 
+#[derive(Debug, Deserialize)]
+pub struct LandlordListParams {
+    pub building_id: Option<Uuid>,
+}
+
+pub async fn get_landlord_summary(
+    auth: JWT,
+    State(ctx): State<AppContext>,
+) -> Result<Response> {
+    let landlord_id = auth::get_user_id(&auth)?;
+    let summary = Meter::get_landlord_summary(&ctx.db, landlord_id).await?;
+    format::json(summary)
+}
+
+pub async fn list_landlord_meters(
+    auth: JWT,
+    State(ctx): State<AppContext>,
+    Query(params): Query<LandlordListParams>,
+) -> Result<Response> {
+    let landlord_id = auth::get_user_id(&auth)?;
+    let meters = Meter::list_landlord_meters(&ctx.db, landlord_id, params.building_id).await?;
+    format::json(meters)
+}
+
 pub fn routes() -> Routes {
     Routes::new()
         .prefix("api/v1/meters")
         .add("/", post(create))
         .add("/my-meters", get(get_my_meters))
+        .add("/landlord/summary", get(get_landlord_summary))
+        .add("/landlord/list", get(list_landlord_meters))
         .add("/room/{room_id}", get(list_by_room))
         .add("/{id}/readings", post(record_reading))
         .add("/{id}/readings", get(list_readings))

@@ -40,3 +40,24 @@ export interface RecordReadingParams {
 }
 
 export type RecordReadingInput = RecordReadingParams;
+
+export interface LandlordMeterSummary {
+  total_meters: number;
+  pending_readings: number;
+  overdue_readings: number;
+  submission_rate: number;
+}
+
+export interface LandlordMeterDetail {
+  id: string;
+  room_id: string;
+  room_code: string;
+  building_id: string;
+  building_name: string;
+  service_name: string;
+  service_unit: string;
+  serial_number: string | null;
+  status: 'SUBMITTED' | 'PENDING' | 'OVERDUE';
+  last_reading: string | null;
+  last_reading_date: string | null;
+}
