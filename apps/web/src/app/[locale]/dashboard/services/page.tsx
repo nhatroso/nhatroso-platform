@@ -2,37 +2,10 @@
 
 import * as React from 'react';
 import { useTranslations } from 'next-intl';
-import {
-  Service,
-  PriceRule,
-  PREDEFINED_SERVICES,
-  PREDEFINED_SERVICE_IDS,
-  PREDEFINED_UNIT_IDS,
-} from '@nhatroso/shared';
+import { Service, PriceRule, PREDEFINED_SERVICES } from '@nhatroso/shared';
 import { servicesApi } from '@/services/api/services';
 import { priceRulesApi } from '@/services/api/price-rules';
-
-function getServiceDisplayName(name: string, t: (key: string) => string) {
-  if (name.startsWith('service_')) {
-    const key = name.replace('service_', '');
-    return t(`Predefined_${key}`);
-  }
-  if (PREDEFINED_SERVICE_IDS.includes(name)) {
-    return t(`Predefined_${name}`);
-  }
-  return name;
-}
-
-function getUnitDisplayName(unit: string, t: (key: string) => string) {
-  if (unit.startsWith('unit_')) {
-    const key = unit.replace('unit_', '');
-    return t(`Unit_${key}`);
-  }
-  if (PREDEFINED_UNIT_IDS.includes(unit)) {
-    return t(`Unit_${unit}`);
-  }
-  return unit;
-}
+import { getServiceDisplayName, getUnitDisplayName } from '@/lib/utils';
 
 export default function ServicesPage() {
   const t = useTranslations('Services');
@@ -485,7 +458,7 @@ export default function ServicesPage() {
                         {t('NameLabel')}
                       </label>
                       <div className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white opacity-70">
-                        {selectedService?.name}
+                        {getServiceDisplayName(selectedService?.name || '', t)}
                       </div>
                     </div>
 
@@ -494,7 +467,7 @@ export default function ServicesPage() {
                         {t('PricingUnit')}
                       </label>
                       <div className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white opacity-70">
-                        {selectedService?.unit}
+                        {getUnitDisplayName(selectedService?.unit || '', t)}
                       </div>
                     </div>
                   </div>

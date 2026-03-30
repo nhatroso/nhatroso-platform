@@ -5,5 +5,55 @@
   "activeTenants": "Người thuê hiện tại",
   "monthlyRevenue": "Doanh thu tháng",
   "pendingBills": "Hóa đơn chờ",
-  "occupancyRate": "Tỉ lệ lấp đầy"
+  "occupancyRate": "Tỉ lệ lấp đầy",
+  "tenant": {
+    "welcome": "Xin chào, {{name}}",
+    "todayOverview": "Đây là tổng quan hôm nay của bạn",
+    "rentBalance": "Dư nợ tiền thuê",
+    "dueDate": "Hạn thanh toán",
+    "metersStatus": "Trạng thái đồng hồ",
+    "quickActions": "Tiện ích nhanh",
+    "reportMeterReading": "Nộp chỉ số đồng hồ",
+    "contactLandlord": "Liên hệ chủ nhà",
+    "pendingReadingRequest": "Yêu cầu nộp chỉ số",
+    "landlordRequestedReadings": "Chủ nhà đã yêu cầu nộp chỉ số cho tháng {{month}}/{{year}}",
+    "readingCompleted": "Đã hoàn thành nộp chỉ số",
+    "readingCompletedMessage": "Cảm ơn bạn đã nộp chỉ số cho tháng {{month}}/{{year}}",
+    "submitted": "Đã nộp",
+    "notSubmitted": "Chưa nộp",
+    "latestReading": "Chỉ số cuối",
+    "recordedAt": "Ghi nhận lúc",
+    "electricity": "Điện",
+    "water": "Nước",
+    "pendingUpdate": "Chưa cập nhật"
+  },
+  "profile": {
+    "guest": "Khách",
+    "phonePrefix": "SĐT: ",
+    "editProfile": "Chỉnh sửa hồ sơ",
+    "accountSettings": "Cài đặt tài khoản",
+    "helpSupport": "Trợ giúp & Hỗ trợ",
+    "signOut": "Đăng xuất",
+    "version": "Phiên bản 1.0.0",
+    "language": "Ngôn ngữ",
+    "selectLanguage": "Chọn ngôn ngữ",
+    "cancel": "Hủy"
+  },
+  "room": {
+    "noInfoTitle": "Chưa có thông tin phòng",
+    "noInfoDesc": "Hệ thống hiện chưa tìm thấy hợp đồng thuê phòng nào đang hoạt động cho tài khoản của bạn.",
+    "roomNumber": "Phòng {{code}}",
+    "address": "Địa chỉ",
+    "floor": "Tầng",
+    "groundFloor": "Tầng trệt",
+    "monthlyCosts": "Chi phí hàng tháng",
+    "roomRent": "Tiền thuê phòng",
+    "currency": "đ",
+    "perUnit": "Mỗi {{unit}}"
+  },
+  "tabs": {
+    "dashboard": "Tổng quan",
+    "room": "Phòng của tôi",
+    "profile": "Cá nhân"
+  }
 }

@@ -11,6 +11,11 @@ import {
   updateBuilding,
   archiveBuilding,
 } from '@/services/api/buildings';
+import {
+  getReadingRequestsByBuilding,
+  ReadingRequest,
+} from '@/services/api/reading-requests';
+import { ReadingRequestModal } from './ReadingRequestModal';
 
 interface BuildingDetailPanelProps {
   building: Building | null;
@@ -32,11 +37,19 @@ export function BuildingDetailPanel({
   const [address, setAddress] = React.useState(building?.address || '');
   const [error, setError] = React.useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [isRequestModalOpen, setIsRequestModalOpen] = React.useState(false);
+  const [requests, setRequests] = React.useState<ReadingRequest[]>([]);
 
   React.useEffect(() => {
     setName(building?.name || '');
     setAddress(building?.address || '');
     setError(null);
+
+    if (building) {
+      getReadingRequestsByBuilding(building.id)
+        .then(setRequests)
+        .catch(console.error);
+    }
   }, [building, isCreating]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -135,6 +148,18 @@ export function BuildingDetailPanel({
           </svg>
         </button>
       </div>
+
+      {/* Reading Request Modal */}
+      {!isCreating && building && (
+        <ReadingRequestModal
+          building={building}
+          isOpen={isRequestModalOpen}
+          onClose={() => setIsRequestModalOpen(false)}
+          onSuccess={() => {
+            // Optional: refresh data or show success message
+          }}
+        />
+      )}
 
       {/* Tabs */}
       {!isCreating && building && (
@@ -242,6 +267,58 @@ export function BuildingDetailPanel({
               </div>
             </div>
 
+            {/* Reading Requests List */}
+            {!isCreating && building && requests.length > 0 && (
+              <div className="mt-8 border-t border-gray-200 pt-6 dark:border-gray-700">
+                <h4 className="text-sm font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-4">
+                  {t('RecentRequests')}
+                </h4>
+                <div className="space-y-3">
+                  {requests.slice(0, 5).map((req) => (
+                    <div
+                      key={req.id}
+                      className="flex items-center justify-between p-3 rounded-lg border border-gray-100 bg-gray-50 dark:bg-gray-700/50 dark:border-gray-600"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                            />
+                          </svg>
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                            Tháng {req.month}/{req.year}
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            {new Date(req.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                      <span
+                        className={`px-2 py-1 text-xs font-medium rounded-full ${
+                          req.status === 'OPEN'
+                            ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
+                            : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                        }`}
+                      >
+                        {req.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="mt-8 flex items-center justify-end gap-x-4 border-t border-gray-200 pt-6 dark:border-gray-700">
               {!isCreating && building?.status === 'ACTIVE' && (
                 <button
@@ -265,6 +342,29 @@ export function BuildingDetailPanel({
                     ? t('Creating')
                     : t('Update')}
               </button>
+
+              {!isCreating && building?.status === 'ACTIVE' && (
+                <button
+                  type="button"
+                  onClick={() => setIsRequestModalOpen(true)}
+                  className="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center text-white bg-green-600 rounded-lg hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 dark:bg-green-500 dark:hover:bg-green-600 dark:focus:ring-green-800"
+                >
+                  <svg
+                    className="w-4 h-4 me-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+                    />
+                  </svg>
+                  {t('RequestReading')}
+                </button>
+              )}
             </div>
           </form>
         </div>

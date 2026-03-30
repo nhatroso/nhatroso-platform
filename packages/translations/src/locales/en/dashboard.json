@@ -5,5 +5,55 @@
   "activeTenants": "Active Tenants",
   "monthlyRevenue": "Monthly Revenue",
   "pendingBills": "Pending Bills",
-  "occupancyRate": "Occupancy Rate"
+  "occupancyRate": "Occupancy Rate",
+  "tenant": {
+    "welcome": "Welcome, {{name}}",
+    "todayOverview": "Here's what's happening today",
+    "rentBalance": "Rent Balance",
+    "dueDate": "Due Date",
+    "metersStatus": "Meters Status",
+    "quickActions": "Quick Actions",
+    "reportMeterReading": "Report Meter Reading",
+    "contactLandlord": "Contact Landlord",
+    "pendingReadingRequest": "Pending Reading Request",
+    "landlordRequestedReadings": "Landlord requested readings for {{month}}/{{year}}",
+    "readingCompleted": "Reading Submitted",
+    "readingCompletedMessage": "Thank you for submitting readings for {{month}}/{{year}}",
+    "submitted": "Submitted",
+    "notSubmitted": "Not submitted",
+    "latestReading": "Latest reading",
+    "recordedAt": "Recorded at",
+    "electricity": "Electricity",
+    "water": "Water",
+    "pendingUpdate": "Not updated"
+  },
+  "profile": {
+    "guest": "Guest",
+    "phonePrefix": "Phone: ",
+    "editProfile": "Edit Profile",
+    "accountSettings": "Account Settings",
+    "helpSupport": "Help & Support",
+    "signOut": "Sign Out",
+    "version": "Version 1.0.0",
+    "language": "Language",
+    "selectLanguage": "Select Language",
+    "cancel": "Cancel"
+  },
+  "room": {
+    "noInfoTitle": "No room information",
+    "noInfoDesc": "The system could not find any active room lease contract for your account.",
+    "roomNumber": "Room {{code}}",
+    "address": "Address",
+    "floor": "Floor",
+    "groundFloor": "Ground floor",
+    "monthlyCosts": "Monthly costs",
+    "roomRent": "Room rent",
+    "currency": "VND",
+    "perUnit": "Per {{unit}}"
+  },
+  "tabs": {
+    "dashboard": "Dashboard",
+    "room": "My Room",
+    "profile": "Profile"
+  }
 }

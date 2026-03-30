@@ -1,42 +1,14 @@
 import * as React from 'react';
 import { useTranslations } from 'next-intl';
-import {
-  Room,
-  Service,
-  PriceRule,
-  RoomService,
-  PREDEFINED_SERVICE_IDS,
-  PREDEFINED_UNIT_IDS,
-} from '@nhatroso/shared';
+import { Room, Service, PriceRule, RoomService } from '@nhatroso/shared';
 import { servicesApi } from '@/services/api/services';
 import { priceRulesApi } from '@/services/api/price-rules';
 import { roomServicesApi } from '@/services/api/room-services';
+import { getServiceDisplayName, getUnitDisplayName } from '@/lib/utils';
 
 interface RoomPricingModalProps {
   room: Room;
   onClose: () => void;
-}
-
-function getServiceDisplayName(name: string, t: (key: string) => string) {
-  if (name.startsWith('service_')) {
-    const key = name.replace('service_', '');
-    return t(`Predefined_${key}`);
-  }
-  if (PREDEFINED_SERVICE_IDS.includes(name)) {
-    return t(`Predefined_${name}`);
-  }
-  return name;
-}
-
-function getUnitDisplayName(unit: string, t: (key: string) => string) {
-  if (unit.startsWith('unit_')) {
-    const key = unit.replace('unit_', '');
-    return t(`Unit_${key}`);
-  }
-  if (PREDEFINED_UNIT_IDS.includes(unit)) {
-    return t(`Unit_${unit}`);
-  }
-  return unit;
 }
 
 export function RoomPricingModal({ room, onClose }: RoomPricingModalProps) {
@@ -116,6 +88,13 @@ export function RoomPricingModal({ room, onClose }: RoomPricingModalProps) {
       setErrorMsg('');
     }
   }, [selectedServiceId, roomServices]);
+
+  // Auto-select first template if active but no template selected
+  React.useEffect(() => {
+    if (stagedIsActive && !stagedPriceRuleId && serviceTemplates.length > 0) {
+      setStagedPriceRuleId(serviceTemplates[0].id);
+    }
+  }, [stagedIsActive, stagedPriceRuleId, serviceTemplates]);
 
   const handleSave = async () => {
     if (!selectedServiceId) return;

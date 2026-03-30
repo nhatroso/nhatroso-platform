@@ -9,5 +9,6 @@
   "UNKNOWN_ERROR": "Đã có lỗi không xác định xảy ra",
   "BUILDING_HAS_ACTIVE_ROOMS": "Không thể lưu trữ tòa nhà: Vẫn còn phòng đang được thuê hoặc đặt cọc",
   "BUILDING_UPDATE_ARCHIVED": "Không thể cập nhật tòa nhà đã lưu trữ.",
-  "ROOM_CODE_EXISTS": "Mã phòng đã tồn tại trong tòa nhà này."
+  "ROOM_CODE_EXISTS": "Mã phòng đã tồn tại trong tòa nhà này.",
+  "READING_REQUEST_ALREADY_EXISTS": "Yêu cầu chốt số cho tháng và năm này đã tồn tại."
 }

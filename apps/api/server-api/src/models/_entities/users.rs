@@ -33,6 +33,8 @@ pub enum Relation {
     Contracts,
     #[sea_orm(has_many = "super::price_rules::Entity")]
     PriceRules,
+    #[sea_orm(has_many = "super::reading_requests::Entity")]
+    ReadingRequests,
     #[sea_orm(has_many = "super::refresh_tokens::Entity")]
     RefreshTokens,
     #[sea_orm(has_many = "super::services::Entity")]
@@ -54,6 +56,12 @@ impl Related<super::contract_tenants::Entity> for Entity {
 impl Related<super::price_rules::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::PriceRules.def()
+    }
+}
+
+impl Related<super::reading_requests::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::ReadingRequests.def()
     }
 }
 

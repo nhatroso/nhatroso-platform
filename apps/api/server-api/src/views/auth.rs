@@ -25,4 +25,6 @@ pub struct AuthResponse {
     pub token: String,
     pub refresh_token: String,
     pub id: Uuid,
+    pub name: String,
+    pub phone: String,
 }

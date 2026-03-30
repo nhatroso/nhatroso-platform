@@ -98,9 +98,8 @@ export default function ContractsPage() {
                       {new Date(contract.created_at).toLocaleDateString(
                         'vi-VN',
                       )}
-                      - {new Date(contract.end_date).toLocaleDateString(
-                        'vi-VN',
-                      )}
+                      -{' '}
+                      {new Date(contract.end_date).toLocaleDateString('vi-VN')}
                     </span>
                   </div>
                   <h3 className="text-base font-semibold text-gray-900 dark:text-white line-clamp-1">
