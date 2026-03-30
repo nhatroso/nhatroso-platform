@@ -37,6 +37,7 @@ export default function MeterManagementPage() {
   const [statusFilter, setStatusFilter] = useState<
     'ALL' | 'PENDING' | 'SUBMITTED' | 'OVERDUE'
   >('ALL');
+  const [serviceFilter, setServiceFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
@@ -65,11 +66,15 @@ export default function MeterManagementPage() {
 
   const filteredMeters = meters.filter((m) => {
     const matchesStatus = statusFilter === 'ALL' || m.status === statusFilter;
+    const matchesService =
+      serviceFilter === 'all' || m.service_name === serviceFilter;
     const matchesSearch =
       m.room_code.toLowerCase().includes(searchQuery.toLowerCase()) ||
       m.serial_number?.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesStatus && matchesSearch;
+    return matchesStatus && matchesService && matchesSearch;
   });
+
+  const serviceOptions = Array.from(new Set(meters.map((m) => m.service_name)));
 
   if (loading && !summary) {
     return (
@@ -158,6 +163,18 @@ export default function MeterManagementPage() {
             <option value="PENDING">{t('Status_PENDING')}</option>
             <option value="SUBMITTED">{t('Status_SUBMITTED')}</option>
             <option value="OVERDUE">{t('Status_OVERDUE')}</option>
+          </select>
+          <select
+            value={serviceFilter}
+            onChange={(e) => setServiceFilter(e.target.value)}
+            className="rounded-xl border-gray-200 bg-gray-50 text-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+          >
+            <option value="all">{t('AllServices')}</option>
+            {serviceOptions.map((svc) => (
+              <option key={svc} value={svc}>
+                {getServiceDisplayName(svc, tServices)}
+              </option>
+            ))}
           </select>
         </div>
       </div>

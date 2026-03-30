@@ -29,8 +29,10 @@ impl ActiveModelBehavior for ActiveModel {
 
 // implement your read-oriented logic here
 impl Model {
-    pub async fn list_contracts(db: &DatabaseConnection) -> Result<Vec<ContractResponse>> {
-        let contracts = Contracts::find().all(db).await?;
+    pub async fn list_contracts(db: &DatabaseConnection, landlord_id: Uuid) -> Result<Vec<ContractResponse>> {
+        let contracts = Contracts::find()
+            .filter(crate::models::_entities::contracts::Column::UserId.eq(landlord_id))
+            .all(db).await?;
         let mut results = Vec::new();
         for contract in contracts {
             let owner = Users::find_by_id(contract.user_id).one(db).await?;
@@ -51,8 +53,10 @@ impl Model {
         Ok(results)
     }
 
-    pub async fn get_contract_by_id(db: &DatabaseConnection, id: Uuid) -> Result<std::result::Result<ContractResponse, (StatusCode, &'static str)>> {
-        let contract = Contracts::find_by_id(id).one(db).await?;
+    pub async fn get_contract_by_id(db: &DatabaseConnection, landlord_id: Uuid, id: Uuid) -> Result<std::result::Result<ContractResponse, (StatusCode, &'static str)>> {
+        let contract = Contracts::find_by_id(id)
+            .filter(crate::models::_entities::contracts::Column::UserId.eq(landlord_id))
+            .one(db).await?;
         let Some(contract) = contract else {
             return Ok(Err((StatusCode::NOT_FOUND, "NOT_FOUND")));
         };
