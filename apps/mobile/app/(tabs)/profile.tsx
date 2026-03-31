@@ -15,29 +15,21 @@ import {
   HelpCircle,
   Globe,
 } from '@/src/lib/icons';
-import { useAuth } from '@/src/context/AuthContext';
 import { useTranslation } from 'react-i18next';
+import { useProfileScreen } from '@/src/hooks/useProfileScreen';
 
 export default function ProfileScreen() {
-  const { logout, user } = useAuth();
   const { t, i18n } = useTranslation();
-
-  const [isLogoutModalVisible, setIsLogoutModalVisible] = React.useState(false);
-
-  const handleLogout = async () => {
-    setIsLogoutModalVisible(true);
-  };
-
-  const confirmLogout = async () => {
-    setIsLogoutModalVisible(false);
-    await logout();
-  };
-
-  const [isLangModalVisible, setIsLangModalVisible] = React.useState(false);
-
-  const handleLanguageToggle = () => {
-    setIsLangModalVisible(true);
-  };
+  const {
+    user,
+    isLogoutModalVisible,
+    setIsLogoutModalVisible,
+    isLangModalVisible,
+    setIsLangModalVisible,
+    handleLogout,
+    confirmLogout,
+    handleLanguageToggle,
+  } = useProfileScreen();
 
   return (
     <ScrollView className="flex-1 bg-background">
@@ -73,7 +65,6 @@ export default function ProfileScreen() {
           <ChevronRight size={20} className="text-icon" />
         </Pressable>
 
-        {/* Language Toggler */}
         <Pressable
           className="flex-row items-center justify-between rounded-2xl bg-background p-5 shadow-sm border border-border active:bg-input"
           onPress={handleLanguageToggle}
@@ -156,7 +147,6 @@ export default function ProfileScreen() {
                 Tiếng Việt
               </Text>
             </TouchableOpacity>
-
             <TouchableOpacity
               onPress={() => {
                 i18n.changeLanguage('en');
@@ -166,7 +156,6 @@ export default function ProfileScreen() {
             >
               <Text className="text-blue-600 font-bold text-base">English</Text>
             </TouchableOpacity>
-
             <TouchableOpacity
               onPress={() => setIsLangModalVisible(false)}
               className="w-full py-3.5 px-5 mt-2 rounded-xl bg-white border border-border items-center justify-center"

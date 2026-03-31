@@ -6,69 +6,28 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useQuery } from '@tanstack/react-query';
 import {
   CreditCard,
   AlertCircle,
   MessageSquare,
   ChevronRight,
-  Zap,
-  Droplets,
   CheckCircle2,
 } from '@/src/lib/icons';
 import { useAuth } from '@/src/context/AuthContext';
-import { meterService } from '@/src/api/meter';
-import { roomService } from '@/src/api/room';
 import { useTranslation } from 'react-i18next';
+import {
+  useDashboardScreen,
+  useServiceLabel,
+} from '@/src/hooks/useDashboardScreen';
+import { MeterStatusList } from '@/src/features/dashboard/MeterStatusList';
 
 export default function DashboardScreen() {
   const { user } = useAuth();
   const router = useRouter();
   const { t } = useTranslation();
-
-  const { data: meters, isLoading: isLoadingMeters } = useQuery({
-    queryKey: ['my-meters'],
-    queryFn: meterService.getMyMeters,
-  });
-
-  const { data: readingRequests } = useQuery({
-    queryKey: ['my-reading-requests'],
-    queryFn: meterService.getReadingRequests,
-  });
-
-  const { data: room } = useQuery({
-    queryKey: ['my-room'],
-    queryFn: roomService.getMyRoom,
-  });
-
-  const activeRequest = Array.isArray(readingRequests)
-    ? readingRequests.find((r) => r.status === 'OPEN')
-    : null;
-
-  const requiredServices = room?.services
-    ? room.services.filter((s: any) => {
-        const name = s.name?.toLowerCase() || '';
-        const isElec = name.includes('điện') || name.includes('electricity');
-        const isWater = name.includes('nước') || name.includes('water');
-        return isElec || isWater;
-      })
-    : [];
-
-  const completedServicesCount = requiredServices.filter((s: any) => {
-    const sMeter = (meters || []).find(
-      (m: any) => m.service_id === s.service_id,
-    );
-    return sMeter?.latest_reading_date
-      ? new Date(sMeter.latest_reading_date).getMonth() ===
-          (activeRequest?.month || new Date().getMonth() + 1) - 1 &&
-          new Date(sMeter.latest_reading_date).getFullYear() ===
-            (activeRequest?.year || new Date().getFullYear())
-      : false;
-  }).length;
-
-  const isRequestCompleted =
-    requiredServices.length > 0 &&
-    completedServicesCount === requiredServices.length;
+  const getServiceLabel = useServiceLabel();
+  const { meters, isLoadingMeters, activeRequest, isRequestCompleted } =
+    useDashboardScreen();
 
   return (
     <ScrollView className="flex-1 bg-background p-6">
@@ -82,7 +41,7 @@ export default function DashboardScreen() {
       </View>
 
       {/* Pending Request Alert */}
-      {activeRequest && requiredServices.length > 0 && !isRequestCompleted && (
+      {activeRequest && !isRequestCompleted && (
         <TouchableOpacity
           onPress={() => router.push('/meter-submission')}
           className="mb-8 bg-primary/10 border border-primary/20 p-5 rounded-3xl flex-row items-center"
@@ -149,7 +108,7 @@ export default function DashboardScreen() {
         </View>
       </View>
 
-      {/* Meter Status (Preview) */}
+      {/* Meter Status */}
       <View className="mb-8">
         <Text className="text-xl font-bold text-text mb-4">
           {t('Dashboard.tenant.metersStatus')}
@@ -157,114 +116,18 @@ export default function DashboardScreen() {
         {isLoadingMeters ? (
           <ActivityIndicator size="small" color="#3b82f6" />
         ) : (
-          <View className="gap-y-3">
-            {Array.isArray(meters) &&
-              meters.map((m) => {
-                const isElectricity =
-                  m.service_name?.toLowerCase().includes('electricity') ||
-                  m.service_name?.toLowerCase().includes('điện');
-                const isSubmittedThisMonth = m.latest_reading_date
-                  ? new Date(m.latest_reading_date).getMonth() ===
-                      new Date().getMonth() &&
-                    new Date(m.latest_reading_date).getFullYear() ===
-                      new Date().getFullYear()
-                  : false;
-
-                return (
-                  <TouchableOpacity
-                    key={m.id}
-                    onPress={() =>
-                      router.push({
-                        pathname: '/meter-history',
-                        params: {
-                          meterId: m.id,
-                          serviceName:
-                            m.service_name ||
-                            (isElectricity
-                              ? t('Dashboard.tenant.electricity')
-                              : t('Dashboard.tenant.water')),
-                          unit: t(
-                            `Services.Unit_${m.service_unit || (isElectricity ? 'kWh' : 'm³')}`,
-                            m.service_unit || (isElectricity ? 'kWh' : 'm³'),
-                          ),
-                        },
-                      })
-                    }
-                    className="bg-white p-4 rounded-2xl border border-border shadow-sm mb-3 active:bg-input"
-                  >
-                    <View className="flex-row items-center justify-between mb-2">
-                      <View className="flex-row items-center">
-                        <View
-                          className={`h-8 w-8 rounded-full items-center justify-center mr-3 ${isElectricity ? 'bg-warning/10' : 'bg-primary/10'}`}
-                        >
-                          {isElectricity ? (
-                            <Zap size={16} className="text-warning" />
-                          ) : (
-                            <Droplets size={16} className="text-primary" />
-                          )}
-                        </View>
-                        <Text className="text-text font-bold text-sm">
-                          {m.service_name ||
-                            (isElectricity
-                              ? t('Dashboard.tenant.electricity')
-                              : t('Dashboard.tenant.water'))}
-                        </Text>
-                      </View>
-                      <View className="flex-row items-center">
-                        <View
-                          className={`h-2 w-2 rounded-full mr-1.5 ${isSubmittedThisMonth ? 'bg-success' : 'bg-warning'}`}
-                        />
-                        <Text className="text-xs text-muted font-medium mr-1.5">
-                          {isSubmittedThisMonth
-                            ? t('Dashboard.tenant.submitted')
-                            : t('Dashboard.tenant.notSubmitted')}
-                        </Text>
-                        <ChevronRight size={16} className="text-muted/50" />
-                      </View>
-                    </View>
-
-                    <View className="bg-background rounded-xl p-3 flex-row items-center justify-between">
-                      <View>
-                        <Text className="text-muted text-[10px] uppercase font-bold mb-0.5">
-                          {t('Dashboard.tenant.latestReading')}
-                        </Text>
-                        <View className="flex-row items-end">
-                          <Text className="text-text font-bold text-lg leading-none">
-                            {m.latest_reading || m.initial_reading}
-                          </Text>
-                          <Text className="text-muted text-xs font-medium ml-1 mb-0.5">
-                            {t(
-                              `Services.Unit_${m.service_unit || (isElectricity ? 'kWh' : 'm³')}`,
-                              m.service_unit || (isElectricity ? 'kWh' : 'm³'),
-                            )}
-                          </Text>
-                        </View>
-                      </View>
-                      <View className="items-end">
-                        <Text className="text-muted text-[10px] uppercase font-bold mb-0.5">
-                          {t('Dashboard.tenant.recordedAt')}
-                        </Text>
-                        <Text className="text-text font-medium text-xs">
-                          {m.latest_reading_date
-                            ? new Date(
-                                m.latest_reading_date,
-                              ).toLocaleDateString()
-                            : t('Dashboard.tenant.pendingUpdate')}
-                        </Text>
-                      </View>
-                    </View>
-                  </TouchableOpacity>
-                );
-              })}
-          </View>
+          <MeterStatusList
+            meters={meters}
+            isLoadingMeters={isLoadingMeters}
+            getServiceLabel={getServiceLabel}
+          />
         )}
       </View>
 
-      {/* Main Actions */}
+      {/* Quick Actions */}
       <Text className="text-xl font-bold text-text mb-5">
         {t('Dashboard.tenant.quickActions')}
       </Text>
-
       <View className="gap-y-4 mb-8">
         <TouchableOpacity
           onPress={() => router.push('/meter-submission')}
@@ -272,7 +135,7 @@ export default function DashboardScreen() {
         >
           <View className="flex-row items-center">
             <View className="h-10 w-10 bg-success/10 rounded-xl items-center justify-center mr-4">
-              <Zap size={20} className="text-success" />
+              <CheckCircle2 size={20} className="text-success" />
             </View>
             <Text className="text-text font-bold text-base">
               {t('Dashboard.tenant.reportMeterReading')}

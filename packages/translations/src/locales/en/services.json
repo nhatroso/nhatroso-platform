@@ -129,7 +129,12 @@
     "serialNumber": "Serial Number:",
     "submitted": "Submitted",
     "notSubmitted": "Not Submitted",
-    "notUpdated": "Not Updated"
+    "notUpdated": "Not Updated",
+    "validationNegative": "Reading value cannot be negative.",
+    "validationLessThanPrevious": "New reading ({{newValue}}) must be greater than or equal to the previous reading ({{previousValue}}).",
+    "validationExceedsMax": "Reading exceeds maximum allowed value. Please double-check.",
+    "validationDecimalPlaces": "Reading allows a maximum of 2 decimal places.",
+    "previousReading": "Previous reading:"
   },
   "history": {
     "title": "Reading History",

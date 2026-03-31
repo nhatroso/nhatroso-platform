@@ -129,7 +129,12 @@
     "serialNumber": "Mã đồng hồ:",
     "submitted": "Đã nộp",
     "notSubmitted": "Chưa nộp",
-    "notUpdated": "Chưa cập nhật"
+    "notUpdated": "Chưa cập nhật",
+    "validationNegative": "Chỉ số không được âm.",
+    "validationLessThanPrevious": "Chỉ số mới ({{newValue}}) phải lớn hơn hoặc bằng chỉ số cũ ({{previousValue}}).",
+    "validationExceedsMax": "Chỉ số vượt quá giới hạn cho phép. Vui lòng kiểm tra lại.",
+    "validationDecimalPlaces": "Chỉ số chỉ cho phép tối đa 2 chữ số thập phân.",
+    "previousReading": "Chỉ số cũ:"
   },
   "history": {
     "title": "Lịch sử ghi số",

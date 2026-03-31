@@ -1,51 +1,29 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
   ScrollView,
   ActivityIndicator,
-  Image,
   TouchableOpacity,
+  Image,
   Modal,
 } from 'react-native';
-import { useLocalSearchParams, Stack } from 'expo-router';
-import { useQuery } from '@tanstack/react-query';
-import { meterService } from '@/src/api/meter';
+import { Stack } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Calendar, FileImage, Hash, X } from '@/src/lib/icons';
-
-// Safely format date
-const formatDate = (dateString: string) => {
-  try {
-    const d = new Date(dateString);
-    if (isNaN(d.getTime())) return dateString;
-    return d.toLocaleDateString('vi-VN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  } catch {
-    return dateString;
-  }
-};
+import { useMeterHistory } from '@/src/hooks/useMeterHistory';
 
 export default function MeterHistoryScreen() {
   const { t } = useTranslation();
-  const { meterId, serviceName, unit } = useLocalSearchParams<{
-    meterId: string;
-    serviceName: string;
-    unit: string;
-  }>();
-
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
-
-  const { data: readings, isLoading } = useQuery({
-    queryKey: ['meter-readings', meterId],
-    queryFn: () => meterService.getReadings(meterId || ''),
-    enabled: !!meterId,
-  });
+  const {
+    serviceName,
+    unit,
+    isLoading,
+    sortedReadings,
+    selectedImage,
+    setSelectedImage,
+    formatDate,
+  } = useMeterHistory();
 
   if (isLoading) {
     return (
@@ -55,16 +33,6 @@ export default function MeterHistoryScreen() {
       </View>
     );
   }
-
-  // Fallback to empty array if data isn't available
-  const sortedReadings = Array.isArray(readings)
-    ? [...readings].sort((a, b) => {
-        return (
-          new Date(b.reading_date).getTime() -
-          new Date(a.reading_date).getTime()
-        );
-      })
-    : [];
 
   return (
     <View className="flex-1 bg-background">
@@ -158,7 +126,6 @@ export default function MeterHistoryScreen() {
         <View className="h-12" />
       </ScrollView>
 
-      {/* Full Screen Image Viewer Modal */}
       <Modal
         visible={!!selectedImage}
         transparent={true}
