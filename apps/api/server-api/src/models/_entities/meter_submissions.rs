@@ -4,34 +4,32 @@ use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
-#[sea_orm(table_name = "meter_readings")]
+#[sea_orm(table_name = "meter_submissions")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
-    pub meter_id: Uuid,
-    pub reading_value: Decimal,
-    pub reading_date: DateTimeWithTimeZone,
-    pub image_url: Option<String>,
+    pub meter_request_id: Uuid,
+    pub electric_image_url: String,
+    pub water_image_url: String,
+    pub submitted_at: DateTimeWithTimeZone,
     pub created_at: DateTimeWithTimeZone,
-    pub tenant_id: Option<Uuid>,
-    pub usage: Decimal,
-    pub period_month: Option<String>,
+    pub updated_at: DateTimeWithTimeZone,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
     #[sea_orm(
-        belongs_to = "super::meters::Entity",
-        from = "Column::MeterId",
-        to = "super::meters::Column::Id",
+        belongs_to = "super::meter_requests::Entity",
+        from = "Column::MeterRequestId",
+        to = "super::meter_requests::Column::Id",
         on_update = "Cascade",
         on_delete = "Cascade"
     )]
-    Meters,
+    MeterRequests,
 }
 
-impl Related<super::meters::Entity> for Entity {
+impl Related<super::meter_requests::Entity> for Entity {
     fn to() -> RelationDef {
-        Relation::Meters.def()
+        Relation::MeterRequests.def()
     }
 }

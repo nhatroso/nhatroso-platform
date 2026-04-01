@@ -140,6 +140,7 @@
     "title": "Lịch sử ghi số",
     "noReadings": "Chưa có dữ liệu ghi số.",
     "value": "Chỉ số",
+    "usage": "Tiêu thụ",
     "recordedAt": "Ngày ghi",
     "photoProof": "Ảnh chụp",
     "monthYear": "Kỳ: Tháng {{month}}/{{year}}"

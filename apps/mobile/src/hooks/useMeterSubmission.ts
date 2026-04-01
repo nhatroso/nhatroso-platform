@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as ImagePicker from 'expo-image-picker';
 import { useTranslation } from 'react-i18next';
@@ -11,6 +11,7 @@ const MAX_READING_VALUE = 9999999;
 export function useMeterSubmission() {
   const { t } = useTranslation();
   const router = useRouter();
+  const { period_month } = useLocalSearchParams();
   const queryClient = useQueryClient();
 
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(
@@ -144,14 +145,17 @@ export function useMeterSubmission() {
       meterId: string;
       reading_value: number;
       image_url?: string | null;
+      period_month?: string | null;
     }) =>
       meterService.submitReading(data.meterId, {
         reading_value: data.reading_value.toString(),
         reading_date: new Date().toISOString(),
         image_url: data.image_url,
+        period_month: data.period_month,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['my-meters'] });
+      queryClient.invalidateQueries({ queryKey: ['my-reading-requests'] });
       showAlert(
         t('Services.submission.success'),
         t('Services.submission.successMessage'),
@@ -303,6 +307,7 @@ export function useMeterSubmission() {
       meterId: submitMeterId,
       reading_value: val,
       image_url: finalImageUrl,
+      period_month: period_month as string,
     });
   };
 

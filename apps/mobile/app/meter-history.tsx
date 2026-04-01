@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { Stack } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Calendar, FileImage, Hash, X } from '@/src/lib/icons';
+import { Calendar, FileImage, Hash, X, TrendingUp } from '@/src/lib/icons';
 import { useMeterHistory } from '@/src/hooks/useMeterHistory';
 
 export default function MeterHistoryScreen() {
@@ -65,6 +65,17 @@ export default function MeterHistoryScreen() {
           <View className="gap-y-4">
             {sortedReadings.map((r, index) => {
               const d = new Date(r.reading_date);
+              let displayMonth = d.getMonth() + 1;
+              let displayYear = d.getFullYear();
+
+              if (r.period_month) {
+                const parts = r.period_month.split('-');
+                if (parts.length === 2) {
+                  displayYear = parseInt(parts[0], 10);
+                  displayMonth = parseInt(parts[1], 10);
+                }
+              }
+
               return (
                 <View
                   key={r.id || index}
@@ -72,25 +83,41 @@ export default function MeterHistoryScreen() {
                 >
                   <View className="flex-1 pr-4">
                     <View className="flex-row items-center mb-1">
-                      <Calendar size={14} className="text-primary mr-1.5" />
-                      <Text className="text-xs font-bold text-primary uppercase tracking-widest">
-                        {t('Services.history.monthYear', {
-                          month: d.getMonth() + 1,
-                          year: d.getFullYear(),
-                        })}
-                      </Text>
+                      <View className="bg-primary/10 px-2 py-0.5 rounded-md flex-row items-center mr-2">
+                        <Calendar size={10} className="text-primary mr-1" />
+                        <Text className="text-[10px] font-bold text-primary uppercase tracking-tight">
+                          {t('Services.history.monthYear', {
+                            month: displayMonth,
+                            year: displayYear,
+                          })}
+                        </Text>
+                      </View>
                     </View>
 
-                    <View className="flex-row items-end mb-3">
-                      <Text className="text-3xl font-extrabold text-text leading-none tracking-tight">
+                    <View className="flex-row items-baseline mt-1.5 mb-1">
+                      <Text className="text-4xl font-black text-text tracking-tighter">
                         {r.reading_value}
                       </Text>
                       {unit && (
-                        <Text className="text-base font-bold text-muted ml-1 mb-0.5">
+                        <Text className="text-xs font-bold text-muted ml-1.5 uppercase">
                           {unit}
                         </Text>
                       )}
                     </View>
+
+                    {r.usage && Number(r.usage) > 0 && (
+                      <View className="flex-row items-center mt-1 mb-2">
+                        <View className="bg-green-500/10 px-2.5 py-1 rounded-full flex-row items-center">
+                          <TrendingUp
+                            size={12}
+                            className="text-green-600 mr-1.5"
+                          />
+                          <Text className="text-xs font-black text-green-600">
+                            {r.usage} {unit}
+                          </Text>
+                        </View>
+                      </View>
+                    )}
 
                     <Text className="text-xs text-muted font-medium">
                       {t('Services.history.recordedAt')}:{' '}

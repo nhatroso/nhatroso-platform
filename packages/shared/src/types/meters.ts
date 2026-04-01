@@ -21,6 +21,9 @@ export interface MeterReading {
   reading_value: string; // Decimal as string
   reading_date: string;
   image_url: string | null;
+  usage: string; // Decimal as string
+  tenant_id: string | null;
+  period_month: string | null;
   created_at: string;
 }
 
@@ -37,6 +40,7 @@ export interface RecordReadingParams {
   reading_value: string;
   reading_date?: string;
   image_url?: string | null;
+  period_month?: string | null;
 }
 
 export type RecordReadingInput = RecordReadingParams;

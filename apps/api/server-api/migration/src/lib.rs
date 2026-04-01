@@ -27,6 +27,11 @@ mod m20260321_031739_allow_null_price_rule_in_room_services;
 mod m20260324_021448_meters;
 mod m20260324_021458_create_meter_readings;
 mod m20260327_105200_create_reading_requests;
+mod m20260331_032227_meter_request_configs;
+mod m20260331_032406_meter_requests;
+mod m20260331_032456_meter_submissions;
+mod m20260401_031812_add_usage_to_meter_readings;
+mod m20260401_035027_add_period_to_meter_readings;
 pub struct Migrator;
 
 #[async_trait::async_trait]
@@ -57,6 +62,11 @@ impl MigratorTrait for Migrator {
             Box::new(m20260324_021448_meters::Migration),
             Box::new(m20260324_021458_create_meter_readings::Migration),
             Box::new(m20260327_105200_create_reading_requests::Migration),
+            Box::new(m20260331_032227_meter_request_configs::Migration),
+            Box::new(m20260331_032406_meter_requests::Migration),
+            Box::new(m20260331_032456_meter_submissions::Migration),
+            Box::new(m20260401_031812_add_usage_to_meter_readings::Migration),
+            Box::new(m20260401_035027_add_period_to_meter_readings::Migration),
         ]
     }
 }

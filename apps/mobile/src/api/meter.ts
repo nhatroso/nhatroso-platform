@@ -41,7 +41,7 @@ export const meterService = {
 
   getReadingRequests: async (): Promise<any[]> => {
     const response = await apiClient.get<any[]>(
-      '/v1/reading-requests/my-requests',
+      '/v1/meter-requests/my-requests',
     );
     return response.data;
   },

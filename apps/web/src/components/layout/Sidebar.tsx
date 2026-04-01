@@ -29,7 +29,15 @@ const navItems: NavItem[] = [
     ],
   },
   { key: 'contracts', href: '/dashboard/contracts', icon: 'document' },
-  { key: 'meters', href: '/dashboard/meters', icon: 'activity' },
+  {
+    key: 'meter_management',
+    icon: 'activity',
+    children: [
+      { key: 'meters', href: '/dashboard/meters' },
+      { key: 'meter_requests', href: '/dashboard/meter-requests' },
+      { key: 'meter_settings', href: '/dashboard/meter-settings' },
+    ],
+  },
   { key: 'services', href: '/dashboard/services', icon: 'server' },
 ];
 

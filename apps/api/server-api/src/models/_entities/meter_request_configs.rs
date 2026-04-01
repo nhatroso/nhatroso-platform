@@ -4,29 +4,20 @@ use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
-#[sea_orm(table_name = "reading_requests")]
+#[sea_orm(table_name = "meter_request_configs")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
-    pub building_id: Uuid,
     pub landlord_id: Uuid,
-    pub month: i32,
-    pub year: i32,
-    pub status: String,
+    pub day_of_month: i32,
+    pub grace_days: i32,
+    pub auto_generate: bool,
     pub created_at: DateTimeWithTimeZone,
     pub updated_at: DateTimeWithTimeZone,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(
-        belongs_to = "super::buildings::Entity",
-        from = "Column::BuildingId",
-        to = "super::buildings::Column::Id",
-        on_update = "Cascade",
-        on_delete = "Cascade"
-    )]
-    Buildings,
     #[sea_orm(
         belongs_to = "super::users::Entity",
         from = "Column::LandlordId",
@@ -35,12 +26,6 @@ pub enum Relation {
         on_delete = "Cascade"
     )]
     Users,
-}
-
-impl Related<super::buildings::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Buildings.def()
-    }
 }
 
 impl Related<super::users::Entity> for Entity {

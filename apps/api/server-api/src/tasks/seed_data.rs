@@ -4,7 +4,7 @@ use sea_orm::{ActiveModelTrait, ActiveValue, EntityTrait, ColumnTrait, QueryFilt
 use crate::models::_entities::{
     users, buildings, floors, rooms, services, price_rules,
     room_services, contracts, contract_tenants, meters, meter_readings,
-    reading_requests,
+    meter_requests, meter_request_configs,
 };
 
 pub struct SeedData;
@@ -119,6 +119,12 @@ impl Task for SeedData {
             println!("[OK] Building: {}", b.name);
             building_ids.push(bid);
         }
+
+        // ════════════════════════════════════════════════════════════════════════════
+        // 2.5 METER REQUEST CONFIGS
+        // ════════════════════════════════════════════════════════════════════════════
+        find_or_create_meter_request_config(db, owner_id, 5, 5, true).await?;
+        println!("[OK] Meter Request Config created for owner");
 
         // ════════════════════════════════════════════════════════════════════════════
         // 3. FLOORS
@@ -274,68 +280,88 @@ impl Task for SeedData {
         }
 
         // ════════════════════════════════════════════════════════════════════════════
-        // 10. METER READINGS (sample readings for previous months)
+        // 10. METER READINGS & REQUESTS & SUBMISSIONS
         // ════════════════════════════════════════════════════════════════════════════
         let current_year = chrono::Utc::now().year();
         let current_month = chrono::Utc::now().month();
 
-        // Create readings for the last 3 months
-        for (meter_id, label) in &meter_ids {
-            let is_electric = label.contains("ELEC");
-            let mut cumulative = 0i64;
+        // Historical data: Generate requests & submissions for the last 3 months
+        for months_ago in (1..=3).rev() {
+            let reading_month = if current_month as i32 - months_ago > 0 {
+                (current_month as i32 - months_ago) as u32
+            } else {
+                (12 + current_month as i32 - months_ago) as u32
+            };
+            let reading_year = if current_month as i32 - months_ago > 0 {
+                current_year
+            } else {
+                current_year - 1
+            };
 
-            for months_ago in (1..=3).rev() {
-                let reading_month = if current_month as i32 - months_ago > 0 {
-                    (current_month as i32 - months_ago) as u32
-                } else {
-                    (12 + current_month as i32 - months_ago) as u32
-                };
-                let reading_year = if current_month as i32 - months_ago > 0 {
-                    current_year
-                } else {
-                    current_year - 1
-                };
+            let period_month = format!("{:04}-{:02}", reading_year, reading_month);
+            let _req_date = chrono::NaiveDate::from_ymd_opt(reading_year, reading_month, 5).unwrap();
+            let due_date = chrono::NaiveDate::from_ymd_opt(reading_year, reading_month, 10).unwrap()
+                .and_hms_opt(23, 59, 59).unwrap();
+            let due_date_tz: chrono::DateTime<chrono::FixedOffset> = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(due_date, chrono::Utc).into();
 
-                let increment = if is_electric {
-                    rand_range(50, 150)
-                } else {
-                    rand_range(5, 20)
-                };
-                cumulative += increment;
+            for (rid, code, _) in &occupied_rooms {
+                let _req_id = find_or_create_meter_request(
+                    db, *rid, &period_month, due_date_tz, "SUBMITTED"
+                ).await?;
 
-                let reading_date = chrono::NaiveDate::from_ymd_opt(reading_year, reading_month, 15).unwrap();
-                let reading_dt = reading_date.and_hms_opt(10, 0, 0).unwrap();
-                let reading_dt_tz: chrono::DateTime<chrono::FixedOffset> = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(reading_dt, chrono::Utc).into();
+                // Generate readings for this history
+                for (meter_id, label) in &meter_ids {
+                    if label.starts_with(code) {
+                        let is_electric = label.contains("ELEC");
+                        let val = if is_electric { rand_range(200, 300) } else { rand_range(20, 30) };
+                        let reading_dt = chrono::NaiveDate::from_ymd_opt(reading_year, reading_month, rand_range(5, 9) as u32).unwrap()
+                            .and_hms_opt(10, 0, 0).unwrap();
+                        let reading_dt_tz: chrono::DateTime<chrono::FixedOffset> = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(reading_dt, chrono::Utc).into();
 
-                create_meter_reading_if_needed(db, *meter_id, cumulative, reading_dt_tz).await?;
+                        create_meter_reading_if_needed(db, *meter_id, val, reading_dt_tz).await?;
+                    }
+                }
+
+                // find_or_create_meter_submission was here, now deprecated.
             }
-            println!("[OK] Readings created for: {}", label);
+            println!("[OK] Historical requests and submissions for {}/{}", reading_month, reading_year);
         }
 
-        // Also create current month reading for SOME meters (to simulate partial submission)
-        // A101 and B101 have submitted this month, others pending
-        for (meter_id, label) in &meter_ids {
-            if label.starts_with("A101") || label.starts_with("B101") {
-                let is_electric = label.contains("ELEC");
-                let last_val = if is_electric { 450 } else { 50 };
-                let reading_date = chrono::NaiveDate::from_ymd_opt(current_year, current_month, 10).unwrap();
-                let reading_dt = reading_date.and_hms_opt(10, 0, 0).unwrap();
-                let reading_dt_tz: chrono::DateTime<chrono::FixedOffset> = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(reading_dt, chrono::Utc).into();
+        // Current month: Generate requests
+        let current_period = format!("{:04}-{:02}", current_year, current_month);
+        let current_due = chrono::NaiveDate::from_ymd_opt(current_year, current_month, 10).unwrap()
+            .and_hms_opt(23, 59, 59).unwrap();
+        let current_due_tz: chrono::DateTime<chrono::FixedOffset> = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(current_due, chrono::Utc).into();
 
-                create_meter_reading_if_needed(db, *meter_id, last_val, reading_dt_tz).await?;
-                println!("[OK] Current month reading for: {}", label);
-            }
-        }
+        for (rid, code, _) in &occupied_rooms {
+            // Assume A101 and B101 have already submitted this month, others is PENDING
+            let (status, has_submitted) = if code == "A101" || code == "B101" {
+                ("SUBMITTED", true)
+            } else {
+                ("PENDING", false)
+            };
 
-        // ════════════════════════════════════════════════════════════════════════════
-        // 11. READING REQUESTS
-        // ════════════════════════════════════════════════════════════════════════════
-        for bid in &building_ids {
-            find_or_create_reading_request(
-                db, *bid, owner_id, current_month as i32, current_year,
+            let _req_id = find_or_create_meter_request(
+                db, *rid, &current_period, current_due_tz, status
             ).await?;
+
+            if has_submitted {
+                let reading_date = chrono::NaiveDate::from_ymd_opt(current_year, current_month, 8).unwrap()
+                    .and_hms_opt(10, 0, 0).unwrap();
+                let reading_dt_tz: chrono::DateTime<chrono::FixedOffset> = chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(reading_date, chrono::Utc).into();
+
+                for (meter_id, label) in &meter_ids {
+                    if label.starts_with(code) {
+                        let is_electric = label.contains("ELEC");
+                        let val = if is_electric { 350 } else { 45 };
+                        create_meter_reading_if_needed(db, *meter_id, val, reading_dt_tz).await?;
+                    }
+                }
+
+                // find_or_create_meter_submission was here, now deprecated.
+            }
         }
-        println!("[OK] Reading requests created for current month");
+        println!("[OK] Current month pending & simulated submissions created");
 
         // ════════════════════════════════════════════════════════════════════════════
         // SUMMARY
@@ -358,7 +384,8 @@ impl Task for SeedData {
         println!("  Rooms: A101(occ), A102(occ), A103(vac), A201(occ), A202(vac), B101(occ), B102(occ), B103(vac)");
         println!("  Services: Dien, Nuoc, Internet, Rac");
         println!("  Meters: ELEC + WATER per occupied room");
-        println!("  Readings: 3 months history + partial current month");
+        println!("  Meter Requests: 3 months historical, current month generated (A101, B101 submitted)");
+        println!("  Meter Submissions: Bound to historical and partial current month requests");
         println!("════════════════════════════════════════════════════════════════");
 
         Ok(())
@@ -604,32 +631,62 @@ async fn create_meter_reading_if_needed(
         reading_value: ActiveValue::Set(rust_decimal::Decimal::from(value)),
         reading_date: ActiveValue::Set(reading_date),
         image_url: ActiveValue::Set(None),
+        tenant_id: ActiveValue::Set(None),
+        usage: ActiveValue::Set(rust_decimal::Decimal::from(0)),
+        period_month: ActiveValue::Set(Some(reading_date.format("%Y-%m").to_string())),
         created_at: ActiveValue::Set(now()),
     }.insert(db).await?;
     Ok(())
 }
 
-async fn find_or_create_reading_request(
-    db: &DatabaseConnection, building_id: uuid::Uuid, landlord_id: uuid::Uuid,
-    month: i32, year: i32,
-) -> Result<()> {
-    let exists = reading_requests::Entity::find()
-        .filter(reading_requests::Column::BuildingId.eq(building_id))
-        .filter(reading_requests::Column::Month.eq(month))
-        .filter(reading_requests::Column::Year.eq(year))
-        .one(db).await?.is_some();
+async fn find_or_create_meter_request(
+    db: &DatabaseConnection, room_id: uuid::Uuid,
+    period_month: &str, due_date: chrono::DateTime<chrono::FixedOffset>,
+    status: &str,
+) -> Result<uuid::Uuid> {
+    if let Some(existing) = meter_requests::Entity::find()
+        .filter(meter_requests::Column::RoomId.eq(room_id))
+        .filter(meter_requests::Column::PeriodMonth.eq(period_month))
+        .one(db).await? {
+        // Option to update status if needed
+        let mut model: meter_requests::ActiveModel = existing.clone().into();
+        model.status = ActiveValue::Set(status.to_string());
+        model.update(db).await?;
+        return Ok(existing.id);
+    }
 
-    if exists { return Ok(()); }
-
-    reading_requests::ActiveModel {
+    let result = meter_requests::ActiveModel {
         id: ActiveValue::Set(uuid::Uuid::new_v4()),
-        building_id: ActiveValue::Set(building_id),
-        landlord_id: ActiveValue::Set(landlord_id),
-        month: ActiveValue::Set(month),
-        year: ActiveValue::Set(year),
-        status: ActiveValue::Set("OPEN".to_string()),
+        room_id: ActiveValue::Set(room_id),
+        period_month: ActiveValue::Set(period_month.to_string()),
+        due_date: ActiveValue::Set(due_date),
+        status: ActiveValue::Set(status.to_string()),
         created_at: ActiveValue::Set(now()),
         updated_at: ActiveValue::Set(now()),
     }.insert(db).await?;
-    Ok(())
+    Ok(result.id)
 }
+
+async fn find_or_create_meter_request_config(
+    db: &DatabaseConnection, landlord_id: uuid::Uuid,
+    day_of_month: i32, grace_days: i32, auto_generate: bool,
+) -> Result<uuid::Uuid> {
+    if let Some(existing) = meter_request_configs::Entity::find()
+        .filter(meter_request_configs::Column::LandlordId.eq(landlord_id))
+        .one(db).await? {
+        return Ok(existing.id);
+    }
+
+    let result = meter_request_configs::ActiveModel {
+        id: ActiveValue::Set(uuid::Uuid::new_v4()),
+        landlord_id: ActiveValue::Set(landlord_id),
+        day_of_month: ActiveValue::Set(day_of_month),
+        grace_days: ActiveValue::Set(grace_days),
+        auto_generate: ActiveValue::Set(auto_generate),
+        created_at: ActiveValue::Set(now()),
+        updated_at: ActiveValue::Set(now()),
+    }.insert(db).await?;
+    Ok(result.id)
+}
+
+

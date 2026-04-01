@@ -223,7 +223,7 @@ export function MeterManagementModal({
                       {t('NoReadingsYet')}
                     </div>
                   ) : (
-                    readings.map((r, i) => (
+                    readings.map((r) => (
                       <div
                         key={r.id}
                         className="flex items-center justify-between rounded-xl border border-gray-50 p-3 shadow-sm transition-all hover:border-gray-200 dark:border-gray-800 dark:hover:border-gray-700"
@@ -241,14 +241,10 @@ export function MeterManagementModal({
                             </p>
                           </div>
                         </div>
-                        {i < readings.length - 1 && (
+                        {r.usage && parseFloat(r.usage) > 0 && (
                           <div className="flex items-center gap-1.5 text-xs font-medium text-green-600 dark:text-green-400">
                             <ChevronRight size={12} className="text-gray-300" />
-                            +
-                            {(
-                              parseFloat(r.reading_value) -
-                              parseFloat(readings[i + 1].reading_value)
-                            ).toFixed(2)}
+                            +{parseFloat(r.usage).toFixed(2)}
                           </div>
                         )}
                       </div>

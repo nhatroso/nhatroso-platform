@@ -140,6 +140,7 @@
     "title": "Reading History",
     "noReadings": "No readings found.",
     "value": "Value",
+    "usage": "Usage",
     "recordedAt": "Recorded At",
     "photoProof": "Photo Proof",
     "monthYear": "Period: Month {{month}}/{{year}}"

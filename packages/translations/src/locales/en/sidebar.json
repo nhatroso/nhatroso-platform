@@ -6,5 +6,8 @@
   "properties": "Properties",
   "floors": "Floors",
   "rooms": "Rooms",
-  "meters": "Meter Management"
+  "meters": "Readings",
+  "meter_requests": "Meter Requests",
+  "meter_settings": "Meter Settings",
+  "meter_management": "Meter Management"
 }

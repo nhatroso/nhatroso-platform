@@ -32,7 +32,7 @@ export function useDashboardScreen() {
   });
 
   const activeRequest = Array.isArray(readingRequests)
-    ? readingRequests.find((r) => r.status === 'OPEN')
+    ? readingRequests.find((r) => r.status === 'PENDING' || r.status === 'LATE')
     : null;
 
   const requiredServices = room?.services
@@ -51,11 +51,20 @@ export function useDashboardScreen() {
     const sMeter = (meters || []).find(
       (m: any) => m.service_id === s.service_id,
     );
+
+    let reqMonth = new Date().getMonth() + 1;
+    let reqYear = new Date().getFullYear();
+    if (activeRequest?.period_month) {
+      const parts = activeRequest.period_month.split('-');
+      if (parts.length === 2) {
+        reqYear = parseInt(parts[0], 10);
+        reqMonth = parseInt(parts[1], 10);
+      }
+    }
+
     return sMeter?.latest_reading_date
-      ? new Date(sMeter.latest_reading_date).getMonth() ===
-          (activeRequest?.month || new Date().getMonth() + 1) - 1 &&
-          new Date(sMeter.latest_reading_date).getFullYear() ===
-            (activeRequest?.year || new Date().getFullYear())
+      ? new Date(sMeter.latest_reading_date).getMonth() === reqMonth - 1 &&
+          new Date(sMeter.latest_reading_date).getFullYear() === reqYear
       : false;
   }).length;
 

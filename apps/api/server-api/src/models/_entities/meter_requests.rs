@@ -4,13 +4,13 @@ use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
-#[sea_orm(table_name = "buildings")]
+#[sea_orm(table_name = "meter_requests")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
-    pub owner_id: Uuid,
-    pub name: String,
-    pub address: Option<String>,
+    pub room_id: Uuid,
+    pub period_month: String,
+    pub due_date: DateTimeWithTimeZone,
     pub status: String,
     pub created_at: DateTimeWithTimeZone,
     pub updated_at: DateTimeWithTimeZone,
@@ -18,34 +18,18 @@ pub struct Model {
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(has_many = "super::floors::Entity")]
-    Floors,
-    #[sea_orm(has_many = "super::rooms::Entity")]
-    Rooms,
     #[sea_orm(
-        belongs_to = "super::users::Entity",
-        from = "Column::OwnerId",
-        to = "super::users::Column::Id",
+        belongs_to = "super::rooms::Entity",
+        from = "Column::RoomId",
+        to = "super::rooms::Column::Id",
         on_update = "Cascade",
         on_delete = "Cascade"
     )]
-    Users,
-}
-
-impl Related<super::floors::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Floors.def()
-    }
+    Rooms,
 }
 
 impl Related<super::rooms::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Rooms.def()
-    }
-}
-
-impl Related<super::users::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Users.def()
     }
 }

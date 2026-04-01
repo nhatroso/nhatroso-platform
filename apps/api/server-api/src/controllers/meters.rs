@@ -52,7 +52,7 @@ pub async fn record_reading(
         return error_response("METER_ACCESS_DENIED", StatusCode::FORBIDDEN);
     }
 
-    match MeterReading::record_reading(&ctx.db, id, params).await? {
+    match MeterReading::record_reading(&ctx.db, id, user_id, params).await? {
         Ok(res) => format::json(res),
         Err((status, code)) => error_response(code, status),
     }

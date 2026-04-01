@@ -6,5 +6,8 @@
   "properties": "Bất động sản",
   "floors": "Tầng",
   "rooms": "Phòng",
-  "meters": "Quản lý chỉ số"
+  "meters": "Danh sách chỉ số",
+  "meter_requests": "Lịch sử yêu cầu",
+  "meter_settings": "Cài đặt tự động",
+  "meter_management": "Quản lý chỉ số"
 }

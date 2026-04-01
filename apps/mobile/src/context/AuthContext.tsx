@@ -1,7 +1,14 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from 'react';
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 import { AuthResponse } from '@nhatroso/shared';
+import { setLogoutHandler } from '../api/client';
 
 interface AuthContextType {
   user: AuthResponse | null;
@@ -42,7 +49,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     loadStorageData();
   }, []);
 
-  const login = async (data: AuthResponse) => {
+  const login = useCallback(async (data: AuthResponse) => {
     setUser(data);
     const authDataString = JSON.stringify(data);
     if (Platform.OS === 'web') {
@@ -50,16 +57,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     } else {
       await SecureStore.setItemAsync('auth_data', authDataString);
     }
-  };
+  }, []);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     setUser(null);
     if (Platform.OS === 'web') {
       localStorage.removeItem('auth_data');
     } else {
       await SecureStore.deleteItemAsync('auth_data');
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    setLogoutHandler(logout);
+    return () => setLogoutHandler(() => {});
+  }, [logout]);
 
   return (
     <AuthContext.Provider value={{ user, isLoading, login, logout }}>

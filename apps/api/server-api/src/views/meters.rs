@@ -17,6 +17,7 @@ pub struct RecordReadingParams {
     pub reading_value: Decimal,
     pub reading_date: Option<DateTime<Utc>>,
     pub image_url: Option<String>,
+    pub period_month: Option<String>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -42,6 +43,9 @@ pub struct MeterReadingResponse {
     pub reading_value: Decimal,
     pub reading_date: DateTime<Utc>,
     pub image_url: Option<String>,
+    pub usage: Decimal,
+    pub tenant_id: Option<Uuid>,
+    pub period_month: Option<String>,
     pub created_at: DateTime<Utc>,
 }
 
@@ -91,6 +95,9 @@ impl From<meter_readings::Model> for MeterReadingResponse {
             reading_value: m.reading_value,
             reading_date: m.reading_date.into(),
             image_url: m.image_url,
+            usage: m.usage,
+            tenant_id: m.tenant_id,
+            period_month: m.period_month,
             created_at: m.created_at.into(),
         }
     }

@@ -35,6 +35,24 @@ apiClient.interceptors.request.use(async (config) => {
   return config;
 });
 
+let logoutHandler: (() => void) | null = null;
+
+export const setLogoutHandler = (handler: () => void | Promise<void>) => {
+  logoutHandler = handler;
+};
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response?.status === 401) {
+      if (logoutHandler) {
+        logoutHandler();
+      }
+    }
+    return Promise.reject(error);
+  },
+);
+
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {

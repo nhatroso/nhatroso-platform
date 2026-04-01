@@ -43,7 +43,12 @@ export default function DashboardScreen() {
       {/* Pending Request Alert */}
       {activeRequest && !isRequestCompleted && (
         <TouchableOpacity
-          onPress={() => router.push('/meter-submission')}
+          onPress={() =>
+            router.push({
+              pathname: '/meter-submission',
+              params: { period_month: activeRequest.period_month },
+            })
+          }
           className="mb-8 bg-primary/10 border border-primary/20 p-5 rounded-3xl flex-row items-center"
         >
           <View className="h-12 w-12 bg-primary/20 rounded-2xl items-center justify-center mr-4">
@@ -55,32 +60,13 @@ export default function DashboardScreen() {
             </Text>
             <Text className="text-primary/70 font-medium">
               {t('Dashboard.tenant.landlordRequestedReadings', {
-                month: activeRequest.month,
-                year: activeRequest.year,
+                month: activeRequest.period_month?.split('-')[1] || '',
+                year: activeRequest.period_month?.split('-')[0] || '',
               })}
             </Text>
           </View>
           <ChevronRight size={20} className="text-primary/50" />
         </TouchableOpacity>
-      )}
-
-      {activeRequest && isRequestCompleted && (
-        <View className="mb-8 bg-success/10 border border-success/20 p-5 rounded-3xl flex-row items-center">
-          <View className="h-12 w-12 bg-success/20 rounded-2xl items-center justify-center mr-4">
-            <CheckCircle2 size={28} className="text-success" />
-          </View>
-          <View className="flex-1">
-            <Text className="text-success font-bold text-lg">
-              {t('Dashboard.tenant.readingCompleted')}
-            </Text>
-            <Text className="text-success/70 font-medium">
-              {t('Dashboard.tenant.readingCompletedMessage', {
-                month: activeRequest.month,
-                year: activeRequest.year,
-              })}
-            </Text>
-          </View>
-        </View>
       )}
 
       {/* Stats Grid */}
@@ -130,7 +116,12 @@ export default function DashboardScreen() {
       </Text>
       <View className="gap-y-4 mb-8">
         <TouchableOpacity
-          onPress={() => router.push('/meter-submission')}
+          onPress={() =>
+            router.push({
+              pathname: '/meter-submission',
+              params: { period_month: activeRequest?.period_month },
+            })
+          }
           className="flex-row items-center justify-between bg-background p-5 rounded-2xl border border-border shadow-sm active:bg-input"
         >
           <View className="flex-row items-center">
