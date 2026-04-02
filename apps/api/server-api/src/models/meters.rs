@@ -124,10 +124,11 @@ impl Model {
     }
 
     pub async fn create_meter(db: &DatabaseConnection, params: CreateMeterParams) -> Result<std::result::Result<MeterResponse, (StatusCode, &'static str)>> {
-        // Check for duplicate meter for room + service
+        // Check for duplicate ACTIVE meter for room + service
         let existing = Meters::find()
             .filter(crate::models::_entities::meters::Column::RoomId.eq(params.room_id))
             .filter(crate::models::_entities::meters::Column::ServiceId.eq(params.service_id))
+            .filter(crate::models::_entities::meters::Column::Status.eq("ACTIVE".to_string()))
             .one(db)
             .await?;
 
@@ -252,6 +253,16 @@ impl Model {
         }
 
         Ok(detailed_results)
+    }
+
+    pub async fn update_status(db: &DatabaseConnection, id: Uuid, status: &str) -> Result<()> {
+        let meter = Meters::find_by_id(id).one(db).await?;
+        if let Some(m) = meter {
+            let mut active_model: ActiveModel = m.into();
+            active_model.status = ActiveValue::Set(status.to_string());
+            active_model.update(db).await?;
+        }
+        Ok(())
     }
 }
 

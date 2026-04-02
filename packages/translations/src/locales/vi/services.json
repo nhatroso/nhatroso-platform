@@ -100,6 +100,21 @@
   "DisableServiceDescription": "Tắt để ngưng áp dụng {name} cho phòng này.",
   "PredefinedServiceNote": "Các dịch vụ có sẵn không thể đổi tên hoặc đơn vị tính. Để ngưng sử dụng dịch vụ này, hãy nhấn \"Ngưng áp dụng dịch vụ\".",
   "ErrorQuickAdd": "Không thể thêm nhanh dịch vụ. Vui lòng thử lại.",
+  "SetupRequired": "Cần khởi tạo",
+  "ClickToSetup": "Nhấn để khởi tạo",
+  "SetupMeter": "Khởi tạo đồng hồ",
+  "SetupMeterDescription": "Nhập chỉ số hiện tại trên đồng hồ vật lý để hệ thống tính tiêu thụ chính xác từ lần nộp đầu tiên.",
+  "InitialReading": "Đầu:",
+  "InitialReadingLabel": "Chỉ số đầu (bắt buộc)",
+  "InitialReadingPlaceholder": "VD: 1542.5",
+  "InitialReadingHint": "Đây là chỉ số hiện tại trên đồng hồ vật lý. Khi người thuê nộp lần đầu, lượng tiêu thụ sẽ được tính từ chỉ số này.",
+  "InvalidInitialReading": "Giá trị bắt đầu không hợp lệ",
+  "SerialNumber": "Số serial đồng hồ",
+  "SerialNumberPlaceholder": "VD: SN-2025-0042",
+  "Optional": "Tùy chọn",
+  "Creating": "Đang tạo...",
+  "CreateMeter": "Khởi tạo đồng hồ",
+  "InitialReadingRequired": "Vui lòng nhập chỉ số đầu của đồng hồ.",
   "submission": {
     "success": "Thành công",
     "successMessage": "Chỉ số của bạn đã được ghi nhận.",
@@ -144,5 +159,8 @@
     "recordedAt": "Ngày ghi",
     "photoProof": "Ảnh chụp",
     "monthYear": "Kỳ: Tháng {{month}}/{{year}}"
-  }
+  },
+  "CurrentMeterReading": "Chỉ số công tơ hiện tại",
+  "Currency": "VND",
+  "SaveError": "Lỗi khi lưu cấu hình"
 }

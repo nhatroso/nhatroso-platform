@@ -1,11 +1,10 @@
 use loco_rs::prelude::*;
 use loco_rs::controller::extractor::auth::JWT;
 use axum::{Json, http::StatusCode, extract::Query};
-use serde::Deserialize;
 use uuid::Uuid;
 
 use crate::{
-    views::meters::{CreateMeterParams, RecordReadingParams},
+    views::meters::{CreateMeterParams, RecordReadingParams, LandlordListParams, UpdateMeterStatusParams},
     models::meters::Model as Meter,
     models::meter_readings::Model as MeterReading,
     utils::{auth, error::error_response},
@@ -67,10 +66,6 @@ pub async fn list_readings(
     format::json(readings)
 }
 
-#[derive(Debug, Deserialize)]
-pub struct LandlordListParams {
-    pub building_id: Option<Uuid>,
-}
 
 pub async fn get_landlord_summary(
     auth: JWT,
@@ -91,6 +86,16 @@ pub async fn list_landlord_meters(
     format::json(meters)
 }
 
+pub async fn update_status(
+    _auth: JWT,
+    Path(id): Path<Uuid>,
+    State(ctx): State<AppContext>,
+    Json(params): Json<UpdateMeterStatusParams>,
+) -> Result<Response> {
+    Meter::update_status(&ctx.db, id, &params.status).await?;
+    format::empty()
+}
+
 pub fn routes() -> Routes {
     Routes::new()
         .prefix("api/v1/meters")
@@ -99,6 +104,7 @@ pub fn routes() -> Routes {
         .add("/landlord/summary", get(get_landlord_summary))
         .add("/landlord/list", get(list_landlord_meters))
         .add("/room/{room_id}", get(list_by_room))
+        .add("/{id}/status", patch(update_status))
         .add("/{id}/readings", post(record_reading))
         .add("/{id}/readings", get(list_readings))
 }

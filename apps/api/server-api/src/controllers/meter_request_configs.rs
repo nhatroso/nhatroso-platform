@@ -3,20 +3,11 @@
 #![allow(clippy::unused_async)]
 use loco_rs::prelude::*;
 use loco_rs::controller::extractor::auth::JWT;
-use serde::{Deserialize, Serialize};
-use sea_orm::{ActiveModelTrait, EntityTrait, QueryFilter, ColumnTrait, Set};
-
 use crate::{
-    models::_entities::meter_request_configs,
+    models::meter_request_configs::Model as MeterRequestConfig,
+    views::meter_request_configs::ConfigParams,
     utils::auth,
 };
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct ConfigParams {
-    pub day_of_month: i32,
-    pub grace_days: i32,
-    pub auto_generate: bool,
-}
 
 #[debug_handler]
 pub async fn get_config(
@@ -26,10 +17,7 @@ pub async fn get_config(
     let landlord_id = auth::get_user_id(&auth)?;
     let db = &ctx.db;
 
-    let config = meter_request_configs::Entity::find()
-        .filter(meter_request_configs::Column::LandlordId.eq(landlord_id))
-        .one(db)
-        .await?;
+    let config = MeterRequestConfig::get_by_landlord(db, landlord_id).await?;
 
     match config {
         Some(c) => format::json(c),
@@ -46,29 +34,8 @@ pub async fn update_config(
     let landlord_id = auth::get_user_id(&auth)?;
     let db = &ctx.db;
 
-    let config = meter_request_configs::Entity::find()
-        .filter(meter_request_configs::Column::LandlordId.eq(landlord_id))
-        .one(db)
-        .await?;
-
-    if let Some(c) = config {
-        let mut active: meter_request_configs::ActiveModel = c.into();
-        active.day_of_month = Set(params.day_of_month);
-        active.grace_days = Set(params.grace_days);
-        active.auto_generate = Set(params.auto_generate);
-        let updated = active.update(db).await?;
-        format::json(updated)
-    } else {
-        let new_config = meter_request_configs::ActiveModel {
-            landlord_id: Set(landlord_id),
-            day_of_month: Set(params.day_of_month),
-            grace_days: Set(params.grace_days),
-            auto_generate: Set(params.auto_generate),
-            ..Default::default()
-        };
-        let inserted = new_config.insert(db).await?;
-        format::json(inserted)
-    }
+    let config = MeterRequestConfig::update_or_create(db, landlord_id, params).await?;
+    format::json(config)
 }
 
 pub fn routes() -> Routes {

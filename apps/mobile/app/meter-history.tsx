@@ -96,13 +96,8 @@ export default function MeterHistoryScreen() {
 
                     <View className="flex-row items-baseline mt-1.5 mb-1">
                       <Text className="text-4xl font-black text-text tracking-tighter">
-                        {r.reading_value}
+                        {r.reading_value} {unit}
                       </Text>
-                      {unit && (
-                        <Text className="text-xs font-bold text-muted ml-1.5 uppercase">
-                          {unit}
-                        </Text>
-                      )}
                     </View>
 
                     {r.usage && Number(r.usage) > 0 && (

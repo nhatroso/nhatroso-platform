@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Home, Mail, Lock, ArrowRight, AlertCircle } from '@/src/lib/icons';
+import { Lock, ArrowRight, AlertCircle, Phone, Home } from '@/src/lib/icons';
 import { useAuth } from '@/src/context/AuthContext';
 import { authService } from '@/src/api/auth';
 import { LoginSchema } from '@nhatroso/shared';
@@ -98,7 +98,7 @@ export default function LoginScreen() {
                 {t('Auth.login.phoneLabel')}
               </Text>
               <View className="flex-row items-center rounded-2xl bg-input border border-border px-4 py-4 focus:border-primary">
-                <Mail size={20} className="text-icon" />
+                <Phone size={20} className="text-icon" />
                 <TextInput
                   placeholder={t('Auth.login.phonePlaceholder')}
                   className="flex-1 ml-3 text-base text-text"

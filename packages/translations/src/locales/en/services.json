@@ -100,6 +100,21 @@
   "DisableServiceDescription": "Turn off to completely disable {name} for this room.",
   "PredefinedServiceNote": "Predefined services cannot be renamed or have their unit changed. To stop using this service, click \"Disable Service\".",
   "ErrorQuickAdd": "Failed to quick add service. Please try again.",
+  "SetupRequired": "Setup required",
+  "ClickToSetup": "Click to setup",
+  "SetupMeter": "Setup Meter",
+  "SetupMeterDescription": "Enter the current reading on the physical meter to allow the system to calculate usage correctly from the first submission.",
+  "InitialReading": "Initial:",
+  "InitialReadingLabel": "Initial Reading (required)",
+  "InitialReadingPlaceholder": "e.g. 1542.5",
+  "InitialReadingHint": "This is the current reading on the physical meter. When the tenant submits for the first time, usage will be calculated from this value.",
+  "InvalidInitialReading": "Invalid initial reading value",
+  "SerialNumber": "Meter Serial Number",
+  "SerialNumberPlaceholder": "e.g. SN-2025-0042",
+  "Optional": "Optional",
+  "Creating": "Creating...",
+  "CreateMeter": "Create Meter",
+  "InitialReadingRequired": "Please enter the initial meter reading.",
   "submission": {
     "success": "Success",
     "successMessage": "Your reading has been recorded.",
@@ -144,5 +159,8 @@
     "recordedAt": "Recorded At",
     "photoProof": "Photo Proof",
     "monthYear": "Period: Month {{month}}/{{year}}"
-  }
+  },
+  "CurrentMeterReading": "Current meter reading",
+  "Currency": "VND",
+  "SaveError": "Failed to save configuration"
 }

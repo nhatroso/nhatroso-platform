@@ -125,4 +125,12 @@ pub struct LandlordMeterDetail {
     pub last_reading: Option<Decimal>,
     pub last_reading_date: Option<DateTime<Utc>>,
 }
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct LandlordListParams {
+    pub building_id: Option<Uuid>,
+}
 
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct UpdateMeterStatusParams {
+    pub status: String,
+}

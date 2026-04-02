@@ -9,5 +9,8 @@
   "meters": "Readings",
   "meter_requests": "Meter Requests",
   "meter_settings": "Meter Settings",
-  "meter_management": "Meter Management"
+  "meter_management": "Meter Management",
+  "service_catalog": "Service Catalog",
+  "room_services": "Room Services",
+  "logout": "Logout"
 }

@@ -48,7 +48,7 @@
     "groundFloor": "Tầng trệt",
     "monthlyCosts": "Chi phí hàng tháng",
     "roomRent": "Tiền thuê phòng",
-    "currency": "đ",
+    "currency": "VND",
     "perUnit": "Mỗi {{unit}}"
   },
   "tabs": {

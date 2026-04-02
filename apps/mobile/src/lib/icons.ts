@@ -28,6 +28,7 @@ import {
   FileImage,
   TrendingUp,
   Activity,
+  Phone,
 } from 'lucide-react-native';
 
 const iconList = [
@@ -59,6 +60,7 @@ const iconList = [
   FileImage,
   TrendingUp,
   Activity,
+  Phone,
 ];
 
 iconList.forEach((icon) => {
@@ -101,4 +103,5 @@ export {
   FileImage,
   TrendingUp,
   Activity,
+  Phone,
 };
