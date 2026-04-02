@@ -3,12 +3,37 @@
 import * as React from 'react';
 import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
-import { Building, Floor, Room } from '@nhatroso/shared';
-import { getBuildings, getAllFloors } from '@/services/api/buildings';
-import { getAllRooms, createRoom } from '@/services/api/rooms';
-import { RoomPricingModal } from '@/components/buildings/RoomPricingModal';
-import { MeterManagementModal } from '@/components/buildings/MeterManagementModal';
+import { useRooms } from '@/hooks/use-rooms';
 import { RoomCard } from '@/components/buildings/RoomCard';
+import { Skeleton } from '@/components/ui/Skeleton';
+
+function RoomGridSkeleton() {
+  return (
+    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+      {Array.from({ length: 10 }).map((_, i) => (
+        <div
+          key={i}
+          className="flex flex-col justify-between overflow-hidden rounded-xl bg-white p-5 shadow-sm ring-1 ring-inset ring-gray-100 dark:bg-gray-800 dark:ring-gray-700"
+        >
+          <div>
+            <div className="mb-3 flex items-center justify-between">
+              <Skeleton className="h-5 w-16 rounded-full" />
+              <Skeleton className="h-4 w-20" />
+            </div>
+            <Skeleton className="h-6 w-24 mb-2" />
+            <Skeleton className="h-4 w-32" />
+          </div>
+          <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+            <div className="flex items-center justify-between">
+              <Skeleton className="h-4 w-16" />
+              <Skeleton className="h-4 w-24" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 function RoomsPageContent() {
   const t = useTranslations('Buildings');
@@ -16,111 +41,34 @@ function RoomsPageContent() {
   const initialBuildingId = searchParams.get('buildingId') || 'all';
   const initialFloorId = searchParams.get('floorId') || 'all';
 
-  const [buildings, setBuildings] = React.useState<Building[]>([]);
-  const [floors, setFloors] = React.useState<Floor[]>([]);
-  const [rooms, setRooms] = React.useState<Room[]>([]);
-
-  const [loading, setLoading] = React.useState(true);
-  const [selectedBuildingId, setSelectedBuildingId] =
-    React.useState<string>(initialBuildingId);
-  const [selectedFloorId, setSelectedFloorId] =
-    React.useState<string>(initialFloorId);
-
-  const [selectedStatus, setSelectedStatus] = React.useState<string>('all');
-  const [managingRoomPrice, setManagingRoomPrice] = React.useState<Room | null>(
-    null,
-  );
-  const [managingRoomMeters, setManagingRoomMeters] =
-    React.useState<Room | null>(null);
-
-  // Modal State
-  const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false);
-  const [newBuildingId, setNewBuildingId] = React.useState('');
-  const [newFloorId, setNewFloorId] = React.useState('');
-  const [newRoomCode, setNewRoomCode] = React.useState('');
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
-
-  React.useEffect(() => {
-    async function fetchData() {
-      try {
-        setLoading(true);
-        const [bData, fData, rData] = await Promise.all([
-          getBuildings(),
-          getAllFloors(),
-          getAllRooms(),
-        ]);
-        setBuildings(bData);
-        setFloors(fData);
-        setRooms(rData);
-      } catch (err) {
-        console.error('Failed to fetch data', err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchData();
-  }, []);
-
-  const availableFloors = React.useMemo(() => {
-    if (selectedBuildingId === 'all') return floors;
-    return floors.filter((f) => f.building_id === selectedBuildingId);
-  }, [floors, selectedBuildingId]);
-
-  // If selected floor is not in available floors, reset it
-  React.useEffect(() => {
-    if (selectedFloorId !== 'all') {
-      const exists = availableFloors.find((f) => f.id === selectedFloorId);
-      if (!exists) setSelectedFloorId('all');
-    }
-  }, [availableFloors, selectedFloorId]);
-
-  const filteredRooms = React.useMemo(() => {
-    return rooms.filter((r) => {
-      const matchBuilding =
-        selectedBuildingId === 'all' || r.building_id === selectedBuildingId;
-      const matchFloor =
-        selectedFloorId === 'all' || r.floor_id === selectedFloorId;
-      const matchStatus =
-        selectedStatus === 'all' || r.status === selectedStatus;
-      return matchBuilding && matchFloor && matchStatus;
-    });
-  }, [rooms, selectedBuildingId, selectedFloorId, selectedStatus]);
-
-  const handleClearFilters = () => {
-    setSelectedBuildingId('all');
-    setSelectedFloorId('all');
-    setSelectedStatus('all');
-  };
-
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newFloorId || !newRoomCode.trim()) return;
-    try {
-      setIsSubmitting(true);
-      await createRoom(newFloorId, { code: newRoomCode });
-      setIsCreateModalOpen(false);
-      setNewRoomCode('');
-      setNewFloorId('');
-      setNewBuildingId('');
-
-      const rData = await getAllRooms();
-      setRooms(rData);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const modalAvailableFloors = React.useMemo(() => {
-    if (!newBuildingId) return [];
-    return floors.filter((f) => f.building_id === newBuildingId);
-  }, [floors, newBuildingId]);
-
-  // Reset floor when building changes in modal
-  React.useEffect(() => {
-    setNewFloorId('');
-  }, [newBuildingId]);
+  const {
+    buildings,
+    floors,
+    availableFloors,
+    filteredRooms,
+    modalAvailableFloors,
+    loading,
+    selectedBuildingId,
+    selectedFloorId,
+    selectedStatus,
+    isCreateModalOpen,
+    newBuildingId,
+    newFloorId,
+    newRoomCode,
+    isSubmitting,
+    setSelectedBuildingId,
+    setSelectedFloorId,
+    setSelectedStatus,
+    setIsCreateModalOpen,
+    setNewBuildingId,
+    setNewFloorId,
+    setNewRoomCode,
+    handleClearFilters,
+    handleCreate,
+  } = useRooms({
+    initialBuildingId,
+    initialFloorId,
+  });
 
   return (
     <div className="flex h-[calc(100vh-112px)] w-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
@@ -240,9 +188,7 @@ function RoomsPageContent() {
 
       <div className="flex-1 overflow-y-auto p-6 bg-gray-50/50 dark:bg-gray-900/50">
         {loading ? (
-          <div className="flex h-32 items-center justify-center">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-blue-600" />
-          </div>
+          <RoomGridSkeleton />
         ) : filteredRooms.length === 0 ? (
           <div className="rounded-lg border-2 border-dashed border-gray-300 p-12 text-center text-gray-500 dark:border-gray-700 dark:text-gray-400">
             {t('EmptyRooms')}
@@ -261,28 +207,12 @@ function RoomsPageContent() {
                   room={rm}
                   buildingName={bName}
                   floorName={fName}
-                  onManagePrice={setManagingRoomPrice}
-                  onManageMeters={setManagingRoomMeters}
                 />
               );
             })}
           </div>
         )}
       </div>
-
-      {managingRoomPrice && (
-        <RoomPricingModal
-          room={managingRoomPrice}
-          onClose={() => setManagingRoomPrice(null)}
-        />
-      )}
-
-      {managingRoomMeters && (
-        <MeterManagementModal
-          room={managingRoomMeters}
-          onClose={() => setManagingRoomMeters(null)}
-        />
-      )}
 
       {isCreateModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden bg-gray-900/50 p-4">

@@ -19,6 +19,7 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   { key: 'dashboard', href: '/dashboard', icon: 'grid' },
+  { key: 'contracts', href: '/dashboard/contracts', icon: 'document' },
   {
     key: 'properties',
     icon: 'building',
@@ -28,7 +29,6 @@ const navItems: NavItem[] = [
       { key: 'rooms', href: '/dashboard/rooms' },
     ],
   },
-  { key: 'contracts', href: '/dashboard/contracts', icon: 'document' },
   {
     key: 'meter_management',
     icon: 'activity',
@@ -38,7 +38,14 @@ const navItems: NavItem[] = [
       { key: 'meter_settings', href: '/dashboard/meter-settings' },
     ],
   },
-  { key: 'services', href: '/dashboard/services', icon: 'server' },
+  {
+    key: 'services',
+    icon: 'server',
+    children: [
+      { key: 'room_services', href: '/dashboard/room-services' },
+      { key: 'service_catalog', href: '/dashboard/services' },
+    ],
+  },
 ];
 
 function NavIcon({ type }: { type: string }) {

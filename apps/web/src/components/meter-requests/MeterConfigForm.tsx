@@ -1,85 +1,20 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import {
-  getMeterConfig,
-  updateMeterConfig,
-} from '@/services/api/meter-automation';
+import { useMeterConfig } from '@/hooks/use-meter-config';
 import { Save, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
-
-const configSchema = z.object({
-  day_of_month: z.number().min(1).max(31),
-  grace_days: z.number().min(0).max(30),
-  auto_generate: z.boolean(),
-});
-
-type ConfigFormValues = z.infer<typeof configSchema>;
+import { useTranslations } from 'next-intl';
 
 export default function MeterConfigForm() {
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+  const t = useTranslations('MeterRequests.Config');
+  const { form, loading, saving, error, success, onSubmit } = useMeterConfig();
 
   const {
     register,
-    handleSubmit,
-    reset,
     watch,
     formState: { errors, isDirty },
-  } = useForm<ConfigFormValues>({
-    resolver: zodResolver(configSchema),
-    defaultValues: {
-      day_of_month: 25,
-      grace_days: 5,
-      auto_generate: true,
-    },
-  });
+  } = form;
 
   const autoGenerate = watch('auto_generate');
-
-  useEffect(() => {
-    async function fetchConfig() {
-      try {
-        const config = await getMeterConfig();
-        if (config) {
-          reset({
-            day_of_month: config.day_of_month,
-            grace_days: config.grace_days,
-            auto_generate: config.auto_generate,
-          });
-        }
-      } catch (err: unknown) {
-        const msg =
-          err instanceof Error ? err.message : 'Failed to load configuration';
-        setError(msg);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchConfig();
-  }, [reset]);
-
-  const onSubmit = async (data: ConfigFormValues) => {
-    setSaving(true);
-    setError(null);
-    setSuccess(false);
-    try {
-      await updateMeterConfig(data);
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
-      reset(data); // reset isDirty
-    } catch (err: unknown) {
-      const msg =
-        err instanceof Error ? err.message : 'Failed to save configuration';
-      setError(msg);
-    } finally {
-      setSaving(false);
-    }
-  };
 
   if (loading) {
     return (
@@ -94,12 +29,10 @@ export default function MeterConfigForm() {
       <div className="p-4 sm:p-7">
         <div className="mb-8">
           <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">
-            {/* Fallback to english if missing key */}
-            Automation Configuration
+            {t('Title')}
           </h2>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Configure automatic requests for water and electricity readings from
-            your tenants.
+            {t('Description')}
           </p>
         </div>
 
@@ -113,19 +46,19 @@ export default function MeterConfigForm() {
         {success && (
           <div className="mb-4 bg-teal-50 border border-teal-200 text-sm text-teal-600 rounded-lg p-4 flex items-center dark:bg-teal-800/10 dark:border-teal-900 dark:text-teal-500">
             <CheckCircle2 className="shrink-0 h-4 w-4 mr-2" />
-            Settings saved successfully!
+            {t('Success')}
           </div>
         )}
 
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={onSubmit}>
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
                 <label className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                  Enable Automation
+                  {t('Enable')}
                 </label>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Automatically create requests each month
+                  {t('EnableDesc')}
                 </p>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
@@ -144,7 +77,7 @@ export default function MeterConfigForm() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium mb-2 dark:text-white">
-                    Day of the month
+                    {t('DayOfMonth')}
                   </label>
                   <input
                     type="number"
@@ -158,13 +91,13 @@ export default function MeterConfigForm() {
                     </p>
                   )}
                   <p className="text-sm text-gray-500 mt-2">
-                    Request goes out on this day (1-31)
+                    {t('DayOfMonthDesc')}
                   </p>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium mb-2 dark:text-white">
-                    Grace Period (Days)
+                    {t('GracePeriod')}
                   </label>
                   <input
                     type="number"
@@ -178,7 +111,7 @@ export default function MeterConfigForm() {
                     </p>
                   )}
                   <p className="text-sm text-gray-500 mt-2">
-                    Days allowed before request is marked LATE
+                    {t('GracePeriodDesc')}
                   </p>
                 </div>
               </div>
@@ -195,7 +128,7 @@ export default function MeterConfigForm() {
                 ) : (
                   <Save className="shrink-0 h-4 w-4" />
                 )}
-                Save Configuration
+                {t('Save')}
               </button>
             </div>
           </div>

@@ -4,53 +4,41 @@ import * as React from 'react';
 import { useTranslations } from 'next-intl';
 import { BuildingStream } from '@/components/buildings/BuildingStream';
 import { BuildingDetailPanel } from '@/components/buildings/BuildingDetailPanel';
-import { Building } from '@nhatroso/shared';
-import { getBuildings } from '@/services/api/buildings';
+import { useBuildings } from '@/hooks/use-buildings';
+import { Skeleton } from '@/components/ui/Skeleton';
+
+function ListSkeleton() {
+  return (
+    <div className="space-y-2">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div
+          key={i}
+          className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white p-3 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+        >
+          <Skeleton className="h-10 w-10 rounded-lg" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-3 w-48" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function BuildingsPage() {
   const t = useTranslations('Buildings');
-  const [buildings, setBuildings] = React.useState<Building[]>([]);
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [selectedBuildingId, setSelectedBuildingId] = React.useState<
-    string | null
-  >(null);
-  const [isCreating, setIsCreating] = React.useState(false);
-
-  const fetchBuildings = React.useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const data = await getBuildings();
-      setBuildings(data);
-    } catch (err) {
-      console.error('Failed to fetch buildings', err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  React.useEffect(() => {
-    fetchBuildings();
-  }, [fetchBuildings]);
-
-  const selectedBuilding = React.useMemo(
-    () => buildings.find((b) => b.id === selectedBuildingId) || null,
-    [buildings, selectedBuildingId],
-  );
-
-  const handleCreateNew = () => {
-    setSelectedBuildingId(null);
-    setIsCreating(true);
-  };
-
-  const handleSelectBuilding = (id: string) => {
-    setIsCreating(false);
-    setSelectedBuildingId(id);
-  };
-
-  const handleClosePanel = () => {
-    setIsCreating(false);
-    setSelectedBuildingId(null);
-  };
+  const {
+    buildings,
+    isLoading,
+    isCreating,
+    selectedBuildingId,
+    selectedBuilding,
+    handleCreateNew,
+    handleSelectBuilding,
+    handleClosePanel,
+    handleSuccess,
+  } = useBuildings();
 
   return (
     <div className="flex h-[calc(100vh-112px)] w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
@@ -94,9 +82,7 @@ export default function BuildingsPage() {
 
         <div className="flex-1 overflow-y-auto bg-gray-50/50 dark:bg-gray-900/50 p-2">
           {isLoading ? (
-            <div className="flex h-32 items-center justify-center">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-blue-600" />
-            </div>
+            <ListSkeleton />
           ) : (
             <BuildingStream
               buildings={buildings}
@@ -118,12 +104,7 @@ export default function BuildingsPage() {
             building={selectedBuilding}
             isCreating={isCreating}
             onClose={handleClosePanel}
-            onSuccess={() => {
-              fetchBuildings();
-              if (isCreating) {
-                setIsCreating(false);
-              }
-            }}
+            onSuccess={handleSuccess}
           />
         ) : (
           <div className="hidden h-full w-full items-center justify-center md:flex">

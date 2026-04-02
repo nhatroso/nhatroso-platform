@@ -19,6 +19,7 @@ export interface ConfigParams {
 export interface MeterRequest {
   id: string;
   room_id: string;
+  room_code: string;
   period_month: string;
   due_date: string;
   status: string;

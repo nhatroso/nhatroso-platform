@@ -2,8 +2,6 @@ import * as React from 'react';
 import { useTranslations } from 'next-intl';
 import { Room, CreateRoomInput } from '@nhatroso/shared';
 import { getRooms, createRoom } from '@/services/api/rooms';
-import { RoomPricingModal } from './RoomPricingModal';
-import { MeterManagementModal } from './MeterManagementModal';
 import { RoomCard } from './RoomCard';
 
 export function RoomList({ floorId }: { floorId: string }) {
@@ -14,11 +12,6 @@ export function RoomList({ floorId }: { floorId: string }) {
   const [isCreating, setIsCreating] = React.useState(false);
   const [newCode, setNewCode] = React.useState('');
   const [errorMsg, setErrorMsg] = React.useState('');
-  const [managingRoomPrice, setManagingRoomPrice] = React.useState<Room | null>(
-    null,
-  );
-  const [managingRoomMeters, setManagingRoomMeters] =
-    React.useState<Room | null>(null);
 
   React.useEffect(() => {
     fetchRooms();
@@ -86,13 +79,7 @@ export function RoomList({ floorId }: { floorId: string }) {
         ) : (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
             {rooms.map((rm) => (
-              <RoomCard
-                key={rm.id}
-                room={rm}
-                onManagePrice={setManagingRoomPrice}
-                onManageMeters={setManagingRoomMeters}
-                compact
-              />
+              <RoomCard key={rm.id} room={rm} compact />
             ))}
           </div>
         )}
@@ -122,20 +109,6 @@ export function RoomList({ floorId }: { floorId: string }) {
           </button>
         </form>
       </div>
-
-      {managingRoomPrice && (
-        <RoomPricingModal
-          room={managingRoomPrice}
-          onClose={() => setManagingRoomPrice(null)}
-        />
-      )}
-
-      {managingRoomMeters && (
-        <MeterManagementModal
-          room={managingRoomMeters}
-          onClose={() => setManagingRoomMeters(null)}
-        />
-      )}
     </div>
   );
 }

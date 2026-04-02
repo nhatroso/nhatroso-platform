@@ -5,6 +5,7 @@ import { generateManualRequests } from '@/services/api/meter-automation';
 import { getBuildings } from '@/services/api/buildings';
 import { Building } from '@nhatroso/shared';
 import { Loader2, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface ManualGenerateModalProps {
   onClose: () => void;
@@ -15,6 +16,7 @@ export default function ManualGenerateModal({
   onClose,
   onSuccess,
 }: ManualGenerateModalProps) {
+  const t = useTranslations('MeterRequests.Manual');
   const [buildings, setBuildings] = useState<Building[]>([]);
   const [loading, setLoading] = useState(false);
   const [fetchingBuildings, setFetchingBuildings] = useState(true);
@@ -41,18 +43,18 @@ export default function ManualGenerateModal({
           setBuildingId(data[0].id);
         }
       } catch {
-        setError('Không thể tải danh sách tòa nhà.');
+        setError(t('LoadBuildingsError'));
       } finally {
         setFetchingBuildings(false);
       }
     }
     loadBuildings();
-  }, []);
+  }, [t]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!buildingId || !periodMonth) {
-      setError('Vui lòng chọn tòa nhà và kỳ hạn (tháng).');
+      setError(t('ValidationError'));
       return;
     }
 
@@ -74,8 +76,7 @@ export default function ManualGenerateModal({
       });
       onSuccess(res.generated_count);
     } catch (err: unknown) {
-      const msg =
-        err instanceof Error ? err.message : 'Lỗi khi tạo yêu cầu thủ công.';
+      const msg = err instanceof Error ? err.message : t('GenerateError');
       setError(msg);
     } finally {
       setLoading(false);
@@ -93,7 +94,7 @@ export default function ManualGenerateModal({
         </button>
 
         <h3 className="mb-4 text-xl font-bold text-gray-900 dark:text-white">
-          Tạo yêu cầu (Thủ công)
+          {t('Title')}
         </h3>
 
         {error && (
@@ -110,7 +111,7 @@ export default function ManualGenerateModal({
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Tòa nhà
+                {t('Building')}
               </label>
               <select
                 value={buildingId}
@@ -118,7 +119,7 @@ export default function ManualGenerateModal({
                 className="block w-full rounded-lg border-gray-200 px-4 py-2 text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 dark:border-gray-700 dark:bg-slate-900 dark:text-gray-400"
               >
                 <option value="" disabled>
-                  -- Chọn tòa nhà --
+                  {t('SelectBuilding')}
                 </option>
                 {buildings.map((b) => (
                   <option key={b.id} value={b.id}>
@@ -130,7 +131,7 @@ export default function ManualGenerateModal({
 
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Kỳ hạn (Tháng chốt số)
+                {t('Period')}
               </label>
               <input
                 type="month"
@@ -142,7 +143,7 @@ export default function ManualGenerateModal({
 
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Hạn chốt sổ (Due Date)
+                {t('DueDate')}
               </label>
               <input
                 type="date"
@@ -159,7 +160,7 @@ export default function ManualGenerateModal({
                 onClick={onClose}
                 className="inline-flex items-center gap-x-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:bg-slate-900 dark:text-white dark:hover:bg-gray-800"
               >
-                Hủy bỏ
+                {t('Cancel')}
               </button>
               <button
                 type="submit"
@@ -169,7 +170,7 @@ export default function ManualGenerateModal({
                 {loading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  'Tạo dữ liệu'
+                  t('Submit')
                 )}
               </button>
             </div>

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useTranslations } from 'next-intl';
-import { Room, Meter, MeterReading } from '@nhatroso/shared';
-import { metersApi } from '@/services/api/meters';
+import { Room } from '@nhatroso/shared';
+import { useMeterManagement } from '@/hooks/use-meter-management';
 import { getServiceDisplayName } from '@/lib/utils';
 import {
   Activity,
@@ -27,66 +27,19 @@ export function MeterManagementModal({
   const t = useTranslations('Buildings');
   const tServices = useTranslations('Services');
 
-  const [meters, setMeters] = React.useState<Meter[]>([]);
-  const [selectedMeter, setSelectedMeter] = React.useState<Meter | null>(null);
-  const [readings, setReadings] = React.useState<MeterReading[]>([]);
-  const [loading, setLoading] = React.useState(true);
-  const [submitting, setSubmitting] = React.useState(false);
-
-  const [newReadingValue, setNewReadingValue] = React.useState('');
-  const [isRecording, setIsRecording] = React.useState(false);
-
-  const fetchMeters = React.useCallback(async () => {
-    try {
-      setLoading(true);
-      const data = await metersApi.listByRoom(room.id);
-      setMeters(data);
-      if (data.length > 0 && !selectedMeter) {
-        setSelectedMeter(data[0]);
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }, [room.id, selectedMeter]);
-
-  React.useEffect(() => {
-    fetchMeters();
-  }, [fetchMeters]);
-
-  const fetchReadings = React.useCallback(async (meterId: string) => {
-    try {
-      const data = await metersApi.listReadings(meterId);
-      setReadings(data);
-    } catch (err) {
-      console.error(err);
-    }
-  }, []);
-
-  React.useEffect(() => {
-    if (selectedMeter) {
-      fetchReadings(selectedMeter.id);
-    }
-  }, [selectedMeter, fetchReadings]);
-
-  const handleRecordReading = async () => {
-    if (!selectedMeter || !newReadingValue) return;
-    try {
-      setSubmitting(true);
-      await metersApi.recordReading(selectedMeter.id, {
-        reading_value: newReadingValue,
-        reading_date: new Date().toISOString(),
-      });
-      setNewReadingValue('');
-      setIsRecording(false);
-      fetchReadings(selectedMeter.id);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setSubmitting(false);
-    }
-  };
+  const {
+    meters,
+    selectedMeter,
+    readings,
+    loading,
+    submitting,
+    newReadingValue,
+    isRecording,
+    setSelectedMeter,
+    setNewReadingValue,
+    setIsRecording,
+    handleRecordReading,
+  } = useMeterManagement(room);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">

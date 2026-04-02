@@ -60,4 +60,13 @@ export const metersApi = {
     if (!res.ok) throw new Error('Failed to list landlord meters');
     return res.json();
   },
+
+  updateStatus: async (id: string, status: string): Promise<void> => {
+    const res = await apiFetch(`${API_BASE_URL}/meters/${id}/status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status }),
+    });
+    if (!res.ok) throw new Error('Failed to update meter status');
+  },
 };
