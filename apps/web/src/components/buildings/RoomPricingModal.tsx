@@ -1,180 +1,41 @@
 import * as React from 'react';
 import { useTranslations } from 'next-intl';
-import {
-  Room,
-  Service,
-  PriceRule,
-  RoomService,
-  PREDEFINED_SERVICE_IDS,
-  PREDEFINED_UNIT_IDS,
-} from '@nhatroso/shared';
-import { servicesApi } from '@/services/api/services';
-import { priceRulesApi } from '@/services/api/price-rules';
-import { roomServicesApi } from '@/services/api/room-services';
+import { Room } from '@nhatroso/shared';
+import { useRoomPricing } from '@/hooks/use-room-pricing';
+import { getServiceDisplayName, getUnitDisplayName } from '@/lib/utils';
+import { Gauge } from 'lucide-react';
 
 interface RoomPricingModalProps {
   room: Room;
   onClose: () => void;
 }
 
-function getServiceDisplayName(name: string, t: (key: string) => string) {
-  if (name.startsWith('service_')) {
-    const key = name.replace('service_', '');
-    return t(`Predefined_${key}`);
-  }
-  if (PREDEFINED_SERVICE_IDS.includes(name)) {
-    return t(`Predefined_${name}`);
-  }
-  return name;
-}
-
-function getUnitDisplayName(unit: string, t: (key: string) => string) {
-  if (unit.startsWith('unit_')) {
-    const key = unit.replace('unit_', '');
-    return t(`Unit_${key}`);
-  }
-  if (PREDEFINED_UNIT_IDS.includes(unit)) {
-    return t(`Unit_${unit}`);
-  }
-  return unit;
-}
-
 export function RoomPricingModal({ room, onClose }: RoomPricingModalProps) {
   const t = useTranslations('Buildings');
   const tServices = useTranslations('Services');
 
-  const [services, setServices] = React.useState<Service[]>([]);
-  const [roomServices, setRoomServices] = React.useState<RoomService[]>([]);
-  const [serviceTemplates, setServiceTemplates] = React.useState<PriceRule[]>(
-    [],
-  );
-
-  const [loading, setLoading] = React.useState(true);
-  const [selectedServiceId, setSelectedServiceId] = React.useState<
-    string | null
-  >(null);
-
-  const [stagedIsActive, setStagedIsActive] = React.useState(false);
-  const [stagedPriceRuleId, setStagedPriceRuleId] = React.useState('');
-  const [errorMsg, setErrorMsg] = React.useState<string>('');
-  const [isSaving, setIsSaving] = React.useState(false);
-
-  React.useEffect(() => {
-    fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [room.id]);
-
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const [allServices, assignedServices] = await Promise.all([
-        servicesApi.list(),
-        roomServicesApi.listByRoom(room.id),
-      ]);
-
-      const activeServices = allServices.filter((s) => s.status === 'ACTIVE');
-      setServices(activeServices);
-      setRoomServices(assignedServices);
-
-      if (activeServices.length > 0 && !selectedServiceId) {
-        setSelectedServiceId(activeServices[0].id);
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchTemplates = async (serviceId: string) => {
-    try {
-      const templates = await priceRulesApi.listByService(serviceId);
-      setServiceTemplates(
-        templates.sort((a, b) => a.name.localeCompare(b.name)),
-      );
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  React.useEffect(() => {
-    if (selectedServiceId) {
-      fetchTemplates(selectedServiceId);
-
-      const assigned = roomServices.find(
-        (rs) => rs.service_id === selectedServiceId,
-      );
-
-      if (assigned) {
-        setStagedIsActive(assigned.is_active);
-        setStagedPriceRuleId(assigned.price_rule_id || '');
-      } else {
-        setStagedIsActive(false);
-        setStagedPriceRuleId('');
-      }
-
-      setErrorMsg('');
-    }
-  }, [selectedServiceId, roomServices]);
-
-  const handleSave = async () => {
-    if (!selectedServiceId) return;
-
-    // Validation: If enabled, must have a template
-    if (stagedIsActive && !stagedPriceRuleId) {
-      setErrorMsg(tServices('ErrorSelectPriceRule'));
-      return;
-    }
-
-    setErrorMsg('');
-    setIsSaving(true);
-
-    try {
-      const assigned = roomServices.find(
-        (rs) => rs.service_id === selectedServiceId,
-      );
-
-      if (stagedIsActive) {
-        if (!assigned) {
-          // New assignment
-          await roomServicesApi.assign(room.id, {
-            service_id: selectedServiceId,
-            price_rule_id: stagedPriceRuleId,
-          });
-        } else {
-          // Update existing assignment
-          await roomServicesApi.update(room.id, assigned.id, {
-            price_rule_id: stagedPriceRuleId,
-            is_active: true,
-          });
-        }
-      } else {
-        // Disabling
-        if (assigned) {
-          // Remove or set inactive. User previous flow used remove.
-          await roomServicesApi.remove(room.id, assigned.id);
-        }
-      }
-
-      // Reload room services
-      const assignedServices = await roomServicesApi.listByRoom(room.id);
-      setRoomServices(assignedServices);
-      setErrorMsg('');
-      alert(tServices('SuccessSaveConfig'));
-    } catch (err: unknown) {
-      setErrorMsg(
-        err instanceof Error ? err.message : 'Failed to save configuration',
-      );
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const activeService = services.find((s) => s.id === selectedServiceId);
-  const assignedRecord = roomServices.find(
-    (rs) => rs.service_id === selectedServiceId,
-  );
-  const isActuallyEnabled = !!assignedRecord;
+  const {
+    services,
+    roomServices,
+    serviceTemplates,
+    activeService,
+    activeMeter,
+    loading,
+    isSaving,
+    selectedServiceId,
+    stagedIsActive,
+    stagedPriceRuleId,
+    initialMeterReading,
+    errorMsg,
+    isActuallyEnabled,
+    isNewUtilityActivation,
+    setSelectedServiceId,
+    setStagedIsActive,
+    setStagedPriceRuleId,
+    setInitialMeterReading,
+    setErrorMsg,
+    handleSave,
+  } = useRoomPricing(room);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-sm">
@@ -237,12 +98,8 @@ export function RoomPricingModal({ room, onClose }: RoomPricingModalProps) {
                   return (
                     <li key={s.id}>
                       <button
-                        onClick={() => {
-                          setSelectedServiceId(s.id);
-                        }}
-                        className={`group flex w-full items-center rounded-lg p-2 text-gray-900 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 ${
-                          isActive ? 'bg-gray-100 dark:bg-gray-700' : ''
-                        }`}
+                        onClick={() => setSelectedServiceId(s.id)}
+                        className={`group flex w-full items-center rounded-lg p-2 text-gray-900 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 ${isActive ? 'bg-gray-100 dark:bg-gray-700' : ''}`}
                       >
                         <div className="flex flex-1 flex-col text-left">
                           <span
@@ -304,6 +161,34 @@ export function RoomPricingModal({ room, onClose }: RoomPricingModalProps) {
                     </label>
                   </div>
 
+                  {(() => {
+                    const meter = activeMeter;
+                    if (!meter) return null;
+                    const reading =
+                      meter.latest_reading ?? meter.initial_reading;
+                    return (
+                      <div className="mt-4 flex items-center gap-3 rounded-lg bg-blue-50/50 p-4 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800/30">
+                        <Gauge
+                          size={16}
+                          className="text-blue-600 dark:text-blue-400"
+                        />
+                        <div className="flex-1">
+                          <p className="text-xs font-medium text-blue-800 dark:text-blue-300">
+                            {tServices('CurrentMeterReading')}
+                          </p>
+                          <p className="text-sm font-bold text-gray-900 dark:text-white mt-0.5">
+                            {Number(reading).toLocaleString()}{' '}
+                            {meter.service_unit ||
+                              getUnitDisplayName(
+                                activeService?.unit || '',
+                                tServices,
+                              )}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })()}
+
                   {!stagedIsActive && (
                     <div
                       className="mt-4 p-4 text-sm text-gray-800 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-gray-300"
@@ -325,6 +210,42 @@ export function RoomPricingModal({ room, onClose }: RoomPricingModalProps) {
                     </div>
                   )}
                 </div>
+
+                {/* Meter Initial Reading — only for new utility service activations */}
+                {isNewUtilityActivation && (
+                  <div className="rounded-lg border border-amber-200 bg-amber-50/50 px-6 py-5 shadow-sm dark:border-amber-800/30 dark:bg-amber-950/10">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Gauge size={18} className="text-amber-600" />
+                      <h3 className="text-sm font-bold text-amber-800 dark:text-amber-400">
+                        {tServices('SetupMeter')}
+                      </h3>
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+                      {tServices('SetupMeterDescription')}
+                    </p>
+                    <div className="max-w-xs">
+                      <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-1.5">
+                        {tServices('InitialReadingLabel')}
+                        <span className="text-red-500 ml-1">*</span>
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="any"
+                        value={initialMeterReading}
+                        onChange={(e) => {
+                          setInitialMeterReading(e.target.value);
+                          setErrorMsg('');
+                        }}
+                        placeholder={tServices('InitialReadingPlaceholder')}
+                        className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm focus:border-amber-400 focus:ring-2 focus:ring-amber-100 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-amber-500"
+                      />
+                      <p className="mt-1.5 text-xs text-gray-400">
+                        {tServices('InitialReadingHint')}
+                      </p>
+                    </div>
+                  </div>
+                )}
 
                 {/* Price Template Options */}
                 {stagedIsActive && (
@@ -365,7 +286,6 @@ export function RoomPricingModal({ room, onClose }: RoomPricingModalProps) {
                           </select>
                         </div>
 
-                        {/* Display Current Selected Template Details */}
                         {stagedPriceRuleId && (
                           <div className="p-4 rounded-lg bg-blue-50 dark:bg-gray-800/50 border border-blue-100 dark:border-gray-700">
                             {serviceTemplates
@@ -378,7 +298,8 @@ export function RoomPricingModal({ room, onClose }: RoomPricingModalProps) {
                                     })}
                                   </p>
                                   <p className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white mt-1">
-                                    {Number(t.unit_price).toLocaleString()}đ{' '}
+                                    {Number(t.unit_price).toLocaleString()}
+                                    {tServices('Currency')}{' '}
                                     <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
                                       /{' '}
                                       {getUnitDisplayName(

@@ -1,0 +1,54 @@
+{
+  "Table": {
+    "Room": "Phòng",
+    "Period": "Kỳ hạn",
+    "DueDate": "Ngày hết hạn",
+    "Status": "Trạng thái",
+    "Action": "Thao tác",
+    "NoRequests": "Không tìm thấy yêu cầu nào.",
+    "ViewImages": "Xem ảnh",
+    "Waiting": "Đang chờ...",
+    "FetchError": "Lỗi khi tải yêu cầu.",
+    "StatusValue": {
+      "SUBMITTED": "Đã nộp",
+      "LATE": "Quá hạn",
+      "PENDING": "Đang chờ"
+    }
+  },
+  "Config": {
+    "Title": "Cấu hình Tự động",
+    "Description": "Cấu hình gửi yêu cầu chốt chỉ số điện nước tự động định kỳ cho người thuê.",
+    "Success": "Đã lưu cấu hình thành công!",
+    "LoadError": "Lỗi khi tải cấu hình.",
+    "SaveError": "Lỗi khi lưu cấu hình.",
+    "Enable": "Kích hoạt tự động",
+    "EnableDesc": "Tự động tạo yêu cầu mỗi tháng",
+    "DayOfMonth": "Ngày chốt số",
+    "DayOfMonthDesc": "Yêu cầu sẽ được gửi vào ngày này hàng tháng (1-31)",
+    "GracePeriod": "Thời gian gia hạn (Ngày)",
+    "GracePeriodDesc": "Số ngày cho phép trước khi yêu cầu bị đánh dấu là QUÁ HẠN",
+    "Save": "Lưu cấu hình"
+  },
+  "Manual": {
+    "Title": "Tạo yêu cầu thủ công",
+    "LoadBuildingsError": "Không thể tải danh sách tòa nhà.",
+    "ValidationError": "Vui lòng chọn tòa nhà và kỳ hạn (tháng).",
+    "GenerateError": "Lỗi khi tạo yêu cầu thủ công.",
+    "Building": "Tòa nhà",
+    "SelectBuilding": "-- Chọn tòa nhà --",
+    "Period": "Kỳ hạn (Tháng chốt số)",
+    "DueDate": "Ngày hết hạn",
+    "Cancel": "Hủy bỏ",
+    "Submit": "Tạo dữ liệu"
+  },
+  "Page": {
+    "RequestsTitle": "Yêu cầu chốt số",
+    "RequestsDesc": "Theo dõi tiến độ nộp chỉ số của người thuê và các yêu cầu định kỳ",
+    "SettingsTitle": "Cấu hình chốt số",
+    "SettingsDesc": "Quản lý lịch trình tự động gửi yêu cầu chốt chỉ số điện nước",
+    "ManualButton": "Tạo yêu cầu thủ công"
+  },
+  "Alerts": {
+    "SuccessGenerated": "Đã tạo thành công {count} yêu cầu nộp chỉ số."
+  }
+}

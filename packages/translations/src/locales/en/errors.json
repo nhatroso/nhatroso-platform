@@ -9,5 +9,6 @@
   "UNKNOWN_ERROR": "An unknown error occurred",
   "BUILDING_HAS_ACTIVE_ROOMS": "Cannot archive building: There are still rented or deposited rooms",
   "BUILDING_UPDATE_ARCHIVED": "Cannot update archived building.",
-  "ROOM_CODE_EXISTS": "Room code already exists in this building."
+  "ROOM_CODE_EXISTS": "Room code already exists in this building.",
+  "READING_REQUEST_ALREADY_EXISTS": "A reading request for this month and year already exists."
 }

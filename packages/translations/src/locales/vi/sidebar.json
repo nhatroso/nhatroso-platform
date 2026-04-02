@@ -5,5 +5,12 @@
   "services": "Dịch vụ",
   "properties": "Bất động sản",
   "floors": "Tầng",
-  "rooms": "Phòng"
+  "rooms": "Phòng",
+  "meters": "Danh sách chỉ số",
+  "meter_requests": "Lịch sử yêu cầu",
+  "meter_settings": "Cài đặt tự động",
+  "meter_management": "Quản lý chỉ số",
+  "service_catalog": "Danh sách dịch vụ",
+  "room_services": "Dịch vụ phòng",
+  "logout": "Đăng xuất"
 }

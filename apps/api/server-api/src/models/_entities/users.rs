@@ -31,6 +31,8 @@ pub enum Relation {
     ContractTenants,
     #[sea_orm(has_many = "super::contracts::Entity")]
     Contracts,
+    #[sea_orm(has_many = "super::meter_request_configs::Entity")]
+    MeterRequestConfigs,
     #[sea_orm(has_many = "super::price_rules::Entity")]
     PriceRules,
     #[sea_orm(has_many = "super::refresh_tokens::Entity")]
@@ -48,6 +50,12 @@ impl Related<super::buildings::Entity> for Entity {
 impl Related<super::contract_tenants::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::ContractTenants.def()
+    }
+}
+
+impl Related<super::meter_request_configs::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::MeterRequestConfigs.def()
     }
 }
 

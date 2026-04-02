@@ -8,4 +8,6 @@ export interface AuthResponse {
   token: String;
   refresh_token: String;
   id: String;
+  name: String;
+  phone: String;
 }

@@ -1,12 +1,16 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { LocaleSwitcher } from './LocaleSwitcher';
+import { LogOut } from 'lucide-react';
 
 interface TopNavbarProps {
   onMenuToggle: () => void;
 }
 
 export function TopNavbar({ onMenuToggle }: TopNavbarProps) {
+  const t = useTranslations('Sidebar');
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -42,13 +46,18 @@ export function TopNavbar({ onMenuToggle }: TopNavbarProps) {
           </div>
 
           {/* Right side */}
-          <div className="flex items-center gap-3">
-            {/* User menu */}
+          <div className="flex items-center gap-4">
+            <LocaleSwitcher />
+
+            <div className="h-4 w-px bg-gray-200 dark:bg-gray-700 hidden sm:block" />
+
+            {/* Logout */}
             <button
               onClick={handleLogout}
-              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700"
+              className="flex items-center gap-2 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-bold text-white transition-all hover:bg-red-700 active:scale-95 shadow-sm"
             >
-              Logout
+              <LogOut size={14} />
+              <span className="hidden sm:inline">{t('logout')}</span>
             </button>
           </div>
         </div>

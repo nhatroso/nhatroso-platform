@@ -19,6 +19,7 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   { key: 'dashboard', href: '/dashboard', icon: 'grid' },
+  { key: 'contracts', href: '/dashboard/contracts', icon: 'document' },
   {
     key: 'properties',
     icon: 'building',
@@ -28,8 +29,23 @@ const navItems: NavItem[] = [
       { key: 'rooms', href: '/dashboard/rooms' },
     ],
   },
-  { key: 'contracts', href: '/dashboard/contracts', icon: 'document' },
-  { key: 'services', href: '/dashboard/services', icon: 'server' },
+  {
+    key: 'meter_management',
+    icon: 'activity',
+    children: [
+      { key: 'meters', href: '/dashboard/meters' },
+      { key: 'meter_requests', href: '/dashboard/meter-requests' },
+      { key: 'meter_settings', href: '/dashboard/meter-settings' },
+    ],
+  },
+  {
+    key: 'services',
+    icon: 'server',
+    children: [
+      { key: 'room_services', href: '/dashboard/room-services' },
+      { key: 'service_catalog', href: '/dashboard/services' },
+    ],
+  },
 ];
 
 function NavIcon({ type }: { type: string }) {
@@ -74,6 +90,22 @@ function NavIcon({ type }: { type: string }) {
             strokeLinejoin="round"
             strokeWidth={2}
             d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v4a2 2 0 00-2-2"
+          />
+        </svg>
+      );
+    case 'activity':
+      return (
+        <svg
+          className="h-5 w-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M13 10V3L4 14h7v7l9-11h-7z"
           />
         </svg>
       );

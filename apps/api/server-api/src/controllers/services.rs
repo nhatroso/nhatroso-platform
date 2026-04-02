@@ -21,8 +21,9 @@ pub async fn create(
     }
 }
 
-pub async fn list(State(ctx): State<AppContext>) -> Result<Response> {
-    let response = Service::list_services(&ctx.db).await?;
+pub async fn list(auth: JWT, State(ctx): State<AppContext>) -> Result<Response> {
+    let owner_id = auth::get_user_id(&auth)?;
+    let response = Service::list_services(&ctx.db, owner_id).await?;
     format::json(response)
 }
 

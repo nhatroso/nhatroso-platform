@@ -1,0 +1,11 @@
+{
+  "Title": "Room Services",
+  "Description": "Manage services and utility readings for each room",
+  "RoomsCount": "{count} rooms",
+  "NoRoomsFound": "No rooms match the filters",
+  "CurrentReading": "Current Reading",
+  "ServicesButton": "Services",
+  "MetersButton": "Meters",
+  "ManagePricingTitle": "Manage Services & Pricing",
+  "MetersTitle": "Utility Meters"
+}

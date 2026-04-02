@@ -10,6 +10,12 @@ import viSidebar from './locales/vi/sidebar.json';
 import enSidebar from './locales/en/sidebar.json';
 import viDashboard from './locales/vi/dashboard.json';
 import enDashboard from './locales/en/dashboard.json';
+import viMeters from './locales/vi/meters.json';
+import enMeters from './locales/en/meters.json';
+import viMeterRequests from './locales/vi/meter_requests.json';
+import enMeterRequests from './locales/en/meter_requests.json';
+import viRoomServices from './locales/vi/room_services.json';
+import enRoomServices from './locales/en/room_services.json';
 
 export const i18nConfig = {
   locales: ['vi', 'en'] as const,
@@ -26,6 +32,9 @@ export const translations = {
     Services: viServices,
     Sidebar: viSidebar,
     Dashboard: viDashboard,
+    Meters: viMeters,
+    MeterRequests: viMeterRequests,
+    RoomServices: viRoomServices,
   },
   en: {
     Errors: enErrors,
@@ -34,6 +43,9 @@ export const translations = {
     Services: enServices,
     Sidebar: enSidebar,
     Dashboard: enDashboard,
+    Meters: enMeters,
+    MeterRequests: enMeterRequests,
+    RoomServices: enRoomServices,
   },
 };
 
