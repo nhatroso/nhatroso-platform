@@ -117,8 +117,8 @@ function RoomServicesContent() {
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-3">
           {/* Building filter */}
-          <div className="flex items-center gap-2">
-            <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
+          <div className="flex items-center">
+            <label className="mr-2 text-sm font-medium text-gray-900 dark:text-white">
               {t('Building')}:
             </label>
             <select
@@ -139,8 +139,8 @@ function RoomServicesContent() {
           </div>
 
           {/* Floor filter */}
-          <div className="flex items-center gap-2">
-            <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
+          <div className="flex items-center">
+            <label className="mr-2 text-sm font-medium text-gray-900 dark:text-white">
               {t('Floor')}:
             </label>
             <select
@@ -159,8 +159,8 @@ function RoomServicesContent() {
           </div>
 
           {/* Status filter */}
-          <div className="flex items-center gap-2">
-            <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
+          <div className="flex items-center">
+            <label className="mr-2 text-sm font-medium text-gray-900 dark:text-white">
               {t('Status')}:
             </label>
             <select

@@ -50,5 +50,7 @@
   },
   "Alerts": {
     "SuccessGenerated": "Successfully generated {count} meter requests."
-  }
+  },
+  "Period": "Period",
+  "Status": "Status"
 }

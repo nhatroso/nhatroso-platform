@@ -131,62 +131,92 @@ export default function MeterManagementPage() {
       </div>
 
       {/* Filters Area */}
-      <div className="flex flex-col gap-4 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-200 dark:bg-gray-800 dark:ring-gray-700 sm:flex-row sm:items-center">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-          <input
-            type="text"
-            placeholder={t('SearchRoom')}
-            className="w-full rounded-xl border-gray-200 bg-gray-50 pl-10 text-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <input
-            type="month"
-            value={selectedPeriod}
-            onChange={(e) => setSelectedPeriod(e.target.value)}
-            className="rounded-xl border-gray-200 bg-gray-50 text-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
-          />
-          <select
-            value={selectedBuilding}
-            onChange={(e) => setSelectedBuilding(e.target.value)}
-            className="rounded-xl border-gray-200 bg-gray-50 text-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
-          >
-            <option value="all">{t('AllBuildings')}</option>
-            {buildings.map((b) => (
-              <option key={b.id} value={b.id}>
-                {b.name}
-              </option>
-            ))}
-          </select>
-          <select
-            value={statusFilter}
-            onChange={(e) =>
-              setStatusFilter(
-                e.target.value as 'ALL' | 'PENDING' | 'SUBMITTED' | 'OVERDUE',
-              )
-            }
-            className="rounded-xl border-gray-200 bg-gray-50 text-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
-          >
-            <option value="ALL">{t('Status_ALL')}</option>
-            <option value="PENDING">{t('Status_PENDING')}</option>
-            <option value="SUBMITTED">{t('Status_SUBMITTED')}</option>
-            <option value="OVERDUE">{t('Status_OVERDUE')}</option>
-          </select>
-          <select
-            value={serviceFilter}
-            onChange={(e) => setServiceFilter(e.target.value)}
-            className="rounded-xl border-gray-200 bg-gray-50 text-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
-          >
-            <option value="all">{t('AllServices')}</option>
-            {serviceOptions.map((svc) => (
-              <option key={svc} value={svc}>
-                {getServiceDisplayName(svc, tServices)}
-              </option>
-            ))}
-          </select>
+      <div className="flex flex-col gap-4 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-200 dark:bg-gray-800 dark:ring-gray-700">
+        <div className="flex flex-wrap items-center gap-4">
+          {/* Search */}
+          <div className="flex items-center">
+            <label className="mr-2 text-sm font-medium text-gray-900 dark:text-white">
+              {t('SearchRoom')}:
+            </label>
+            <input
+              type="text"
+              className="block w-48 rounded-lg border border-gray-300 bg-white p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+
+          {/* Period Filter */}
+          <div className="flex items-center">
+            <label className="mr-2 text-sm font-medium text-gray-900 dark:text-white">
+              {t('Period') || 'Kỳ'}:
+            </label>
+            <input
+              type="month"
+              value={selectedPeriod}
+              onChange={(e) => setSelectedPeriod(e.target.value)}
+              className="block w-48 rounded-lg border border-gray-300 bg-white p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+            />
+          </div>
+
+          {/* Building Filter */}
+          <div className="flex items-center">
+            <label className="mr-2 text-sm font-medium text-gray-900 dark:text-white">
+              {t('Building')}:
+            </label>
+            <select
+              value={selectedBuilding}
+              onChange={(e) => setSelectedBuilding(e.target.value)}
+              className="block w-48 rounded-lg border border-gray-300 bg-white p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+            >
+              <option value="all">-- {t('AllBuildings')} --</option>
+              {buildings.map((b) => (
+                <option key={b.id} value={b.id}>
+                  {b.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Service Filter */}
+          <div className="flex items-center">
+            <label className="mr-2 text-sm font-medium text-gray-900 dark:text-white">
+              {t('Service') || 'Dịch vụ'}:
+            </label>
+            <select
+              value={serviceFilter}
+              onChange={(e) => setServiceFilter(e.target.value)}
+              className="block w-40 rounded-lg border border-gray-300 bg-white p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+            >
+              <option value="all">-- {t('AllServices')} --</option>
+              {serviceOptions.map((svc) => (
+                <option key={svc} value={svc}>
+                  {getServiceDisplayName(svc, tServices)}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Status Filter */}
+          <div className="flex items-center">
+            <label className="mr-2 text-sm font-medium text-gray-900 dark:text-white">
+              {t('Status')}:
+            </label>
+            <select
+              value={statusFilter}
+              onChange={(e) =>
+                setStatusFilter(
+                  e.target.value as 'ALL' | 'PENDING' | 'SUBMITTED' | 'OVERDUE',
+                )
+              }
+              className="block w-40 rounded-lg border border-gray-300 bg-white p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+            >
+              <option value="ALL">-- {t('Status_ALL')} --</option>
+              <option value="PENDING">{t('Status_PENDING')}</option>
+              <option value="SUBMITTED">{t('Status_SUBMITTED')}</option>
+              <option value="OVERDUE">{t('Status_OVERDUE')}</option>
+            </select>
+          </div>
         </div>
       </div>
 

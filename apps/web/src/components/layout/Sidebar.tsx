@@ -117,7 +117,9 @@ function NavIcon({ type }: { type: string }) {
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const t = useTranslations('Sidebar');
-  const [openGroups, setOpenGroups] = useState<string[]>(['properties']); // default open
+  const [openGroups, setOpenGroups] = useState<string[]>(
+    navItems.filter((item) => item.children).map((item) => item.key),
+  ); // default open all groups
 
   const toggleGroup = (key: string) => {
     setOpenGroups((prev) =>

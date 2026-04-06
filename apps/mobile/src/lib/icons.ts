@@ -29,6 +29,10 @@ import {
   TrendingUp,
   Activity,
   Phone,
+  History,
+  Image,
+  Download,
+  Loader2,
 } from 'lucide-react-native';
 
 const iconList = [
@@ -61,6 +65,10 @@ const iconList = [
   TrendingUp,
   Activity,
   Phone,
+  History,
+  Image,
+  Download,
+  Loader2,
 ];
 
 iconList.forEach((icon) => {
@@ -104,4 +112,8 @@ export {
   TrendingUp,
   Activity,
   Phone,
+  History,
+  Image,
+  Download,
+  Loader2,
 };

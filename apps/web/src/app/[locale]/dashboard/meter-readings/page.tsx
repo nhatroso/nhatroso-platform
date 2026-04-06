@@ -1,12 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import {
   History,
-  Search,
-  Building2,
-  Calendar,
   Zap,
   Image as ImageIcon,
   Download,
@@ -89,16 +86,44 @@ export default function MeterReadingsPage() {
 
       {/* Filters Section */}
       <div className="flex flex-col gap-4 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-200 dark:bg-gray-800 dark:ring-gray-700 sm:flex-row sm:items-center">
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 w-full">
+        <div className="flex flex-wrap items-center gap-4">
+          {/* Search */}
+          <div className="flex items-center">
+            <label className="mr-2 text-sm font-medium text-gray-900 dark:text-white">
+              {t('SearchRoom')}:
+            </label>
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="block w-40 rounded-lg border border-gray-300 bg-white p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+            />
+          </div>
+
+          {/* Period Filter */}
+          <div className="flex items-center">
+            <label className="mr-2 text-sm font-medium text-gray-900 dark:text-white">
+              {t('Period')}:
+            </label>
+            <input
+              type="month"
+              value={selectedPeriod}
+              onChange={(e) => setSelectedPeriod(e.target.value)}
+              className="block w-48 rounded-lg border border-gray-300 bg-white p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+            />
+          </div>
+
           {/* Building Filter */}
-          <div className="relative">
-            <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <div className="flex items-center">
+            <label className="mr-2 text-sm font-medium text-gray-900 dark:text-white">
+              {t('Building')}:
+            </label>
             <select
               value={selectedBuilding}
               onChange={(e) => setSelectedBuilding(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-900 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500 transition-all outline-none text-gray-900 dark:text-white"
+              className="block w-48 rounded-lg border border-gray-300 bg-white p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
             >
-              <option value="all">{t('AllBuildings')}</option>
+              <option value="all">-- {t('AllBuildings')} --</option>
               {buildings.map((b) => (
                 <option key={b.id} value={b.id}>
                   {b.name}
@@ -107,41 +132,20 @@ export default function MeterReadingsPage() {
             </select>
           </div>
 
-          {/* Period Filter */}
-          <div className="relative">
-            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <input
-              type="month"
-              value={selectedPeriod}
-              onChange={(e) => setSelectedPeriod(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-900 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500 transition-all outline-none text-gray-900 dark:text-white"
-            />
-          </div>
-
           {/* Status Filter */}
-          <div className="relative">
-            <History className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <div className="flex items-center">
+            <label className="mr-2 text-sm font-medium text-gray-900 dark:text-white">
+              {t('Status')}:
+            </label>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-900 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500 transition-all outline-none text-gray-900 dark:text-white"
+              className="block w-50 rounded-lg border border-gray-300 bg-white p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
             >
-              <option value="all">{t('Status_ALL')}</option>
+              <option value="all">-- {t('Status_ALL')} --</option>
               <option value="PENDING">{t('Status_PENDING')}</option>
               <option value="SUBMITTED">{t('Status_SUBMITTED')}</option>
             </select>
-          </div>
-
-          {/* Search */}
-          <div className="relative md:col-span-2">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder={t('SearchRoom')}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-900 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500 transition-all outline-none text-gray-900 dark:text-white"
-            />
           </div>
         </div>
       </div>
@@ -199,7 +203,9 @@ export default function MeterReadingsPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-gray-600 dark:text-gray-300">
                       <div className="flex items-center gap-2">
-                        {r.service_name.toLowerCase().includes('electricity') ? (
+                        {r.service_name
+                          .toLowerCase()
+                          .includes('electricity') ? (
                           <Zap className="h-4 w-4 text-yellow-500" />
                         ) : (
                           <Droplets className="h-4 w-4 text-blue-500" />
