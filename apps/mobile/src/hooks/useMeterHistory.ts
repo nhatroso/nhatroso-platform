@@ -35,11 +35,18 @@ export function useMeterHistory() {
   });
 
   const sortedReadings = Array.isArray(readings)
-    ? [...readings].sort(
-        (a, b) =>
-          new Date(b.reading_date).getTime() -
-          new Date(a.reading_date).getTime(),
-      )
+    ? [...readings]
+        .filter(
+          (r) =>
+            r.status === 'SUBMITTED' ||
+            !r.status ||
+            (r.reading_value && parseFloat(r.reading_value) > 0),
+        )
+        .sort(
+          (a, b) =>
+            new Date(b.reading_date).getTime() -
+            new Date(a.reading_date).getTime(),
+        )
     : [];
 
   return {

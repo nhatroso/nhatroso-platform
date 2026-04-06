@@ -11,16 +11,16 @@ interface ServiceSelectorProps {
   submittedServices: string[];
   getServiceLabel: (name?: string | null) => string;
   completedServicesCount: number;
+  isServiceSubmitted: (serviceId: string) => boolean;
 }
 
 export function ServiceSelector({
   requiredServices,
   selectedServiceId,
   onSelect,
-  meters,
-  submittedServices,
   getServiceLabel,
   completedServicesCount,
+  isServiceSubmitted,
 }: ServiceSelectorProps) {
   const { t } = useTranslation();
 
@@ -33,22 +33,11 @@ export function ServiceSelector({
       <View className="flex-row gap-4 mb-8">
         {requiredServices.map((service: any) => {
           const name = service.name?.toLowerCase() || '';
-          const isElectricity =
-            name.includes('điện') || name.includes('electricity');
+          const isElectricity = name.includes('electricity');
           const isSelected = selectedServiceId === service.service_id;
           const Icon = isElectricity ? Zap : Droplets;
 
-          const currentMeter = (meters || []).find(
-            (m: any) => m.service_id === service.service_id,
-          );
-          const latestDateStr = currentMeter?.latest_reading_date;
-          const isSubmitted =
-            submittedServices.includes(service.service_id) ||
-            (latestDateStr
-              ? new Date(latestDateStr).getMonth() === new Date().getMonth() &&
-                new Date(latestDateStr).getFullYear() ===
-                  new Date().getFullYear()
-              : false);
+          const isSubmitted = isServiceSubmitted(service.service_id);
 
           return (
             <TouchableOpacity

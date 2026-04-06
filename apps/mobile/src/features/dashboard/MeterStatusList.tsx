@@ -8,12 +8,14 @@ interface MeterStatusListProps {
   meters: any[] | undefined;
   isLoadingMeters: boolean;
   getServiceLabel: (name?: string | null) => string;
+  activeRequest?: any;
 }
 
 export function MeterStatusList({
   meters,
   isLoadingMeters,
   getServiceLabel,
+  activeRequest,
 }: MeterStatusListProps) {
   const { t } = useTranslation();
   const router = useRouter();
@@ -29,16 +31,14 @@ export function MeterStatusList({
   return (
     <View className="gap-y-3">
       {meters.map((m) => {
-        const isElectricity =
-          m.service_name?.toLowerCase().includes('electricity') ||
-          m.service_name?.toLowerCase().includes('điện');
+        const isElectricity = m.service_name
+          ?.toLowerCase()
+          .includes('electricity');
 
-        const isSubmittedThisMonth = m.latest_reading_date
-          ? new Date(m.latest_reading_date).getMonth() ===
-              new Date().getMonth() &&
-            new Date(m.latest_reading_date).getFullYear() ===
-              new Date().getFullYear()
-          : false;
+        const isSubmittedThisMonth = activeRequest?.period_month
+          ? m.latest_reading_period === activeRequest.period_month &&
+            m.latest_reading != null
+          : m.latest_reading != null;
 
         const serviceLabel =
           getServiceLabel(m.service_name) ||
@@ -101,7 +101,9 @@ export function MeterStatusList({
                 </Text>
                 <View className="flex-row items-end">
                   <Text className="text-text font-bold text-lg leading-none">
-                    {m.latest_reading || m.initial_reading}
+                    {m.latest_reading != null
+                      ? m.latest_reading
+                      : m.initial_reading}
                   </Text>
                   <Text className="text-muted text-xs font-medium ml-1 mb-0.5">
                     {String(
@@ -118,8 +120,8 @@ export function MeterStatusList({
                   {t('Dashboard.tenant.recordedAt')}
                 </Text>
                 <Text className="text-text font-medium text-xs">
-                  {m.latest_reading_date
-                    ? new Date(m.latest_reading_date).toLocaleDateString()
+                  {m.latest_reading != null
+                    ? new Date(m.latest_reading_date || '').toLocaleDateString()
                     : String(t('Dashboard.tenant.pendingUpdate'))}
                 </Text>
               </View>

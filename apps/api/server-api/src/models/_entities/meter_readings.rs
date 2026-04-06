@@ -9,13 +9,14 @@ pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
     pub meter_id: Uuid,
-    pub reading_value: Decimal,
-    pub reading_date: DateTimeWithTimeZone,
+    pub reading_value: Option<Decimal>,
+    pub reading_date: Option<DateTimeWithTimeZone>,
     pub image_url: Option<String>,
     pub created_at: DateTimeWithTimeZone,
     pub tenant_id: Option<Uuid>,
-    pub usage: Decimal,
+    pub usage: Option<Decimal>,
     pub period_month: Option<String>,
+    pub status: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

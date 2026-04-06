@@ -40,6 +40,7 @@ export default function MeterSubmissionScreen() {
     takePhoto,
     getServiceLabel,
     submittedServices,
+    isServiceSubmitted,
   } = useMeterSubmission();
 
   if (isLoadingMeters || isLoadingRoom) {
@@ -96,6 +97,7 @@ export default function MeterSubmissionScreen() {
           submittedServices={submittedServices}
           getServiceLabel={getServiceLabel}
           completedServicesCount={completedServicesCount}
+          isServiceSubmitted={isServiceSubmitted}
         />
 
         <ReadingForm

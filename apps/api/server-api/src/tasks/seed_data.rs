@@ -321,9 +321,8 @@ impl Task for SeedData {
                         create_meter_reading_if_needed(db, *meter_id, val, reading_dt_tz).await?;
                     }
                 }
-
-                // find_or_create_meter_submission was here, now deprecated.
             }
+
             println!("[OK] Historical requests and submissions for {}/{}", reading_month, reading_year);
         }
 
@@ -628,12 +627,13 @@ async fn create_meter_reading_if_needed(
     meter_readings::ActiveModel {
         id: ActiveValue::Set(uuid::Uuid::new_v4()),
         meter_id: ActiveValue::Set(meter_id),
-        reading_value: ActiveValue::Set(rust_decimal::Decimal::from(value)),
-        reading_date: ActiveValue::Set(reading_date),
+        reading_value: ActiveValue::Set(Some(rust_decimal::Decimal::from(value))),
+        reading_date: ActiveValue::Set(Some(reading_date)),
         image_url: ActiveValue::Set(None),
         tenant_id: ActiveValue::Set(None),
-        usage: ActiveValue::Set(rust_decimal::Decimal::from(0)),
+        usage: ActiveValue::Set(Some(rust_decimal::Decimal::from(0))),
         period_month: ActiveValue::Set(Some(reading_date.format("%Y-%m").to_string())),
+        status: ActiveValue::Set("SUBMITTED".to_string()),
         created_at: ActiveValue::Set(now()),
     }.insert(db).await?;
     Ok(())

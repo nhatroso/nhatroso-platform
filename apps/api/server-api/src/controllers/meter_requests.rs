@@ -30,10 +30,16 @@ pub async fn submit(
     format::json(())
 }
 
+#[derive(Debug, serde::Deserialize)]
+pub struct FilterParams {
+    pub period_month: Option<String>,
+}
+
 #[debug_handler]
 pub async fn get_all(
     auth: loco_rs::controller::extractor::auth::JWT,
     State(ctx): State<AppContext>,
+    Query(params): Query<FilterParams>,
 ) -> Result<Response> {
     let landlord_id = crate::utils::auth::get_user_id(&auth)?;
     let db = &ctx.db;
@@ -48,8 +54,16 @@ pub async fn get_all(
     let rooms = rooms::Entity::find().filter(rooms::Column::BuildingId.is_in(building_ids)).all(db).await?;
     let room_ids: Vec<uuid::Uuid> = rooms.into_iter().map(|r| r.id).collect();
 
-    let requests_with_rooms = meter_requests::Entity::find()
-        .filter(meter_requests::Column::RoomId.is_in(room_ids))
+    let mut query = meter_requests::Entity::find()
+        .filter(meter_requests::Column::RoomId.is_in(room_ids));
+
+    if let Some(period) = params.period_month {
+        if !period.is_empty() {
+            query = query.filter(meter_requests::Column::PeriodMonth.eq(period));
+        }
+    }
+
+    let requests_with_rooms = query
         .find_also_related(rooms::Entity)
         .all(db)
         .await?;

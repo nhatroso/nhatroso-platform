@@ -33,6 +33,7 @@ mod m20260331_032456_meter_submissions;
 mod m20260401_031812_add_usage_to_meter_readings;
 mod m20260401_035027_add_period_to_meter_readings;
 mod m20260402_085249_fix_meter_unique_index;
+mod m20260404_043345_add_status_and_nullable_readings_to_meter_readings;
 pub struct Migrator;
 
 #[async_trait::async_trait]
@@ -69,6 +70,7 @@ impl MigratorTrait for Migrator {
             Box::new(m20260401_031812_add_usage_to_meter_readings::Migration),
             Box::new(m20260401_035027_add_period_to_meter_readings::Migration),
             Box::new(m20260402_085249_fix_meter_unique_index::Migration),
+            Box::new(m20260404_043345_add_status_and_nullable_readings_to_meter_readings::Migration),
         ]
     }
 }

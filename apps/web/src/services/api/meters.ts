@@ -44,18 +44,36 @@ export const metersApi = {
     return res.json();
   },
 
-  getLandlordSummary: async (): Promise<LandlordMeterSummary> => {
-    const res = await apiFetch(`${API_BASE_URL}/meters/landlord/summary`);
+  getLandlordSummary: async (
+    periodMonth?: string,
+  ): Promise<LandlordMeterSummary> => {
+    let url = `${API_BASE_URL}/meters/landlord/summary`;
+    if (periodMonth) {
+      url += `?period_month=${encodeURIComponent(periodMonth)}`;
+    }
+    const res = await apiFetch(url);
     if (!res.ok) throw new Error('Failed to fetch landlord summary');
     return res.json();
   },
 
   listLandlordMeters: async (
     buildingId?: string,
+    periodMonth?: string,
   ): Promise<LandlordMeterDetail[]> => {
-    const url = buildingId
-      ? `${API_BASE_URL}/meters/landlord/list?building_id=${buildingId}`
-      : `${API_BASE_URL}/meters/landlord/list`;
+    let url = `${API_BASE_URL}/meters/landlord/list`;
+    const params = new URLSearchParams();
+    if (buildingId && buildingId !== 'all') {
+      params.append('building_id', buildingId);
+    }
+    if (periodMonth) {
+      params.append('period_month', periodMonth);
+    }
+
+    const queryString = params.toString();
+    if (queryString) {
+      url += `?${queryString}`;
+    }
+
     const res = await apiFetch(url);
     if (!res.ok) throw new Error('Failed to list landlord meters');
     return res.json();
@@ -69,4 +87,34 @@ export const metersApi = {
     });
     if (!res.ok) throw new Error('Failed to update meter status');
   },
+
+  listLandlordReadings: async (params: {
+    buildingId?: string;
+    periodMonth?: string;
+  }): Promise<LandlordMeterReadingDetail[]> => {
+    const query = new URLSearchParams();
+    if (params.buildingId && params.buildingId !== 'all')
+      query.append('building_id', params.buildingId);
+    if (params.periodMonth) query.append('period_month', params.periodMonth);
+    const res = await apiFetch(
+      `${API_BASE_URL}/meters/landlord/readings?${query.toString()}`,
+    );
+    if (!res.ok) throw new Error('Failed to fetch landlord readings');
+    return res.json();
+  },
 };
+
+export interface LandlordMeterReadingDetail {
+  id: string;
+  meter_id: string;
+  room_code: string;
+  building_name: string;
+  service_name: string;
+  service_unit: string;
+  reading_value: number | null;
+  usage: number | null;
+  reading_date: string | null;
+  period_month: string | null;
+  image_url: string | null;
+  status: string;
+}

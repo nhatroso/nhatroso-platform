@@ -5,7 +5,7 @@ import {
   MeterRequest,
 } from '@/services/api/meter-automation';
 
-export function useMeterRequests() {
+export function useMeterRequests(periodMonth?: string) {
   const t = useTranslations('MeterRequests.Table');
   const [requests, setRequests] = React.useState<MeterRequest[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -15,7 +15,7 @@ export function useMeterRequests() {
     setLoading(true);
     setError(null);
     try {
-      const data = await getMeterRequests();
+      const data = await getMeterRequests(periodMonth);
       setRequests(data);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : t('FetchError');
@@ -23,7 +23,7 @@ export function useMeterRequests() {
     } finally {
       setLoading(false);
     }
-  }, [t]);
+  }, [t, periodMonth]);
 
   React.useEffect(() => {
     fetchRequests();

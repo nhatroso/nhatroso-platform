@@ -58,8 +58,15 @@ export async function updateMeterConfig(
   return res.json();
 }
 
-export async function getMeterRequests(): Promise<MeterRequest[]> {
-  const res = await apiFetch(`${API_BASE_URL}/meter-requests`, {
+export async function getMeterRequests(
+  periodMonth?: string,
+): Promise<MeterRequest[]> {
+  let url = `${API_BASE_URL}/meter-requests`;
+  if (periodMonth) {
+    url += `?period_month=${encodeURIComponent(periodMonth)}`;
+  }
+
+  const res = await apiFetch(url, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
   });

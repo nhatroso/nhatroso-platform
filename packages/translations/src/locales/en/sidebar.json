@@ -7,6 +7,7 @@
   "floors": "Floors",
   "rooms": "Rooms",
   "meters": "Readings",
+  "meter_readings": "Reading History",
   "meter_requests": "Meter Requests",
   "meter_settings": "Meter Settings",
   "meter_management": "Meter Management",

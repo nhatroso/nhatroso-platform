@@ -38,6 +38,17 @@ impl Model {
         let mut generated_count = 0;
 
         for room in occupied_rooms {
+            use crate::models::_entities::{meter_readings, meters};
+            let active_meters = meters::Entity::find()
+                .filter(meters::Column::RoomId.eq(room.id))
+                .filter(meters::Column::Status.eq("ACTIVE"))
+                .all(db)
+                .await?;
+
+            if active_meters.is_empty() {
+                continue;
+            }
+
             let exists = Entity::find()
                 .filter(Column::RoomId.eq(room.id))
                 .filter(Column::PeriodMonth.eq(period_month))
@@ -46,8 +57,9 @@ impl Model {
                 .is_some();
 
             if !exists {
+                let request_id = uuid::Uuid::new_v4();
                 ActiveModel {
-                    id: sea_orm::ActiveValue::Set(uuid::Uuid::new_v4()),
+                    id: sea_orm::ActiveValue::Set(request_id),
                     room_id: sea_orm::ActiveValue::Set(room.id),
                     period_month: sea_orm::ActiveValue::Set(period_month.to_string()),
                     due_date: sea_orm::ActiveValue::Set(due_date),
@@ -57,6 +69,21 @@ impl Model {
                 }
                 .insert(db)
                 .await?;
+
+                // Create PENDING meter_readings for all ACTIVE meters in this room
+                for meter in active_meters {
+                    meter_readings::ActiveModel {
+                        id: sea_orm::ActiveValue::Set(uuid::Uuid::new_v4()),
+                        meter_id: sea_orm::ActiveValue::Set(meter.id),
+                        period_month: sea_orm::ActiveValue::Set(Some(period_month.to_string())),
+                        status: sea_orm::ActiveValue::Set("PENDING".to_string()),
+                        created_at: sea_orm::ActiveValue::Set(chrono::Utc::now().into()),
+                        ..Default::default()
+                    }
+                    .insert(db)
+                    .await?;
+                }
+
                 generated_count += 1;
             }
         }

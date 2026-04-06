@@ -33,7 +33,7 @@ const navItems: NavItem[] = [
     key: 'meter_management',
     icon: 'activity',
     children: [
-      { key: 'meters', href: '/dashboard/meters' },
+      { key: 'meter_readings', href: '/dashboard/meter-readings' },
       { key: 'meter_requests', href: '/dashboard/meter-requests' },
       { key: 'meter_settings', href: '/dashboard/meter-settings' },
     ],

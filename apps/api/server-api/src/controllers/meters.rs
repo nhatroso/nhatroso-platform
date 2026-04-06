@@ -4,7 +4,7 @@ use axum::{Json, http::StatusCode, extract::Query};
 use uuid::Uuid;
 
 use crate::{
-    views::meters::{CreateMeterParams, RecordReadingParams, LandlordListParams, UpdateMeterStatusParams},
+    views::meters::{CreateMeterParams, RecordReadingParams, LandlordListParams, UpdateMeterStatusParams, LandlordReadingsParams},
     models::meters::Model as Meter,
     models::meter_readings::Model as MeterReading,
     utils::{auth, error::error_response},
@@ -70,9 +70,10 @@ pub async fn list_readings(
 pub async fn get_landlord_summary(
     auth: JWT,
     State(ctx): State<AppContext>,
+    Query(params): Query<LandlordListParams>,
 ) -> Result<Response> {
     let landlord_id = auth::get_user_id(&auth)?;
-    let summary = Meter::get_landlord_summary(&ctx.db, landlord_id).await?;
+    let summary = Meter::get_landlord_summary(&ctx.db, landlord_id, params.period_month).await?;
     format::json(summary)
 }
 
@@ -82,8 +83,18 @@ pub async fn list_landlord_meters(
     Query(params): Query<LandlordListParams>,
 ) -> Result<Response> {
     let landlord_id = auth::get_user_id(&auth)?;
-    let meters = Meter::list_landlord_meters(&ctx.db, landlord_id, params.building_id).await?;
+    let meters = Meter::list_landlord_meters(&ctx.db, landlord_id, params.building_id, params.period_month).await?;
     format::json(meters)
+}
+
+pub async fn list_landlord_readings(
+    auth: JWT,
+    State(ctx): State<AppContext>,
+    Query(params): Query<LandlordReadingsParams>,
+) -> Result<Response> {
+    let landlord_id = auth::get_user_id(&auth)?;
+    let readings = MeterReading::list_landlord_readings(&ctx.db, landlord_id, params.building_id, params.period_month).await?;
+    format::json(readings)
 }
 
 pub async fn update_status(
@@ -103,6 +114,7 @@ pub fn routes() -> Routes {
         .add("/my-meters", get(get_my_meters))
         .add("/landlord/summary", get(get_landlord_summary))
         .add("/landlord/list", get(list_landlord_meters))
+        .add("/landlord/readings", get(list_landlord_readings))
         .add("/room/{room_id}", get(list_by_room))
         .add("/{id}/status", patch(update_status))
         .add("/{id}/readings", post(record_reading))

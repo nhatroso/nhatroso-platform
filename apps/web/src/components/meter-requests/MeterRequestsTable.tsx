@@ -45,9 +45,9 @@ function TableSkeleton() {
   );
 }
 
-export default function MeterRequestsTable() {
+export default function MeterRequestsTable({ period }: { period?: string }) {
   const t = useTranslations('MeterRequests.Table');
-  const { requests, loading, error } = useMeterRequests();
+  const { requests, loading, error } = useMeterRequests(period);
 
   if (loading) {
     return <TableSkeleton />;

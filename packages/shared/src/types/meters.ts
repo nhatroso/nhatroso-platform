@@ -8,6 +8,7 @@ export interface Meter {
   initial_reading: string; // Decimal as string
   latest_reading?: string | null; // Decimal as string
   latest_reading_date?: string | null; // ISO Date String
+  latest_reading_period?: string | null;
   status: 'ACTIVE' | 'INACTIVE';
   created_at: string;
   updated_at: string;
@@ -18,12 +19,13 @@ export type MeterResponse = Meter;
 export interface MeterReading {
   id: string;
   meter_id: string;
-  reading_value: string; // Decimal as string
+  reading_value: string;
   reading_date: string;
   image_url: string | null;
-  usage: string; // Decimal as string
+  usage: string;
   tenant_id: string | null;
   period_month: string | null;
+  status?: 'PENDING' | 'SUBMITTED' | null;
   created_at: string;
 }
 

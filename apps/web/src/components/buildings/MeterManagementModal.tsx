@@ -89,9 +89,7 @@ export function MeterManagementModal({
                       : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
                   }`}
                 >
-                  {m.service_name?.toLowerCase().includes('điện') ||
-                  m.service_name?.toLowerCase().includes('electricity') ||
-                  m.service_id.includes('electric') ? (
+                  {m.service_name?.toLowerCase().includes('electricity') ? (
                     <Zap size={18} />
                   ) : (
                     <Droplets size={18} />

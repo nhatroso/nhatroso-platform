@@ -106,6 +106,7 @@ export default function DashboardScreen() {
             meters={meters}
             isLoadingMeters={isLoadingMeters}
             getServiceLabel={getServiceLabel}
+            activeRequest={activeRequest}
           />
         )}
       </View>

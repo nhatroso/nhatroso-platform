@@ -31,6 +31,7 @@ pub struct MeterResponse {
     pub initial_reading: Decimal,
     pub latest_reading: Option<Decimal>,
     pub latest_reading_date: Option<DateTime<Utc>>,
+    pub latest_reading_period: Option<String>,
     pub status: String,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
@@ -40,12 +41,13 @@ pub struct MeterResponse {
 pub struct MeterReadingResponse {
     pub id: Uuid,
     pub meter_id: Uuid,
-    pub reading_value: Decimal,
-    pub reading_date: DateTime<Utc>,
+    pub reading_value: Option<Decimal>,
+    pub reading_date: Option<DateTime<Utc>>,
     pub image_url: Option<String>,
-    pub usage: Decimal,
+    pub usage: Option<Decimal>,
     pub tenant_id: Option<Uuid>,
     pub period_month: Option<String>,
+    pub status: String,
     pub created_at: DateTime<Utc>,
 }
 
@@ -61,6 +63,7 @@ impl MeterResponse {
             initial_reading: m.initial_reading,
             latest_reading: None,
             latest_reading_date: None,
+            latest_reading_period: None,
             status: m.status,
             created_at: m.created_at.into(),
             updated_at: m.updated_at.into(),
@@ -80,6 +83,7 @@ impl From<meters::Model> for MeterResponse {
             initial_reading: m.initial_reading,
             latest_reading: None,
             latest_reading_date: None,
+            latest_reading_period: None,
             status: m.status,
             created_at: m.created_at.into(),
             updated_at: m.updated_at.into(),
@@ -93,11 +97,12 @@ impl From<meter_readings::Model> for MeterReadingResponse {
             id: m.id,
             meter_id: m.meter_id,
             reading_value: m.reading_value,
-            reading_date: m.reading_date.into(),
+            reading_date: m.reading_date.map(|d| d.into()),
             image_url: m.image_url,
             usage: m.usage,
             tenant_id: m.tenant_id,
             period_month: m.period_month,
+            status: m.status,
             created_at: m.created_at.into(),
         }
     }
@@ -128,9 +133,32 @@ pub struct LandlordMeterDetail {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LandlordListParams {
     pub building_id: Option<Uuid>,
+    pub period_month: Option<String>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct UpdateMeterStatusParams {
     pub status: String,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct LandlordMeterReadingDetail {
+    pub id: Uuid,
+    pub meter_id: Uuid,
+    pub room_code: String,
+    pub building_name: String,
+    pub service_name: String,
+    pub service_unit: String,
+    pub reading_value: Option<Decimal>,
+    pub usage: Option<Decimal>,
+    pub reading_date: Option<DateTime<Utc>>,
+    pub period_month: Option<String>,
+    pub image_url: Option<String>,
+    pub status: String,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct LandlordReadingsParams {
+    pub building_id: Option<Uuid>,
+    pub period_month: Option<String>,
 }

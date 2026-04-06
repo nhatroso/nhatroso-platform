@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as ImagePicker from 'expo-image-picker';
@@ -42,19 +42,28 @@ export function useMeterSubmission() {
     queryFn: roomService.getMyRoom,
   });
 
+  const { data: readingRequests, isLoading: isLoadingRequests } = useQuery({
+    queryKey: ['my-reading-requests'],
+    queryFn: meterService.getReadingRequests,
+  });
+
   const requiredServices = useMemo(() => {
-    return room?.services
-      ? room.services.filter((s: any) => {
-          const name = s.name?.toLowerCase() || '';
-          return (
-            name.includes('điện') ||
-            name.includes('electricity') ||
-            name.includes('nước') ||
-            name.includes('water')
-          );
-        })
-      : [];
-  }, [room?.services]);
+    if (!room?.services || !readingRequests) return [];
+
+    return room.services.filter((s: any) => {
+      const name = s.name?.toLowerCase() || '';
+      return name.includes('electricity') || name.includes('water');
+    });
+  }, [room?.services, readingRequests]);
+
+  const targetRequest = useMemo(() => {
+    if (!readingRequests || !room?.id) return null;
+    return readingRequests.find(
+      (req: any) =>
+        req.room_id === room.id &&
+        (!period_month || req.period_month === period_month),
+    );
+  }, [readingRequests, room?.id, period_month]);
 
   useEffect(() => {
     if (requiredServices.length > 0 && !selectedServiceId) {
@@ -79,10 +88,9 @@ export function useMeterSubmission() {
 
   const getServiceLabel = (name?: string | null): string => {
     const lower = (name || '').toLowerCase();
-    if (lower.includes('điện') || lower.includes('electricity'))
+    if (lower.includes('electricity'))
       return t('Services.Predefined_electricity');
-    if (lower.includes('nước') || lower.includes('water'))
-      return t('Services.Predefined_water');
+    if (lower.includes('water')) return t('Services.Predefined_water');
     return name || '';
   };
 
@@ -117,28 +125,54 @@ export function useMeterSubmission() {
     setValidationError(text ? validateReading(text) : null);
   };
 
-  const isAlreadySubmitted =
-    submittedServices.includes(selectedServiceId || '') ||
-    (selectedMeter?.latest_reading_date
-      ? new Date(selectedMeter.latest_reading_date).getMonth() ===
-          new Date().getMonth() &&
-        new Date(selectedMeter.latest_reading_date).getFullYear() ===
-          new Date().getFullYear()
-      : false);
+  const isAlreadySubmitted = useMemo(() => {
+    if (submittedServices.includes(selectedServiceId || '')) return true;
 
-  const completedServicesCount = requiredServices.filter((s: any) => {
-    const isSessionSubmitted = submittedServices.includes(s.service_id);
-    const sMeter = (meters || []).find(
-      (m: any) => m.service_id === s.service_id,
-    );
-    const isHistoricalSubmitted = sMeter?.latest_reading_date
-      ? new Date(sMeter.latest_reading_date).getMonth() ===
-          new Date().getMonth() &&
-        new Date(sMeter.latest_reading_date).getFullYear() ===
-          new Date().getFullYear()
-      : false;
-    return isSessionSubmitted || isHistoricalSubmitted;
-  }).length;
+    const currentPeriod = period_month || targetRequest?.period_month;
+    if (selectedMeter && currentPeriod) {
+      if (
+        selectedMeter.latest_reading_period === currentPeriod &&
+        selectedMeter.latest_reading != null
+      ) {
+        return true;
+      }
+    }
+
+    return false;
+  }, [
+    selectedServiceId,
+    submittedServices,
+    selectedMeter,
+    period_month,
+    targetRequest,
+  ]);
+
+  const isServiceSubmitted = useCallback(
+    (serviceId: string) => {
+      if (submittedServices.includes(serviceId)) return true;
+
+      const sMeter = (meters || []).find(
+        (m: any) => m.service_id === serviceId,
+      );
+
+      const currentPeriod = period_month || targetRequest?.period_month;
+      if (sMeter && currentPeriod) {
+        if (
+          sMeter.latest_reading_period === currentPeriod &&
+          sMeter.latest_reading != null
+        ) {
+          return true;
+        }
+      }
+
+      return false;
+    },
+    [submittedServices, meters, period_month, targetRequest],
+  );
+
+  const completedServicesCount = requiredServices.filter((s: any) =>
+    isServiceSubmitted(s.service_id),
+  ).length;
 
   const submissionMutation = useMutation({
     mutationFn: (data: {
@@ -326,12 +360,12 @@ export function useMeterSubmission() {
     setIsSubmitModalVisible,
     alertState,
     setAlertState,
-    submittedServices,
     // data
     meters,
     room,
     isLoadingMeters,
     isLoadingRoom,
+    isLoadingRequests,
     requiredServices,
     selectedMeter,
     selectedService,
@@ -346,5 +380,7 @@ export function useMeterSubmission() {
     pickImage,
     takePhoto,
     getServiceLabel,
+    submittedServices,
+    isServiceSubmitted,
   };
 }

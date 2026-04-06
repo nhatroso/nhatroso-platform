@@ -40,12 +40,16 @@ export default function MeterManagementPage() {
   const [serviceFilter, setServiceFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
+  const now = new Date();
+  const currentPeriod = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const [selectedPeriod, setSelectedPeriod] = useState(currentPeriod);
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
         const [summaryData, buildingsData] = await Promise.all([
-          metersApi.getLandlordSummary(),
+          metersApi.getLandlordSummary(selectedPeriod),
           getBuildings(),
         ]);
         setSummary(summaryData);
@@ -53,6 +57,7 @@ export default function MeterManagementPage() {
 
         const metersData = await metersApi.listLandlordMeters(
           selectedBuilding === 'all' ? undefined : selectedBuilding,
+          selectedPeriod,
         );
         setMeters(metersData);
       } catch (error) {
@@ -62,7 +67,7 @@ export default function MeterManagementPage() {
       }
     };
     fetchData();
-  }, [selectedBuilding]);
+  }, [selectedBuilding, selectedPeriod]);
 
   const filteredMeters = meters.filter((m) => {
     const matchesStatus = statusFilter === 'ALL' || m.status === statusFilter;
@@ -137,7 +142,13 @@ export default function MeterManagementPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <input
+            type="month"
+            value={selectedPeriod}
+            onChange={(e) => setSelectedPeriod(e.target.value)}
+            className="rounded-xl border-gray-200 bg-gray-50 text-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+          />
           <select
             value={selectedBuilding}
             onChange={(e) => setSelectedBuilding(e.target.value)}
@@ -223,8 +234,7 @@ export default function MeterManagementPage() {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
-                      {m.service_name.toLowerCase().includes('điện') ||
-                      m.service_name.toLowerCase().includes('electricity') ? (
+                      {m.service_name.toLowerCase().includes('electricity') ? (
                         <Zap className="h-4 w-4 text-yellow-500" />
                       ) : (
                         <Droplets className="h-4 w-4 text-blue-500" />

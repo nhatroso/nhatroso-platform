@@ -32,5 +32,12 @@
   "NewValue": "Chỉ số mới",
   "ConfirmRecord": "Xác nhận ghi số",
   "SuccessRecord": "Ghi chỉ số thành công!",
-  "ErrorRecord": "Có lỗi khi ghi chỉ số."
+  "ErrorRecord": "Có lỗi khi ghi chỉ số.",
+  "ReadingHistory": "Lịch sử nộp chỉ số",
+  "ReadingHistoryDesc": "Xem lại toàn bộ lịch sử chốt điện nước của người thuê.",
+  "ExportExcel": "Xuất báo cáo",
+  "NoReadingsFound": "Không có bản ghi nào trong kỳ này.",
+  "UsageValue": "Tiêu thụ",
+  "Evidence": "Ảnh bằng chứng",
+  "ReadingValue": "Số mới nhất"
 }
