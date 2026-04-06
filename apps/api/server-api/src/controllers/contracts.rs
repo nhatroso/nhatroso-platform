@@ -20,19 +20,23 @@ pub async fn create(
 }
 
 pub async fn get_by_id(
+    auth: JWT,
     Path(id): Path<Uuid>,
     State(ctx): State<AppContext>,
 ) -> Result<Response> {
-    match Contract::get_contract_by_id(&ctx.db, id).await? {
+    let landlord_id = auth::get_user_id(&auth)?;
+    match Contract::get_contract_by_id(&ctx.db, landlord_id, id).await? {
         Ok(res) => format::json(res),
         Err((status, code)) => error_response(code, status),
     }
 }
 
 pub async fn list(
+    auth: JWT,
     State(ctx): State<AppContext>,
 ) -> Result<Response> {
-    let results = Contract::list_contracts(&ctx.db).await?;
+    let landlord_id = auth::get_user_id(&auth)?;
+    let results = Contract::list_contracts(&ctx.db, landlord_id).await?;
     format::json(results)
 }
 

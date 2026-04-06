@@ -3,76 +3,56 @@
 import * as React from 'react';
 import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
-import { Building, Floor } from '@nhatroso/shared';
-import {
-  getBuildings,
-  getAllFloors,
-  createFloor,
-} from '@/services/api/buildings';
+import { useFloors } from '@/hooks/use-floors';
 import { RoomList } from '@/components/buildings/RoomList';
+import { Skeleton } from '@/components/ui/Skeleton';
+
+function FloorListSkeleton() {
+  return (
+    <div className="space-y-4">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <div
+          key={i}
+          className="overflow-hidden rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-7 w-24" />
+                <Skeleton className="h-5 w-16 rounded-md" />
+              </div>
+              <Skeleton className="h-4 w-48" />
+            </div>
+            <Skeleton className="h-9 w-9 rounded-full" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 function FloorsPageContent() {
   const t = useTranslations('Buildings');
   const searchParams = useSearchParams();
   const initialBuildingId = searchParams.get('buildingId') || 'all';
 
-  const [buildings, setBuildings] = React.useState<Building[]>([]);
-  const [floors, setFloors] = React.useState<Floor[]>([]);
-  const [loading, setLoading] = React.useState(true);
-  const [selectedBuildingId, setSelectedBuildingId] =
-    React.useState<string>(initialBuildingId);
-  const [expandedFloorId, setExpandedFloorId] = React.useState<string | null>(
-    null,
-  );
-
-  // Modal State
-  const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false);
-  const [newBuildingId, setNewBuildingId] = React.useState('');
-  const [newFloorName, setNewFloorName] = React.useState('');
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
-
-  React.useEffect(() => {
-    async function fetchData() {
-      try {
-        setLoading(true);
-        const [bData, fData] = await Promise.all([
-          getBuildings(),
-          getAllFloors(),
-        ]);
-        setBuildings(bData);
-        setFloors(fData);
-      } catch (err) {
-        console.error('Failed to fetch data', err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchData();
-  }, []);
-
-  const filteredFloors = React.useMemo(() => {
-    if (selectedBuildingId === 'all') return floors;
-    return floors.filter((f) => f.building_id === selectedBuildingId);
-  }, [floors, selectedBuildingId]);
-
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newBuildingId || !newFloorName.trim()) return;
-    try {
-      setIsSubmitting(true);
-      await createFloor(newBuildingId, { identifier: newFloorName });
-      setIsCreateModalOpen(false);
-      setNewFloorName('');
-      setNewBuildingId('');
-      // refresh floors
-      const fData = await getAllFloors();
-      setFloors(fData);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const {
+    buildings,
+    filteredFloors,
+    loading,
+    selectedBuildingId,
+    expandedFloorId,
+    isCreateModalOpen,
+    newBuildingId,
+    newFloorName,
+    isSubmitting,
+    setSelectedBuildingId,
+    setIsCreateModalOpen,
+    setNewBuildingId,
+    setNewFloorName,
+    handleCreate,
+    toggleFloorExpansion,
+  } = useFloors({ initialBuildingId });
 
   return (
     <div className="flex h-[calc(100vh-112px)] w-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
@@ -130,9 +110,7 @@ function FloorsPageContent() {
 
       <div className="flex-1 overflow-y-auto p-6 bg-gray-50/50 dark:bg-gray-900/50">
         {loading ? (
-          <div className="flex h-32 items-center justify-center">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-blue-600" />
-          </div>
+          <FloorListSkeleton />
         ) : filteredFloors.length === 0 ? (
           <div className="rounded-lg border-2 border-dashed border-gray-300 p-12 text-center text-gray-500 dark:border-gray-700 dark:text-gray-400">
             {t('EmptyFloors')}
@@ -156,11 +134,7 @@ function FloorsPageContent() {
                 >
                   <button
                     type="button"
-                    onClick={() =>
-                      setExpandedFloorId((prev) =>
-                        prev === fl.id ? null : fl.id,
-                      )
-                    }
+                    onClick={() => toggleFloorExpansion(fl.id)}
                     className="flex w-full items-center justify-between px-6 py-4 text-left focus:outline-none"
                   >
                     <div className="flex flex-col gap-1">

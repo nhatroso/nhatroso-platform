@@ -80,6 +80,18 @@ pub async fn get_by_id(
     }
 }
 
+pub async fn get_my_room(
+    auth: JWT,
+    State(ctx): State<AppContext>,
+) -> Result<Response> {
+    let user_id = auth::get_user_id(&auth)?;
+
+    match Room::get_my_room(&ctx.db, user_id).await? {
+        Ok(res) => format::json(res),
+        Err((status, code)) => error_response(code, status),
+    }
+}
+
 pub fn routes() -> Routes {
     Routes::new()
         .prefix("api/v1")
@@ -87,4 +99,5 @@ pub fn routes() -> Routes {
         .add("/rooms", get(list_owner_rooms))
         .add("/rooms/{id}", get(get_by_id).patch(update))
         .add("/rooms/available", get(list_available))
+        .add("/tenant/room", get(get_my_room))
 }

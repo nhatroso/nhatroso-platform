@@ -1,0 +1,56 @@
+{
+  "Table": {
+    "Room": "Room",
+    "Period": "Period",
+    "DueDate": "Due Date",
+    "Status": "Status",
+    "Action": "Action",
+    "NoRequests": "No meter requests found.",
+    "ViewImages": "View Images",
+    "Waiting": "Waiting...",
+    "FetchError": "Failed to fetch requests",
+    "StatusValue": {
+      "SUBMITTED": "Submitted",
+      "LATE": "Late",
+      "PENDING": "Pending"
+    }
+  },
+  "Config": {
+    "Title": "Automation Configuration",
+    "Description": "Configure automatic requests for water and electricity readings from your tenants.",
+    "Success": "Settings saved successfully!",
+    "LoadError": "Failed to load configuration",
+    "SaveError": "Failed to save configuration",
+    "Enable": "Enable Automation",
+    "EnableDesc": "Automatically create requests each month",
+    "DayOfMonth": "Day of the month",
+    "DayOfMonthDesc": "Request goes out on this day (1-31)",
+    "GracePeriod": "Grace Period (Days)",
+    "GracePeriodDesc": "Days allowed before request is marked LATE",
+    "Save": "Save Configuration"
+  },
+  "Manual": {
+    "Title": "Manual Request Generation",
+    "LoadBuildingsError": "Could not load buildings.",
+    "ValidationError": "Please select a building and a period.",
+    "GenerateError": "Error creating manual requests.",
+    "Building": "Building",
+    "SelectBuilding": "-- Select Building --",
+    "Period": "Period (Month)",
+    "DueDate": "Due Date",
+    "Cancel": "Cancel",
+    "Submit": "Generate Data"
+  },
+  "Page": {
+    "RequestsTitle": "Meter Requests",
+    "RequestsDesc": "Monitor tenant readings and scheduled requests",
+    "SettingsTitle": "Meter Settings",
+    "SettingsDesc": "Manage automation schedules for utility readings",
+    "ManualButton": "Generate Manually"
+  },
+  "Alerts": {
+    "SuccessGenerated": "Successfully generated {count} meter requests."
+  },
+  "Period": "Period",
+  "Status": "Status"
+}

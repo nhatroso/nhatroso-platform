@@ -19,6 +19,7 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   { key: 'dashboard', href: '/dashboard', icon: 'grid' },
+  { key: 'contracts', href: '/dashboard/contracts', icon: 'document' },
   {
     key: 'properties',
     icon: 'building',
@@ -28,8 +29,23 @@ const navItems: NavItem[] = [
       { key: 'rooms', href: '/dashboard/rooms' },
     ],
   },
-  { key: 'contracts', href: '/dashboard/contracts', icon: 'document' },
-  { key: 'services', href: '/dashboard/services', icon: 'server' },
+  {
+    key: 'meter_management',
+    icon: 'activity',
+    children: [
+      { key: 'meter_readings', href: '/dashboard/meter-readings' },
+      { key: 'meter_requests', href: '/dashboard/meter-requests' },
+      { key: 'meter_settings', href: '/dashboard/meter-settings' },
+    ],
+  },
+  {
+    key: 'services',
+    icon: 'server',
+    children: [
+      { key: 'room_services', href: '/dashboard/room-services' },
+      { key: 'service_catalog', href: '/dashboard/services' },
+    ],
+  },
 ];
 
 function NavIcon({ type }: { type: string }) {
@@ -77,6 +93,22 @@ function NavIcon({ type }: { type: string }) {
           />
         </svg>
       );
+    case 'activity':
+      return (
+        <svg
+          className="h-5 w-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M13 10V3L4 14h7v7l9-11h-7z"
+          />
+        </svg>
+      );
     default:
       return null;
   }
@@ -85,7 +117,9 @@ function NavIcon({ type }: { type: string }) {
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const t = useTranslations('Sidebar');
-  const [openGroups, setOpenGroups] = useState<string[]>(['properties']); // default open
+  const [openGroups, setOpenGroups] = useState<string[]>(
+    navItems.filter((item) => item.children).map((item) => item.key),
+  ); // default open all groups
 
   const toggleGroup = (key: string) => {
     setOpenGroups((prev) =>

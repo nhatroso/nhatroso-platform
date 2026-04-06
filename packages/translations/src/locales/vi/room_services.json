@@ -1,0 +1,11 @@
+{
+  "Title": "Dịch vụ phòng",
+  "Description": "Quản lý dịch vụ và chỉ số điện nước cho từng phòng",
+  "RoomsCount": "{count} phòng",
+  "NoRoomsFound": "Không có phòng nào phù hợp bộ lọc",
+  "CurrentReading": "Chỉ số hiện tại",
+  "ServicesButton": "Dịch vụ",
+  "MetersButton": "Công tơ",
+  "ManagePricingTitle": "Quản lý dịch vụ & giá",
+  "MetersTitle": "Công tơ điện nước"
+}

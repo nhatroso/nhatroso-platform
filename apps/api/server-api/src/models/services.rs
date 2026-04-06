@@ -26,8 +26,10 @@ impl ActiveModelBehavior for ActiveModel {
 
 // implement your read-oriented logic here
 impl Model {
-    pub async fn list_services(db: &DatabaseConnection) -> Result<Vec<ServiceResponse>> {
-        let services = Services::find().all(db).await?;
+    pub async fn list_services(db: &DatabaseConnection, owner_id: Uuid) -> Result<Vec<ServiceResponse>> {
+        let services = Services::find()
+            .filter(super::_entities::services::Column::OwnerId.eq(owner_id))
+            .all(db).await?;
         Ok(services.into_iter().map(ServiceResponse::from).collect())
     }
 

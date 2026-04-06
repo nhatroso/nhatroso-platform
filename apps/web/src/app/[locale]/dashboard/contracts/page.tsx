@@ -3,21 +3,40 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { contractsService } from '@/services/api/contracts';
-import { ContractResponse } from '@nhatroso/shared';
+import { useContracts } from '@/hooks/use-contracts';
+import { Skeleton } from '@/components/ui/Skeleton';
+
+function GridSkeleton() {
+  return (
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div
+          key={i}
+          className="flex flex-col justify-between rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+        >
+          <div>
+            <div className="mb-3 flex items-center justify-between">
+              <Skeleton className="h-5 w-16 rounded-full" />
+              <Skeleton className="h-3 w-24" />
+            </div>
+            <Skeleton className="h-5 w-full mb-2" />
+            <Skeleton className="h-4 w-32" />
+          </div>
+          <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+            <div className="flex items-center justify-between">
+              <Skeleton className="h-4 w-16" />
+              <Skeleton className="h-4 w-24" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function ContractsPage() {
   const t = useTranslations('Sidebar');
-  const [contracts, setContracts] = React.useState<ContractResponse[]>([]);
-  const [isLoading, setIsLoading] = React.useState(true);
-
-  React.useEffect(() => {
-    contractsService
-      .list()
-      .then(setContracts)
-      .catch(console.error)
-      .finally(() => setIsLoading(false));
-  }, []);
+  const { contracts, isLoading } = useContracts();
 
   return (
     <div className="flex flex-col h-[calc(100vh-112px)] w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
@@ -53,9 +72,7 @@ export default function ContractsPage() {
 
       <div className="flex-1 overflow-y-auto p-5">
         {isLoading ? (
-          <div className="flex h-32 items-center justify-center">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-blue-600" />
-          </div>
+          <GridSkeleton />
         ) : contracts.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center text-center">
             <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 dark:bg-gray-800">
@@ -98,9 +115,8 @@ export default function ContractsPage() {
                       {new Date(contract.created_at).toLocaleDateString(
                         'vi-VN',
                       )}
-                      - {new Date(contract.end_date).toLocaleDateString(
-                        'vi-VN',
-                      )}
+                      -{' '}
+                      {new Date(contract.end_date).toLocaleDateString('vi-VN')}
                     </span>
                   </div>
                   <h3 className="text-base font-semibold text-gray-900 dark:text-white line-clamp-1">

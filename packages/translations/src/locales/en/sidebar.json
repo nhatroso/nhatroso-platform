@@ -5,5 +5,13 @@
   "services": "Services",
   "properties": "Properties",
   "floors": "Floors",
-  "rooms": "Rooms"
+  "rooms": "Rooms",
+  "meters": "Readings",
+  "meter_readings": "Reading History",
+  "meter_requests": "Meter Requests",
+  "meter_settings": "Meter Settings",
+  "meter_management": "Meter Management",
+  "service_catalog": "Service Catalog",
+  "room_services": "Room Services",
+  "logout": "Logout"
 }

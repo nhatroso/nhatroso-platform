@@ -8,3 +8,6 @@ pub mod services;
 pub mod price_rules;
 
 pub mod room_services;
+pub mod meters;
+pub mod meter_requests;
+pub mod meter_request_configs;

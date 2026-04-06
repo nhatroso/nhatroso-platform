@@ -15,3 +15,4 @@ export * from './types/price_rules';
 export * from './schemas/contracts';
 export * from './types/room_services';
 export * from './constants/services';
+export * from './types/meters';
