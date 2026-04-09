@@ -1,0 +1,81 @@
+\documentclass[12pt,a4paper,oneside]{book}
+
+% ================= DIRECTORY STRUCTURE =================
+% preamble/           - Packages, settings, and commands
+% frontmatter/        - Abstract, Acknowledgments, Declaration
+% chapters/           - Main content files
+% assets/             - Figures, code, and other static files
+% bibliography/       - BibTeX references
+% =======================================================
+
+% Preamble
+\input{preamble/packages}
+\input{preamble/settings}
+\input{preamble/commands}
+
+% Layout settings from styles/thesis (keeping \thesislayout)
+\thesislayout
+
+% Custom metadata for Nhatroso Platform
+\ctname{Xây dựng nền tảng quản lý nhà trọ thông minh (Nhatroso Platform)}
+\cstuname{Đinh Nhật Bảo}
+\csSupervise{TS. Nguyễn Đình Hưng}
+\csCouncil{Công nghệ thông tin}
+\cttime{Khánh Hòa, 04/2026}
+
+% Set document metadata
+\hypersetup{
+    pdfauthor={Đinh Nhật Bảo},
+    pdftitle={Nhatroso Platform: Modern Lodging Management System},
+    pdfsubject={Capstone Project Report},
+    pdfkeywords={Rust, Loco.rs, Modular Monolith, Lodging Management, Automation},
+    bookmarksnumbered=true,
+    bookmarksopen=true,
+}
+
+\begin{document}
+
+% =======================================================
+% --- FRONT MATTER ---
+% =======================================================
+\frontmatter
+
+% Title Page
+\begin{titlepage}
+\coverpage
+\end{titlepage}
+
+% Introductory Sections
+\input{frontmatter/declaration}
+\input{frontmatter/acknowledgments}
+\input{frontmatter/abstract}
+
+% Lists
+\tableofcontents
+\listoffigures
+\listoftables
+
+% =======================================================
+% --- MAIN MATTER ---
+% =======================================================
+\mainmatter
+
+% Chapters
+\input{chapters/01-introduction}
+\input{chapters/02-document-preparation}
+\input{chapters/03-system-design}
+\input{chapters/04-implementation}
+\input{chapters/05-testing}
+\input{chapters/06-conclusion}
+
+% =======================================================
+% --- BACK MATTER ---
+% =======================================================
+\backmatter
+
+% Bibliography
+\nocite{*}
+\bibliographystyle{plain}
+\bibliography{bibliography/refs}
+
+\end{document}

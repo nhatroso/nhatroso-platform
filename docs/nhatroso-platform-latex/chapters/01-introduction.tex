@@ -1,0 +1,41 @@
+% chapters/01-introduction.tex
+\chapter{Giới thiệu}\label{chapter_intro}
+
+\section{Đặt vấn đề}
+
+Tại Việt Nam, thị trường nhà trọ phục vụ hàng triệu sinh viên, công nhân và người lao động. Phần lớn chủ cho thuê nhà trọ quy mô nhỏ và vừa vẫn đang quản lý bằng phương pháp truyền thống: ghi chỉ số điện nước thủ công vào sổ sách, tính tiền bằng Excel hoặc máy tính cầm tay, và thông báo hóa đơn qua nhắn tin. Quy trình này tiềm ẩn nhiều rủi ro: sai sót trong ghi nhận chỉ số, thiếu minh bạch trong tính toán dẫn đến tranh chấp với người thuê, và dữ liệu phân tán khó tổng hợp báo cáo.
+
+Bên cạnh đó, việc theo dõi hợp đồng thuê, quản lý trạng thái phòng, và đối soát thanh toán hàng tháng đòi hỏi nhiều thời gian và công sức của chủ nhà. Người thuê phòng cũng thiếu công cụ để theo dõi hóa đơn và lịch sử thanh toán của mình một cách minh bạch và chủ động.
+
+Sự phát triển của công nghệ nhận dạng ký tự quang học (OCR), ứng dụng web đám mây và hệ thống thanh toán số như QR code mở ra cơ hội số hóa toàn bộ quy trình quản lý nhà trọ, giúp giảm tải thao tác thủ công và gia tăng tính minh bạch. Trong giai đoạn đầu, việc số hóa quy trình thông qua bằng chứng ảnh chụp và hệ thống phê duyệt trực tuyến là bước đệm quan trọng trước khi tiến tới tự động hóa hoàn toàn bằng AI.
+
+\section{Mục tiêu đề tài}
+
+Đồ án hướng đến các mục tiêu sau:
+
+\textbf{Số hóa quy trình ghi nhận chỉ số:} Xây dựng quy trình nộp chỉ số điện nước thông qua ảnh chụp thực tế từ ứng dụng di động, đảm bảo tính minh bạch và có bằng chứng đối soát giữa người thuê và chủ nhà.
+
+\textbf{Quản lý tập trung (Modular Monolith):} Xây dựng hệ thống quản lý tòa nhà, phòng, hợp đồng thuê và dịch vụ trên một nền tảng duy nhất, đảm bảo tính nhất quán của dữ liệu.
+
+\textbf{Lập hóa đơn tự động và linh hoạt:} Tự động tính toán hóa đơn hàng tháng dựa trên chỉ số điện nước (chốt thủ công dựa trên ảnh chụp) và bảng giá dịch vụ theo thời gian hiệu lực.
+
+\textbf{Trải nghiệm người dùng đa nền tảng:} Cung cấp Dashboard Web cho chủ nhà để quản lý vận hành và Ứng dụng di động (Mobile App) cho người thuê để theo dõi và nộp chỉ số.
+
+\section{Phạm vi nghiên cứu}
+
+\textbf{Phạm vi trong đề tài (In-scope):} Quản lý tòa nhà, tầng, phòng; quản lý khách thuê và hợp đồng; danh mục dịch vụ và bảng giá theo thời gian hiệu lực; quy trình nộp và phê duyệt chỉ số đồng hồ kèm ảnh bằng chứng; tạo và quản lý hóa đơn tháng; phân quyền vai trò (Chủ nhà và Người thuê); triển khai hệ thống với Docker.
+
+\textbf{Ngoài phạm vi (Out-of-scope):} Tích hợp IoT đọc số tự động; xử lý thanh toán thực qua cổng ngân hàng (chỉ hỗ trợ hiển thị QR và xác nhận Webhook); tự động nhận diện hành vi gian lận điện nước bằng AI. Tính năng OCR tự động nhận diện chỉ số từ ảnh được xem là mục tiêu mở rộng sau khi hoàn thiện quy trình nghiệp vụ cốt lõi.
+
+\section{Bố cục đồ án}
+
+Đồ án được tổ chức thành sáu chương:
+
+\begin{itemize}
+  \item Chương \ref{chapter_intro}: Giới thiệu --- Bối cảnh, mục tiêu và phạm vi đề tài.
+  \item Chương \ref{chapter_requirements}: Phân tích yêu cầu --- Stakeholder, yêu cầu chức năng và phi chức năng.
+  \item Chương \ref{chapter_design}: Thiết kế hệ thống --- Kiến trúc, cơ sở dữ liệu, API và luồng nghiệp vụ.
+  \item Chương \ref{chapter_impl}: Cài đặt và triển khai --- Công nghệ, cấu trúc module và triển khai Docker.
+  \item Chương \ref{chapter_testing}: Kiểm thử --- Chiến lược, kịch bản và kết quả kiểm thử.
+  \item Chương \ref{chapter_conclusion}: Kết luận --- Tổng kết kết quả, hạn chế và hướng phát triển.
+\end{itemize}

@@ -1,0 +1,3 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k}{\PYGZbs{}inputminted}\PYG{n+nb}{\PYGZob{}}C++/Java/C\PYGZsh{}...\PYG{n+nb}{\PYGZcb{}\PYGZob{}}path to source file\PYG{n+nb}{\PYGZcb{}}
+\end{MintedVerbatim}

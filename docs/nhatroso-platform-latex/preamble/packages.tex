@@ -1,0 +1,63 @@
+% preamble/packages.tex
+
+% --- Language and Encoding ---
+\usepackage[utf8]{vietnam}
+\usepackage[vietnamese,english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T5]{fontenc}
+\usepackage{tipa}
+
+% --- Typography and Fonts ---
+\usepackage{mathptmx}           % Professional Times font
+\usepackage[scaled=0.95]{inconsolata} % Monospaced font for code
+\usepackage[protrusion=false, nopatch=footnote]{microtype} % Disable protrusion for T5 compatibility
+\usepackage{setspace}
+
+% --- Math Support ---
+\usepackage{mathtools}          % Enhanced amsmath
+\usepackage{amsthm}             % For theorem environments
+\usepackage{amssymb, amsfonts}
+
+% --- Tables and Layouts ---
+\usepackage{booktabs}           % Professional table horizontal rules
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{colortbl}
+\usepackage{float}
+\usepackage[a4paper, margin=1in, bindingoffset=0.5cm]{geometry}
+
+% --- Graphics and Aesthetic ---
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{eso-pic}            % For background watermark if needed
+\usepackage{tikz}               % For cover page borders
+\usetikzlibrary{calc}
+
+% --- Headers and Footers ---
+\usepackage{fancyhdr}
+\usepackage{emptypage}          % Blank pages have no headers/footers
+
+% --- Algorithms and Code ---
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{minted}
+
+% --- Miscellaneous ---
+\usepackage{siunitx}
+\sisetup{detect-all}
+\usepackage[autostyle=true]{csquotes}
+\usepackage{preamble/thesis_style}
+
+% --- Hyperlinks and Cross-References ---
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    urlcolor=Black,
+    citecolor=NavyBlue,
+    linkcolor=Black,
+    pdfborder={0 0 0}
+}
+\usepackage{bookmark}
+\usepackage{cleveref}           % Must load after hyperref

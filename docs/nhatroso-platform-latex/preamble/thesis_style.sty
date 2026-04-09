@@ -1,0 +1,151 @@
+\ProvidesPackage{preamble/thesis_style}
+\RequirePackage{graphicx}
+\RequirePackage{vietnam}
+\RequirePackage{geometry}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usepackage{indentfirst}
+% Paper size A4 (210 × 297 mm)
+\def\thesislayout{
+	\geometry{
+		a4paper,
+		total={160mm,247mm},
+		left=30mm,
+		top=25mm,
+	}
+}
+
+\newcommand{\@sdeptname}{KHOA CÔNG NGHỆ THÔNG TIN}
+\newcommand{\csdeptname}[1]{\renewcommand{\@sdeptname}{#1}}
+
+\newcommand{\@tname}{TÊN ĐỒ ÁN TỐT NGHIỆP}
+\newcommand{\ctname}[1]{\renewcommand{\@tname}{#1}}
+
+\newcommand{\@stuname}{Nguyễn Văn A\\Lê Thị B}
+\newcommand{\cstuname}[1]{\renewcommand{\@stuname}{#1}}
+
+\newcommand{\@sCouncil}{Công nghệ thông tin}
+\newcommand{\csCouncil}[1]{\renewcommand{\@sCouncil}{#1}}
+
+\newcommand{\@sSupervise}{TS. Nguyễn Văn A}
+\newcommand{\csSupervise}[1]{\renewcommand{\@sSupervise}{#1}}
+
+\newcommand{\@ttime}{\today}
+\newcommand{\cttime}[1]{\renewcommand{\@ttime}{#1}}
+ % report name (Đồ án/Khóa luận/Báo cáo...)
+\newcommand{\@rname}{ĐỒ ÁN TỐT NGHIỆP ĐẠI HỌC}
+\newcommand{\crname}[1]{\renewcommand{\@rname}{#1}}
+
+% Design cover page
+\def\coverpage{
+    % --- TikZ Border ---
+    \begin{tikzpicture}[remember picture, overlay]
+        % Base coordinates
+        \coordinate (NW) at ($(current page.north west) + (3.0cm,-2.0cm)$);
+        \coordinate (SE) at ($(current page.south east) + (-1.5cm,1.5cm)$);
+        \coordinate (NWinner) at ($(current page.north west) + (3.2cm,-2.2cm)$);
+        \coordinate (SEinner) at ($(current page.south east) + (-1.7cm,1.7cm)$);
+
+        % Main double border
+        \draw[line width=1.2pt, chaptercolor] (NW) rectangle (SE);
+        \draw[line width=2.8pt, chaptercolor] (NWinner) rectangle (SEinner);
+
+        % Corner Ornaments (Manual for parser safety)
+        \begin{scope}[shift={($(current page.north west) + (3.2cm,-2.2cm)$)}, rotate=0]
+            \draw[line width=1pt, chaptercolor] (0, -0.8) -- (0,0) -- (0.8, 0);
+        \end{scope}
+        \begin{scope}[shift={($(current page.north east) + (-1.7cm,-2.2cm)$)}, rotate=-90]
+            \draw[line width=1pt, chaptercolor] (0, -0.8) -- (0,0) -- (0.8, 0);
+        \end{scope}
+        \begin{scope}[shift={($(current page.south east) + (-1.7cm,1.7cm)$)}, rotate=-180]
+            \draw[line width=1pt, chaptercolor] (0, -0.8) -- (0,0) -- (0.8, 0);
+        \end{scope}
+        \begin{scope}[shift={($(current page.south west) + (3.2cm,1.7cm)$)}, rotate=90]
+            \draw[line width=1pt, chaptercolor] (0, -0.8) -- (0,0) -- (0.8, 0);
+        \end{scope}
+    \end{tikzpicture}
+
+    % --- Content ---
+    \begin{center}
+        {\fontsize{14}{16}\selectfont \textbf{BỘ GIÁO DỤC VÀ ĐÀO TẠO}}\\[0.4cm]
+        {\fontsize{16}{19}\selectfont \textbf{TRƯỜNG ĐẠI HỌC NHA TRANG}}\\[0.4cm]
+        {\fontsize{14}{16}\selectfont \textbf{\@sdeptname}}\\
+        \textbf{-----------------------------------------}
+
+        \vfill
+        \includegraphics[width=4.5cm]{assets/figures/ntu_logo.jpg}
+        \vfill
+
+        {\fontsize{18}{22}\selectfont \textbf{\@rname}}
+
+        \vspace{1.5cm}
+
+        \begin{minipage}{0.85\textwidth}
+            \centering
+            {\fontsize{22}{28}\selectfont \textbf{\color{chaptercolor} \@tname}}
+        \end{minipage}
+
+        \vfill
+
+        \begin{flushleft}
+            \hspace{1.5cm}
+            \begin{minipage}{0.8\textwidth}
+                {\fontsize{14}{18}\selectfont
+                {\bfseries Sinh viên thực hiện:} \@stuname\\
+                {\bfseries Lớp:} \@sCouncil\\
+                {\bfseries Giảng viên hướng dẫn:} \@sSupervise
+                }
+            \end{minipage}
+        \end{flushleft}
+
+        \vfill
+        {\fontsize{14}{16}\selectfont \textbf{\@ttime}}
+        \vspace{1cm}
+    \end{center}
+    \clearpage
+}
+
+\def\makeprintversion{}
+
+\RequirePackage{titlesec}
+\titleformat{\chapter}[display]
+  {\normalfont\huge\bfseries\color{chaptercolor}}
+  {\chaptertitlename\ \thechapter}{20pt}{\Huge}
+\titlespacing*{\chapter}{0pt}{-20pt}{40pt}
+
+%% Remember to load babel before loading this package or define the command \abstractname!
+\makeatletter
+\newenvironment{abstract}{
+  \clearpage
+  \@beginparpenalty\@lowpenalty
+  \begin{center}
+	\bfseries \abstractname
+	\@endparpenalty\@M
+  \end{center}}
+ {\par\clearpage}
+\makeatother
+
+\makeatletter
+\newenvironment{acknowledgments}{
+	%\titlepage \null\vfil
+	\small
+	\begin{center}
+	  {\bfseries Lời cảm ơn\vspace{-.5em}\vspace{\z@}}
+	\end{center}
+	\quotation
+  }{}
+\makeatother
+
+% Declaration
+\makeatletter
+\newenvironment{declaration}{
+	\small
+	\begin{center}
+	  {\bfseries Lời cam đoan\vspace{-.5em}\vspace{\z@}}
+	\end{center}
+	\quotation
+  }{}
+\makeatother
+
+% \renewcommand\lstlistingname{Algorithm}
+% \renewcommand\lstlistlistingname{Algorithms}

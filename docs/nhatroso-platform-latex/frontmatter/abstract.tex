@@ -1,0 +1,13 @@
+% frontmatter/abstract.tex
+\begin{abstract}
+
+Quản lý nhà trọ tại Việt Nam hiện vẫn phụ thuộc nhiều vào phương pháp thủ công như sổ sách giấy tờ và bảng tính, dẫn đến sai sót trong ghi nhận chỉ số điện nước, tranh chấp hóa đơn, và dòng tiền kém hiệu quả cho chủ nhà.
+
+Đồ án này trình bày quá trình nghiên cứu, phân tích, thiết kế và xây dựng \textbf{Nhatroso Platform} --- một nền tảng quản lý nhà trọ số hóa hiện đại. Hệ thống cung cấp giải pháp ghi nhận chỉ số điện nước minh bạch thông qua bằng chứng ảnh chụp trên thiết bị di động, tự động hóa quy trình lập hóa đơn tháng và hỗ trợ đối soát thanh toán trực tuyến qua Webhook.
+
+Hệ thống được xây dựng theo kiến trúc \textit{Modular Monolith}, triển khai trên nền tảng Docker với trái tim là Core API sử dụng ngôn ngữ lập trình \textbf{Rust} (framework \textbf{Loco.rs}). Dữ liệu được quản lý linh hoạt bởi \textbf{SeaORM} (hỗ trợ PostgreSQL/SQLite). Giao diện quản lý tập trung (Web Dashboard) được phát triển bằng \textbf{Next.js 16} và ứng dụng dành cho người thuê (Mobile App) được xây dựng bằng \textbf{Expo}.
+
+Kết quả đạt được bao gồm hệ thống phân quyền RBAC phân cấp quản lý bất động sản, quy trình đối soát chỉ số minh bạch giữa Người thuê và Chủ nhà, cơ chế lập hóa đơn linh hoạt dựa trên cấu hình đơn giá theo thời gian thực, và đảm bảo khả năng mở rộng hệ thống trong tương lai.
+
+\end{abstract}
+\newpage

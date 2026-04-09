@@ -16,8 +16,8 @@ Version: v1.0
 Xây dựng hệ thống phần mềm giúp **tự động hoá quản lý nhà trọ**, bao gồm:
 
 - Quản lý phòng, hợp đồng, cư dân tập trung
-- Ghi nhận chỉ số điện nước từ ảnh chụp
-- Tự động tạo hoá đơn và hỗ trợ thanh toán online
+- Ghi nhận chỉ số điện nước với bằng chứng ảnh chụp (tiền đề cho tự động nhận diện OCR)
+- Tự động tạo hoá đơn và hỗ trợ thanh toán online qua QR/Webhook
 - Cung cấp báo cáo doanh thu và tình trạng phòng
 
 Mục tiêu cuối cùng là **giảm thao tác thủ công, tăng minh bạch và tối ưu vận hành** cho chủ nhà.
@@ -38,9 +38,9 @@ Những hạn chế này làm giảm hiệu quả quản lý nhà trọ.
 **In-scope**
 
 - Quản lý phòng, cư dân, hợp đồng
-- Tự động trích xuất số điện nước từ ảnh
-- Tạo hoá đơn và thanh toán QR
-- Dashboard báo cáo doanh thu
+- Quy trình ghi điện nước minh bạch với bằng chứng ảnh chụp (hỗ trợ trích xuất số thủ công/tự động)
+- Tạo hoá đơn và thanh toán QR (hỗ trợ đối soát Webhook)
+- Dashboard báo cáo doanh thu và tình trạng phòng/dịch vụ
 
 **Out-of-scope**
 
@@ -52,12 +52,12 @@ Các giới hạn này đã được nêu rõ trong đề cương.
 
 ### 2. Stakeholders
 
-| Vai trò | Trách nhiệm |
-| --- | --- |
-| Sponsor | Phê duyệt đề tài và đánh giá kết quả |
-| Product Owner | Định hướng sản phẩm và mục tiêu |
-| BA/Dev/Test | Sinh viên chịu trách nhiệm toàn bộ vòng đời dự án |
-| Advisor | Cố vấn học thuật và chuyên môn |
+| Vai trò       | Trách nhiệm                                       |
+| ------------- | ------------------------------------------------- |
+| Sponsor       | Phê duyệt đề tài và đánh giá kết quả              |
+| Product Owner | Định hướng sản phẩm và mục tiêu                   |
+| BA/Dev/Test   | Sinh viên chịu trách nhiệm toàn bộ vòng đời dự án |
+| Advisor       | Cố vấn học thuật và chuyên môn                    |
 
 Cơ cấu nhân sự gồm sinh viên thực hiện và giảng viên hướng dẫn.
 
@@ -101,18 +101,18 @@ Quy trình mới giúp **tự động hoá toàn bộ vòng đời hoá đơn**.
 
 ### 6. Business Requirements
 
-| ID | Mô tả | Priority |
-| --- | --- | --- |
-| BR-01 | Quản lý danh sách phòng và trạng thái | High |
-| BR-02 | Quản lý cư dân và hợp đồng thuê | High |
-| BR-03 | Chụp ảnh đồng hồ và tự động trích xuất chỉ số từ ảnh | High |
-| BR-04 | Tự động tính tiền điện nước | High |
-| BR-05 | Tạo và gửi hoá đơn điện tử | High |
-| BR-06 | Thanh toán bằng QR chuyển khoản | High |
-| BR-07 | Theo dõi trạng thái thanh toán | High |
-| BR-08 | Dashboard báo cáo doanh thu | Medium |
-| BR-09 | Tenant xem hoá đơn và lịch sử giao dịch | High |
-| BR-10 | Gửi yêu cầu sự cố từ tenant | Medium |
+| ID    | Mô tả                                                | Priority |
+| ----- | ---------------------------------------------------- | -------- |
+| BR-01 | Quản lý danh sách phòng và trạng thái                | High     |
+| BR-02 | Quản lý cư dân và hợp đồng thuê                      | High     |
+| BR-03 | Chụp ảnh đồng hồ và tự động trích xuất chỉ số từ ảnh | High     |
+| BR-04 | Tự động tính tiền điện nước                          | High     |
+| BR-05 | Tạo và gửi hoá đơn điện tử                           | High     |
+| BR-06 | Thanh toán bằng QR chuyển khoản                      | High     |
+| BR-07 | Theo dõi trạng thái thanh toán                       | High     |
+| BR-08 | Dashboard báo cáo doanh thu                          | Medium   |
+| BR-09 | Tenant xem hoá đơn và lịch sử giao dịch              | High     |
+| BR-10 | Gửi yêu cầu sự cố từ tenant                          | Medium   |
 
 Các chức năng này phản ánh đầy đủ hai nhóm người dùng Chủ trọ và Người thuê.
 

@@ -1,0 +1,74 @@
+% chapters/02-requirements.tex
+\chapter{Phân tích yêu cầu hệ thống}\label{chapter_requirements}
+
+\section{Phân tích stakeholder}
+
+Dự án Nhatroso Platform phục vụ hai nhóm người dùng chính và một nhóm cố vấn học thuật, được tổng hợp trong bảng sau.
+
+\begin{table}[htbp]
+\centering
+\caption{Danh sách stakeholder của hệ thống}
+\label{tab:stakeholders}
+\begin{tabularx}{\textwidth}{l>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X}
+\toprule
+\textbf{Vai trò} & \textbf{Mối quan tâm chính} & \textbf{Mức ảnh hưởng} \\
+\midrule
+Chủ nhà / Quản lý nhà trọ & Quản lý phòng, tự động hóa điện nước--hóa đơn, giảm tranh chấp, báo cáo doanh thu & Rất cao \\[5pt]
+Người thuê phòng & Minh bạch hóa đơn, thanh toán nhanh, theo dõi hợp đồng dễ dàng & Cao \\[5pt]
+Giảng viên hướng dẫn & Chất lượng chuyên môn, phương pháp luận, kết quả đồ án & Cao \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Yêu cầu chức năng}
+
+Hệ thống cần đáp ứng các yêu cầu chức năng cốt lõi được trình bày theo từng nhóm nghiệp vụ dưới đây.
+
+\subsection{Quản lý tài khoản và phân quyền}
+
+Hệ thống hỗ trợ đăng ký tài khoản bằng email hoặc số điện thoại với mật khẩu được bảo mật. Mỗi người dùng được cấp một ID duy nhất kiểu \texttt{i32}. Sau khi đăng nhập, hệ thống phát JWT access token ngắn hạn kết hợp refresh token. Hai vai trò được phân biệt rõ ràng: \textbf{Owner} (chủ nhà) có quyền quản lý toàn bộ tài nguyên của mình thông qua Web Dashboard, còn \textbf{Tenant} (người thuê) sử dụng Mobile App để gửi chỉ số và xem hóa đơn.
+
+\subsection{Quản lý bất động sản}
+
+Chủ nhà có thể tạo và quản lý theo cấu trúc phân cấp: Tòa nhà $\rightarrow$ Tầng $\rightarrow$ Phòng. Mỗi phòng có một mã định danh duy nhất trong tòa nhà và trạng thái thể hiện vòng đời: \texttt{VACANT} (trống), \texttt{DEPOSITED} (đã đặt cọc), \texttt{OCCUPIED} (đang ở), \texttt{MAINTENANCE} (bảo trì).
+
+\subsection{Danh mục dịch vụ và bảng giá}
+
+Chủ nhà cấu hình danh mục dịch vụ với đơn vị tính và logic tương ứng (điện, nước tính theo số; internet, vệ sinh tính theo tháng). Bảng giá được thiết lập linh hoạt cho từng phòng, hỗ trợ đơn giá thay đổi theo thời gian hiệu lực (\texttt{effective\_start/end}).
+
+\subsection{Hợp đồng thuê}
+
+Hệ thống đảm bảo mỗi phòng chỉ có duy nhất một hợp đồng \texttt{ACTIVE} tại một thời điểm. Hợp đồng liên kết giữa chủ nhà, phòng và các thành viên thuê phòng. Khi kết hợp cùng \texttt{meter\_readings}, đây là căn cứ pháp lý và dữ liệu để tạo hóa đơn.
+
+\subsection{Ghi nhận chỉ số và quy trình Mobile-to-Web}
+
+Quy trình số hóa chỉ số tập trung vào tính minh bạch:
+\begin{itemize}
+    \item Hệ thống mở kỳ nộp số hằng tháng (\texttt{meter\_requests}).
+    \item Người thuê chụp ảnh đồng hồ và nộp kèm số đọc qua Mobile App.
+    \item Chủ nhà xem ảnh bằng chứng và phê duyệt chỉ số trên Web Dashboard.
+    \item Dữ liệu sau khi phê duyệt (\texttt{ACCEPTED}) sẽ được khóa để đảm bảo tính bất biến.
+\end{itemize}
+
+\subsection{Lập hóa đơn và vòng đời trạng thái}
+
+Hệ thống hỗ trợ tính toán trước giá trị hóa đơn (\texttt{calculate}) để chủ nhà kiểm tra số tiền trước khi chính thức phát hành. Mỗi hóa đơn gắn với một hợp đồng và một kỳ thanh toán duy nhất. Trạng thái hóa đơn gồm: \texttt{UNPAID} (chờ thanh toán), \texttt{PAID} (đã thanh toán), và \texttt{VOIDED} (hóa đơn bị hủy).
+
+\section{Yêu cầu phi chức năng}
+
+\begin{table}[htbp]
+\centering
+\caption{Yêu cầu phi chức năng (Implemented)}
+\label{tab:nfr}
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+\textbf{Loại} & \textbf{Yêu cầu} \\
+\midrule
+Bảo mật & TLS 1.2+; mật khẩu băm Argon2; JWT access token ngắn hạn; Ownership check ở tầng backend API. \\[5pt]
+Hiệu năng & API phản hồi nhanh nhờ hiệu năng của ngôn ngữ Rust; Next.js 16 tối ưu Client-side Rendering. \\[5pt]
+Độ tin cậy & Idempotency cho tạo hóa đơn dựa trên (contract\_id, period); SeaORM migration đảm bảo nhất quán schema. \\[5pt]
+Kiểm toán & Đảm bảo tính minh bạch thông qua ảnh chụp đồng hồ điện nước không thể xóa sau khi đã chốt hóa đơn. \\[5pt]
+Triển khai & Containerized Docker; hỗ trợ dual-database SQLite (dev) và PostgreSQL (production). \\
+\bottomrule
+\end{tabularx}
+\end{table}

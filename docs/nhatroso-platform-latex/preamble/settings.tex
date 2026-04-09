@@ -1,0 +1,62 @@
+% preamble/settings.tex
+
+% --- Layout and Spacing ---
+\setlength{\headheight}{15pt}
+\onehalfspacing
+\setlength{\parskip}{0.5em}
+\setlength{\parindent}{2em}
+
+% --- Table Column Types ---
+\newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
+\newcolumntype{M}[1]{>{\centering\arraybackslash}m{#1}}
+
+% --- Colors and Styling ---
+\definecolor{cobalt}{rgb}{0.0, 0.28, 0.67}
+\definecolor{carmine}{rgb}{0.59, 0.0, 0.09}
+\definecolor{chaptercolor}{RGB}{0, 70, 140}
+\definecolor{linkblue}{RGB}{0,51,153}
+
+% --- Chapter Title Styling (Template Aligned) ---
+\titleformat{\chapter}[display]
+  {\normalfont\huge\bfseries\color{chaptercolor}}
+  {\chaptername\ \thechapter}{20pt}{\Huge}
+\titlespacing*{\chapter}{0pt}{-20pt}{40pt}
+
+% --- Header and Footer (Template Aligned) ---
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\nouppercase{\leftmark}}
+\fancyhead[R]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\fancypagestyle{plain}{
+    \fancyhf{}
+    \fancyfoot[C]{\small\thepage}
+    \renewcommand{\headrulewidth}{0pt}
+}
+
+% --- Theorem Environments ---
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[chapter]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+% --- Graphics and Captioning ---
+\graphicspath{{assets/figures/}}
+\captionsetup[figure]{font=small,labelfont=bf,format=hang}
+\captionsetup[table]{font=small,labelfont=bf,format=hang}
+
+% --- Vietnamese Translations ---
+\renewcommand{\chaptername}{Chương}
+\renewcommand{\contentsname}{Mục lục}
+\renewcommand{\listfigurename}{Danh sách hình vẽ}
+\renewcommand{\listtablename}{Danh sách bảng biểu}
+\renewcommand{\bibname}{Tài liệu tham khảo}
+\providecommand{\abstractname}{Tóm tắt}
+
+\setcounter{secnumdepth}{2}

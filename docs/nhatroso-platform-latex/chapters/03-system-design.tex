@@ -1,0 +1,107 @@
+% chapters/03-system-design.tex
+\chapter{Thiết kế hệ thống}\label{chapter_design}
+
+\section{Kiến trúc tổng thể}
+
+Nhatroso Platform được thiết kế theo mô hình \textbf{Modular Monolith} sử dụng ngôn ngữ lập trình Rust. Toàn bộ logic nghiệp vụ được đóng gói trong một API server duy nhất, đảm bảo tính hiệu năng cao, an toàn bộ nhớ và dễ dàng bảo trì. Hệ thống tận dụng nền tảng \textbf{Loco.rs} (với lõi là Axum) để cung cấp các tính năng quản lý cơ sở dữ liệu, xác thực và quản lý background job một cách đồng bộ.
+
+Kiến trúc bao gồm các khối chính được quản lý thông qua Docker:
+
+\begin{table}[htbp]
+\centering
+\caption{Các thành phần hệ thống (Implemented)}
+\label{tab:components}
+\begin{tabularx}{\textwidth}{llX}
+\toprule
+\textbf{Thành phần} & \textbf{Công nghệ} & \textbf{Trách nhiệm} \\
+\midrule
+Owner Dashboard & Next.js 16 & Giao diện quản lý tập trung cho chủ nhà. \\
+Tenant Mobile App & Expo (React Native) & Ứng dụng nộp chỉ số và xem hóa đơn cho người thuê. \\
+Core API Server & Rust (Loco.rs) & Xử lý logic nghiệp vụ, REST API, RBAC, billing. \\
+Database & PostgreSQL / SQLite & Lưu trữ dữ liệu quan hệ (SeaORM). \\
+Storage & Filesystem / S3 & Lưu trữ ảnh minh họa đồng hồ điện nước. \\
+Authentication & JWT & Cơ chế xác thực thông qua Access \& Refresh Tokens. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Thiết kế cơ sở dữ liệu}
+
+Cơ sở dữ liệu được quản lý thông qua \textbf{SeaORM}, cho phép làm việc linh hoạt với cả SQLite (trong môi trường phát triển) và PostgreSQL (trong môi trường sản xuất). Thiết kế ưu tiên tính toàn vẹn dữ liệu thông qua các ràng buộc khóa ngoại và chỉ số serial (i32).
+
+\subsection{Sơ đồ quan hệ thực thể}
+
+Các thực thể chính được thiết kế để hỗ trợ quy trình billing linh hoạt và có bằng chứng đối soát. Bảng \ref{tab:entities} liệt kê các thực thể cốt lõi trong phiên bản MVP.
+
+\begin{table}[htbp]
+\centering
+\caption{Các bảng dữ liệu chính (Sơ đồ thực tế)}
+\label{tab:entities}
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+\textbf{Bảng} & \textbf{Mô tả và ràng buộc quan trọng} \\
+\midrule
+\texttt{users} & Thông tin người dùng, \texttt{role} (OWNER/TENANT). ID kiểu \texttt{i32}. \\
+\texttt{buildings} & Thông tin tòa nhà thuộc sở hữu của chủ trọ. \\
+\texttt{floors} & Phân cấp tầng trong tòa nhà. \\
+\texttt{rooms} & Phòng thuê, trạng thái (VACANT, OCCUPIED, etc.). \\
+\texttt{services} & Danh mục dịch vụ (Điện, Nước, Rác, etc.). \\
+\texttt{room\_services} & Liên kết các dịch vụ được áp dụng cho từng phòng cụ thể. \\
+\texttt{price\_rules} & Quản lý đơn giá theo thời gian hiệu lực cho từng dịch vụ tại mỗi phòng. \\
+\texttt{contracts} & Hợp đồng thuê phòng, ràng buộc 01 hợp đồng \texttt{ACTIVE} tại một thời điểm. \\
+\texttt{meters} & Thiết bị đo (Đồng hồ điện/nước) gắn với phòng. \\
+\texttt{meter\_requests} & Phiên yêu cầu nộp chỉ số theo kỳ (tháng) cho tòa nhà. \\
+\texttt{meter\_readings} & Kết quả ghi nhận chỉ số: ảnh bằng chứng, giá trị manual và trạng thái duyệt. \\
+\texttt{invoices} & Hóa đơn kỳ của phòng, tính toán dựa trên hợp đồng và chỉ số điện nước. \\
+\texttt{invoice\_details} & Chi tiết các khoản mục trong hóa đơn (Label + Amount). \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Thiết kế API}
+
+API được triển khai theo chuẩn RESTful với tiền tố \texttt{/api/v1}. Các endpoint được bảo vệ bởi lớp middleware xác thực JWT.
+
+\begin{table}[htbp]
+\centering
+\caption{Các API endpoint chính}
+\label{tab:api}
+\begin{tabularx}{\textwidth}{llX}
+\toprule
+\textbf{Nhóm} & \textbf{Method / Path} & \textbf{Mô tả} \\
+\midrule
+Auth & POST /auth/login & Đăng nhập và nhận cặp JWT tokens. \\
+ & POST /auth/refresh & Sử dụng refresh token để cấp mới access token. \\
+\midrule
+Property & GET /rooms & Danh sách phòng và trạng thái. \\
+ & POST /room-services & Cấu hình dịch vụ áp dụng cho phòng. \\
+\midrule
+Meters & POST /meter-requests & Khởi tạo kỳ nộp chỉ số cho tòa nhà. \\
+ & POST /meter-readings & Tenant nộp chỉ số kèm ảnh chụp từ mobile app. \\
+ & PATCH /meter-readings/:id & Owner phê duyệt/từ chối chỉ số thực tế. \\
+\midrule
+Billing & POST /invoices/calculate & Xem trước giá trị hóa đơn dựa trên chỉ số thực tế. \\
+ & POST /invoices & Chốt và phát hành hóa đơn cho kỳ. \\
+ & GET /invoices/:id & Truy vấn chi tiết hóa đơn kèm theo line items. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Thiết kế luồng nghiệp vụ quan trọng}
+
+\subsection{Luồng nộp và phê duyệt chỉ số điện nước}
+
+Thay vì dựa vào OCR tự động hoàn toàn như bản thiết kế ban đầu, hệ thống triển khai quy trình phối hợp để đảm bảo tính chính xác tuyệt đối:
+\begin{enumerate}
+  \item Hệ thống tạo \texttt{meter\_requests} hằng tháng dựa trên deadline cấu hình.
+  \item Tenant nhận thông báo, chụp ảnh đồng hồ qua ứng dụng Mobile và nhập số thủ công.
+  \item Dữ liệu được lưu với trạng thái \texttt{PENDING}. Ảnh lưu trên server làm bằng chứng.
+  \item Chủ nhà (Owner) truy cập Dashboard Web, đối chiếu ảnh chụp và số nhập để \texttt{ACCEPT}.
+  \item Chỉ số \texttt{ACCEPTED} trở thành đầu vào cho việc tính hóa đơn.
+\end{enumerate}
+
+\subsection{Quy trình tính hóa đơn (Billing Logic)}
+
+Logic tính toán được thực hiện tại server Rust để đảm bảo an toàn. Hệ thống truy vấn \texttt{price\_rules} có hiệu lực tại thời điểm tạo hóa đơn, kết hợp với chênh lệch chỉ số giữa hai kỳ liên tiếp.
+
+Hóa đơn được tạo dưới dạng bản nháp (\texttt{calculate}) để owner kiểm tra trước khi phát hành chính thức, đảm bảo tính chính xác tuyệt đối của dữ liệu.
