@@ -4,6 +4,7 @@ import * as React from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { contractsService } from '@/services/api/contracts';
 import { ContractResponse } from '@nhatroso/shared';
+import { PageHeader } from '@/components/ui/PageHeader';
 
 // Use same tailwind classes that mimic the provided CSS or convert inline
 export default function ContractDetailPage() {
@@ -27,7 +28,7 @@ export default function ContractDetailPage() {
   if (isLoading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-blue-600" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-border border-t-primary" />
       </div>
     );
   }
@@ -35,11 +36,11 @@ export default function ContractDetailPage() {
   if (errorMSG || !contract) {
     return (
       <div className="mx-auto max-w-3xl py-8">
-        <div className="rounded-lg bg-red-50 p-4 text-red-600">
+        <div className="rounded-lg bg-danger-light p-4 text-danger">
           {errorMSG || 'Contract not found'}
         </div>
         <button
-          className="mt-4 text-blue-600 underline"
+          className="mt-4 text-primary underline"
           onClick={() => router.back()}
         >
           Quay lại
@@ -54,19 +55,28 @@ export default function ContractDetailPage() {
 
   return (
     <div className="mx-auto max-w-4xl py-8">
-      <div className="mb-4 flex justify-between">
-        <button
-          onClick={() => router.back()}
-          className="text-gray-500 hover:text-gray-900 dark:hover:text-white"
-        >
-          &larr; Quay lại
-        </button>
-        <button
-          onClick={handlePrint}
-          className="rounded bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"
-        >
-          In Hợp Đồng
-        </button>
+      <div className="print:hidden">
+        <PageHeader
+          variant="full"
+          title={`Hợp đồng phòng trọ: ${contract.room_code}`}
+          description={`Người Thuê: ${contract.tenant_name}`}
+          actions={
+            <div className="flex gap-4">
+              <button
+                onClick={() => router.back()}
+                className="rounded-lg border border-gray-border bg-gray-card px-4 py-2 font-medium text-gray-text hover:bg-gray-surface active:scale-95 transition-all shadow-sm"
+              >
+                &larr; Quay lại
+              </button>
+              <button
+                onClick={handlePrint}
+                className="rounded-lg bg-primary px-4 py-2 font-medium text-white hover:bg-primary-hover active:scale-95 transition-all shadow-sm"
+              >
+                In Hợp Đồng
+              </button>
+            </div>
+          }
+        />
       </div>
 
       {/* Print area - A4 styled box */}

@@ -60,6 +60,7 @@ impl Hooks for App {
             .add_route(controllers::contracts::routes())
             .add_route(controllers::users::routes())
             .add_route(controllers::uploads::routes())
+            .add_route(controllers::invoices::routes())
     }
 
     async fn after_routes(router: axum::Router, _ctx: &AppContext) -> Result<axum::Router> {

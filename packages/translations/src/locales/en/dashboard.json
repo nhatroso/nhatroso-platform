@@ -6,6 +6,7 @@
   "monthlyRevenue": "Monthly Revenue",
   "pendingBills": "Pending Bills",
   "occupancyRate": "Occupancy Rate",
+  "Invoices": "Invoices",
   "tenant": {
     "welcome": "Welcome, {{name}}",
     "todayOverview": "Here's what's happening today",

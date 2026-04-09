@@ -84,39 +84,37 @@ export default function ManualGenerateModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden bg-gray-900/50 p-4">
-      <div className="relative w-full max-w-md transform rounded-xl bg-white p-6 shadow-2xl transition-all dark:bg-slate-800">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden bg-gray-strong/50 p-4">
+      <div className="relative w-full max-w-md transform rounded-xl bg-gray-card p-6 shadow-2xl transition-all">
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 rounded-md p-1 text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700"
+          className="absolute right-4 top-4 rounded-md p-1 text-gray-muted hover:bg-gray-surface"
         >
           <X className="h-5 w-5" />
         </button>
 
-        <h3 className="mb-4 text-xl font-bold text-gray-900 dark:text-white">
-          {t('Title')}
-        </h3>
+        <h3 className="mb-4 text-h2 font-bold text-gray-text">{t('Title')}</h3>
 
         {error && (
-          <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
+          <div className="mb-4 rounded-md bg-danger-light p-3 text-body text-danger dark:bg-danger-dark/10 dark:text-danger-dark">
             {error}
           </div>
         )}
 
         {fetchingBuildings ? (
           <div className="flex justify-center p-8">
-            <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="mb-1 block text-body font-medium text-gray-muted">
                 {t('Building')}
               </label>
               <select
                 value={buildingId}
                 onChange={(e) => setBuildingId(e.target.value)}
-                className="block w-full rounded-lg border-gray-200 px-4 py-2 text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 dark:border-gray-700 dark:bg-slate-900 dark:text-gray-400"
+                className="block w-full rounded-lg border-gray-border bg-gray-input px-4 py-2 text-body text-gray-text focus:border-primary focus:ring-primary"
               >
                 <option value="" disabled>
                   {t('SelectBuilding')}
@@ -130,19 +128,19 @@ export default function ManualGenerateModal({
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="mb-1 block text-body font-medium text-gray-muted">
                 {t('Period')}
               </label>
               <input
                 type="month"
                 value={periodMonth}
                 onChange={(e) => setPeriodMonth(e.target.value)}
-                className="block w-full rounded-lg border-gray-200 px-4 py-2 text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 dark:border-gray-700 dark:bg-slate-900 dark:text-gray-400"
+                className="block w-full rounded-lg border-gray-border bg-gray-input px-4 py-2 text-body text-gray-text focus:border-primary focus:ring-primary"
               />
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="mb-1 block text-body font-medium text-gray-muted">
                 {t('DueDate')}
               </label>
               <input
@@ -150,7 +148,7 @@ export default function ManualGenerateModal({
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
                 required
-                className="block w-full rounded-lg border-gray-200 px-4 py-2 text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 dark:border-gray-700 dark:bg-slate-900 dark:text-gray-400"
+                className="block w-full rounded-lg border-gray-border bg-gray-input px-4 py-2 text-body text-gray-text focus:border-primary focus:ring-primary"
               />
             </div>
 
@@ -158,14 +156,14 @@ export default function ManualGenerateModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="inline-flex items-center gap-x-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:bg-slate-900 dark:text-white dark:hover:bg-gray-800"
+                className="inline-flex items-center gap-x-2 rounded-lg border border-gray-border bg-gray-card px-4 py-2 text-body font-medium text-gray-text shadow-sm hover:bg-gray-surface disabled:opacity-50"
               >
                 {t('Cancel')}
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="inline-flex items-center gap-x-2 rounded-lg border border-transparent bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+                className="inline-flex items-center gap-x-2 rounded-lg border border-transparent bg-primary px-4 py-2 text-body font-semibold text-white hover:bg-primary-hover disabled:opacity-50"
               >
                 {loading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />

@@ -14,3 +14,6 @@ pub mod meter_readings;
 
 pub mod meter_requests;
 pub mod meter_request_configs;
+pub mod invoice_status_histories;
+pub mod invoices;
+pub mod invoice_details;

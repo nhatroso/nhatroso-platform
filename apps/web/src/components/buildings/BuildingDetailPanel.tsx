@@ -90,20 +90,20 @@ export function BuildingDetailPanel({
   };
 
   return (
-    <div className="flex h-full w-full flex-col bg-white dark:bg-gray-900 overflow-hidden">
+    <div className="flex h-full w-full flex-col bg-gray-card overflow-hidden">
       {/* Header */}
-      <div className="flex shrink-0 items-center justify-between border-b border-gray-200 bg-gray-50 px-6 py-5 dark:border-gray-700 dark:bg-gray-800">
+      <div className="flex shrink-0 items-center justify-between border-b border-gray-border bg-gray-surface px-6 py-5">
         <div>
-          <h2 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">
+          <h2 className="text-h2 font-bold tracking-tight text-gray-text">
             {isCreating ? t('CreateBuilding') : building?.name}
           </h2>
           {!isCreating && building && (
-            <div className="mt-1.5 flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+            <div className="mt-1.5 flex items-center gap-2 text-body text-gray-muted">
               <span
-                className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-semibold ${
+                className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-tiny font-semibold ${
                   building.status === 'ACTIVE'
-                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                    : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                    ? 'bg-success-light text-success dark:bg-success-dark/20 dark:text-success-dark'
+                    : 'bg-gray-subtle text-gray-muted'
                 }`}
               >
                 {t(`Status_${building.status}`)}
@@ -117,7 +117,7 @@ export function BuildingDetailPanel({
         </div>
         <button
           onClick={onClose}
-          className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-200 hover:text-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-200 md:hidden dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700"
+          className="rounded-lg p-2 text-gray-muted transition-colors hover:bg-gray-surface hover:text-gray-text focus:outline-none focus:ring-4 focus:ring-gray-border md:hidden"
           aria-label="Close panel"
         >
           <svg
@@ -138,11 +138,11 @@ export function BuildingDetailPanel({
 
       {/* Tabs */}
       {!isCreating && building && (
-        <div className="border-b border-gray-200 dark:border-gray-700">
-          <ul className="flex flex-wrap -mb-px text-sm font-medium text-center text-gray-500 dark:text-gray-400 px-6">
+        <div className="border-b border-gray-border">
+          <ul className="flex flex-wrap -mb-px text-body font-medium text-center text-gray-muted px-6">
             <li className="mr-2">
               <button
-                className="inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active dark:text-blue-500 dark:border-blue-500"
+                className="inline-block p-4 text-primary border-b-2 border-primary rounded-t-lg active dark:text-primary-dark dark:border-primary-dark"
                 aria-current="page"
               >
                 {t('Overview')}
@@ -151,7 +151,7 @@ export function BuildingDetailPanel({
             <li className="mr-2">
               <Link
                 href={`/dashboard/floors?buildingId=${building.id}`}
-                className="inline-flex items-center p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300"
+                className="inline-flex items-center p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-text hover:border-gray-border"
               >
                 {t('Floors')}
               </Link>
@@ -159,7 +159,7 @@ export function BuildingDetailPanel({
             <li className="mr-2">
               <Link
                 href={`/dashboard/rooms?buildingId=${building.id}`}
-                className="inline-flex items-center p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300"
+                className="inline-flex items-center p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-text hover:border-gray-border"
               >
                 {t('Rooms')}
               </Link>
@@ -169,13 +169,13 @@ export function BuildingDetailPanel({
       )}
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto bg-gray-50/50 dark:bg-gray-900/50 p-6">
-        <div className="mx-auto max-w-2xl bg-white rounded-xl border border-gray-200 shadow-sm dark:bg-gray-800 dark:border-gray-700 overflow-hidden">
-          <div className="border-b border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-800">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+      <div className="flex-1 overflow-y-auto bg-gray-surface/50 p-6">
+        <div className="mx-auto max-w-2xl bg-gray-card rounded-xl border border-gray-border shadow-sm overflow-hidden">
+          <div className="border-b border-gray-border bg-gray-surface px-6 py-4">
+            <h3 className="text-h3 font-bold text-gray-text">
               {isCreating ? t('CreateBuilding') : t('BuildingDetails')}
             </h3>
-            <p className="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
+            <p className="mt-1 text-body font-normal text-gray-muted">
               {t('BuildingDetailsDescription') ||
                 'Update the basic information of this property.'}
             </p>
@@ -185,7 +185,7 @@ export function BuildingDetailPanel({
             <div className="space-y-6">
               {error && (
                 <div
-                  className="flex p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400"
+                  className="flex p-4 mb-4 text-body text-danger rounded-lg bg-danger-light dark:bg-danger-dark/10 dark:text-danger-dark"
                   role="alert"
                 >
                   <svg
@@ -207,9 +207,9 @@ export function BuildingDetailPanel({
               <div>
                 <label
                   htmlFor="name"
-                  className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                  className="block mb-2 text-body font-medium text-gray-text"
                 >
-                  {t('Name')} <span className="text-red-500">*</span>
+                  {t('Name')} <span className="text-danger">*</span>
                 </label>
                 <input
                   id="name"
@@ -218,7 +218,7 @@ export function BuildingDetailPanel({
                   disabled={isSubmitting || building?.status === 'ARCHIVED'}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 disabled:opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  className="bg-gray-input border border-gray-border text-gray-text text-body rounded-lg focus:ring-primary focus:border-primary"
                   placeholder={t('PlaceholderBuildingName')}
                 />
               </div>
@@ -226,7 +226,7 @@ export function BuildingDetailPanel({
               <div>
                 <label
                   htmlFor="address"
-                  className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                  className="block mb-2 text-body font-medium text-gray-text"
                 >
                   {t('Address')}
                 </label>
@@ -236,19 +236,19 @@ export function BuildingDetailPanel({
                   disabled={isSubmitting || building?.status === 'ARCHIVED'}
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  className="block p-2.5 w-full text-body text-gray-text bg-gray-input rounded-lg border border-gray-border focus:ring-primary focus:border-primary disabled:opacity-50"
                   placeholder={t('PlaceholderBuildingAddress')}
                 />
               </div>
             </div>
 
-            <div className="mt-8 flex items-center justify-end gap-x-4 border-t border-gray-200 pt-6 dark:border-gray-700">
+            <div className="mt-8 flex items-center justify-end gap-x-4 border-t border-gray-border pt-6">
               {!isCreating && building?.status === 'ACTIVE' && (
                 <button
                   type="button"
                   onClick={handleArchive}
                   disabled={isSubmitting}
-                  className="text-red-700 hover:text-white border border-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900 disabled:opacity-50"
+                  className="text-danger hover:text-white border border-danger hover:bg-danger-hover focus:ring-4 focus:outline-none focus:ring-danger-light font-medium rounded-lg text-body px-5 py-2.5 text-center dark:border-danger-dark dark:text-danger-dark dark:hover:text-white dark:hover:bg-danger dark:focus:ring-danger-hover disabled:opacity-50"
                 >
                   {isSubmitting ? '...' : t('Archive')}
                 </button>
@@ -257,7 +257,7 @@ export function BuildingDetailPanel({
               <button
                 type="submit"
                 disabled={isSubmitting || building?.status === 'ARCHIVED'}
-                className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 disabled:opacity-50"
+                className="text-white bg-primary hover:bg-primary-hover focus:ring-4 focus:ring-primary-light font-medium rounded-lg text-body px-5 py-2.5 dark:bg-primary dark:hover:bg-primary-hover focus:outline-none dark:focus:ring-primary-hover disabled:opacity-50"
               >
                 {isSubmitting
                   ? t('Saving')

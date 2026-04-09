@@ -6,10 +6,9 @@ pub mod price_rules;
 pub mod rooms;
 pub mod services;
 pub mod users;
-
 pub mod room_services;
 pub mod meters;
 pub mod uploads;
-
 pub mod meter_requests;
 pub mod meter_request_configs;
+pub mod invoices;

@@ -34,6 +34,10 @@ mod m20260401_031812_add_usage_to_meter_readings;
 mod m20260401_035027_add_period_to_meter_readings;
 mod m20260402_085249_fix_meter_unique_index;
 mod m20260404_043345_add_status_and_nullable_readings_to_meter_readings;
+mod m20260408_031256_invoices;
+mod m20260408_031422_invoice_status_histories;
+mod m20260408_034031_invoice_details;
+mod m20260408_034155_remove_breakdown_from_invoices;
 pub struct Migrator;
 
 #[async_trait::async_trait]
@@ -71,6 +75,10 @@ impl MigratorTrait for Migrator {
             Box::new(m20260401_035027_add_period_to_meter_readings::Migration),
             Box::new(m20260402_085249_fix_meter_unique_index::Migration),
             Box::new(m20260404_043345_add_status_and_nullable_readings_to_meter_readings::Migration),
+            Box::new(m20260408_031256_invoices::Migration),
+            Box::new(m20260408_031422_invoice_status_histories::Migration),
+            Box::new(m20260408_034031_invoice_details::Migration),
+            Box::new(m20260408_034155_remove_breakdown_from_invoices::Migration),
         ]
     }
 }

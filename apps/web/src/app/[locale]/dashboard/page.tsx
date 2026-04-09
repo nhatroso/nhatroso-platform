@@ -75,34 +75,34 @@ function KpiIcon({ type }: { type: string }) {
 
 const colorMap: Record<string, { bg: string; icon: string; text: string }> = {
   blue: {
-    bg: 'bg-blue-100 dark:bg-blue-900',
-    icon: 'text-blue-600 dark:text-blue-300',
-    text: 'text-blue-600 dark:text-blue-400',
+    bg: 'bg-primary-light dark:bg-primary-dark/10',
+    icon: 'text-primary dark:text-primary-dark',
+    text: 'text-primary dark:text-primary-dark',
   },
   green: {
-    bg: 'bg-green-100 dark:bg-green-900',
-    icon: 'text-green-600 dark:text-green-300',
-    text: 'text-green-600 dark:text-green-400',
+    bg: 'bg-success-light dark:bg-success-dark/10',
+    icon: 'text-success dark:text-success-dark',
+    text: 'text-success dark:text-success-dark',
   },
   teal: {
-    bg: 'bg-teal-100 dark:bg-teal-900',
-    icon: 'text-teal-600 dark:text-teal-300',
-    text: 'text-teal-600 dark:text-teal-400',
+    bg: 'bg-success-light dark:bg-success-dark/10',
+    icon: 'text-success dark:text-success-dark',
+    text: 'text-success dark:text-success-dark',
   },
   emerald: {
-    bg: 'bg-emerald-100 dark:bg-emerald-900',
-    icon: 'text-emerald-600 dark:text-emerald-300',
-    text: 'text-emerald-600 dark:text-emerald-400',
+    bg: 'bg-success-light dark:bg-success-dark/10',
+    icon: 'text-success dark:text-success-dark',
+    text: 'text-success dark:text-success-dark',
   },
   yellow: {
-    bg: 'bg-yellow-100 dark:bg-yellow-900',
-    icon: 'text-yellow-600 dark:text-yellow-300',
-    text: 'text-yellow-600 dark:text-yellow-400',
+    bg: 'bg-warning-light dark:bg-warning-dark/10',
+    icon: 'text-warning dark:text-warning-dark',
+    text: 'text-warning dark:text-warning-dark',
   },
   cyan: {
-    bg: 'bg-cyan-100 dark:bg-cyan-900',
-    icon: 'text-cyan-600 dark:text-cyan-300',
-    text: 'text-cyan-600 dark:text-cyan-400',
+    bg: 'bg-primary-light dark:bg-primary-dark/10',
+    icon: 'text-primary dark:text-primary-dark',
+    text: 'text-primary dark:text-primary-dark',
   },
 };
 
@@ -111,9 +111,7 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">
-        {t('title')}
-      </h1>
+      <h1 className="mb-6 text-h1 font-bold text-gray-text">{t('title')}</h1>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {kpiData.map((kpi) => {
@@ -121,7 +119,7 @@ export default function DashboardPage() {
           return (
             <div
               key={kpi.key}
-              className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+              className="rounded-lg border border-gray-border bg-gray-card p-5 shadow-sm"
             >
               <div className="flex items-center">
                 <div
@@ -132,10 +130,10 @@ export default function DashboardPage() {
                   </span>
                 </div>
                 <div className="ms-4">
-                  <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  <p className="text-body font-medium text-gray-muted">
                     {t(kpi.key)}
                   </p>
-                  <h3 className={`text-2xl font-bold ${colors.text}`}>
+                  <h3 className={`text-h1 font-bold ${colors.text}`}>
                     {kpi.value}
                   </h3>
                 </div>

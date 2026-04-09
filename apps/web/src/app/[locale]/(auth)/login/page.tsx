@@ -54,25 +54,23 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 dark:bg-gray-900">
+    <div className="flex min-h-screen items-center justify-center bg-gray-surface px-4 py-12">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            NHATROSO
-          </h1>
+          <h1 className="text-h1 font-bold text-gray-text">NHATROSO</h1>
         </div>
 
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm sm:p-8 dark:border-gray-700 dark:bg-gray-800">
-          <h2 className="mb-1 text-2xl font-bold text-gray-900 dark:text-white">
+        <div className="rounded-lg border border-gray-border bg-gray-card p-6 shadow-sm sm:p-8">
+          <h2 className="mb-1 text-h2 font-bold text-gray-text">
             {tAuth('title')}
           </h2>
-          <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">
+          <p className="mb-6 text-body text-gray-muted">
             {tAuth('description')}
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
-              <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:border-red-800 dark:bg-gray-800 dark:text-red-400">
+              <div className="rounded-lg border border-danger-light bg-danger-light p-4 text-body text-danger">
                 {error}
               </div>
             )}
@@ -80,7 +78,7 @@ export default function LoginPage() {
             <div>
               <label
                 htmlFor="phone"
-                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+                className="mb-2 block text-body font-medium text-gray-text"
               >
                 {tAuth('phoneLabel')}
               </label>
@@ -90,14 +88,14 @@ export default function LoginPage() {
                 type="tel"
                 placeholder={tAuth('phonePlaceholder')}
                 required
-                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                className="block w-full rounded-lg border border-gray-border bg-gray-input p-2.5 text-body text-gray-text focus:border-primary focus:ring-primary"
               />
             </div>
 
             <div>
               <label
                 htmlFor="password"
-                className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+                className="mb-2 block text-body font-medium text-gray-text"
               >
                 {tAuth('passwordLabel')}
               </label>
@@ -108,23 +106,23 @@ export default function LoginPage() {
                 placeholder={tAuth('passwordPlaceholder')}
                 required
                 minLength={8}
-                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                className="block w-full rounded-lg border border-gray-border bg-gray-input p-2.5 text-body text-gray-text focus:border-primary focus:ring-primary"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-lg bg-blue-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 disabled:opacity-50 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+              className="w-full rounded-lg bg-primary px-5 py-2.5 text-center text-body font-medium text-white hover:bg-primary-hover focus:outline-none focus:ring-4 focus:ring-primary-light disabled:opacity-50 dark:bg-primary dark:hover:bg-primary-hover dark:focus:ring-primary-hover"
             >
               {loading ? tAuth('submitBtnLoading') : tAuth('submitBtn')}
             </button>
 
-            <p className="text-center text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-center text-body text-gray-muted">
               {tAuth('noAccountPrompt')}{' '}
               <Link
                 href="/register"
-                className="font-medium text-blue-600 hover:underline dark:text-blue-500"
+                className="font-medium text-primary hover:underline dark:text-primary-dark"
               >
                 {tAuth('registerLink')}
               </Link>

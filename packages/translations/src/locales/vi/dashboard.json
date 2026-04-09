@@ -6,6 +6,7 @@
   "monthlyRevenue": "Doanh thu tháng",
   "pendingBills": "Hóa đơn chờ",
   "occupancyRate": "Tỉ lệ lấp đầy",
+  "Invoices": "Hóa đơn",
   "tenant": {
     "welcome": "Xin chào, {{name}}",
     "todayOverview": "Đây là tổng quan hôm nay của bạn",

@@ -82,6 +82,7 @@
   "PricingUnit": "Pricing Unit",
   "InitialPrice": "Initial Price",
   "StandardPrice": "Standard Price",
+  "Back": "Back",
   "BackToList": "Back to List",
   "BasicPredefinedService": "Basic Predefined Service",
   "DisableService": "Disable Service",

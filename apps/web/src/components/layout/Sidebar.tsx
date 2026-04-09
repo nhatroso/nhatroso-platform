@@ -20,6 +20,7 @@ type NavItem = {
 const navItems: NavItem[] = [
   { key: 'dashboard', href: '/dashboard', icon: 'grid' },
   { key: 'contracts', href: '/dashboard/contracts', icon: 'document' },
+  { key: 'invoices', href: '/dashboard/invoices', icon: 'document' },
   {
     key: 'properties',
     icon: 'building',
@@ -142,14 +143,14 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       {/* Mobile overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-30 bg-gray-900/50 lg:hidden"
+          className="fixed inset-0 z-30 bg-gray-strong/50 lg:hidden"
           onClick={onClose}
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-0 z-40 h-screen w-64 border-r border-gray-200 bg-white pt-16 transition-transform dark:border-gray-700 dark:bg-gray-800 lg:translate-x-0 ${
+        className={`fixed left-0 top-0 z-40 h-screen w-64 border-r border-gray-border bg-gray-card pt-16 transition-transform lg:translate-x-0 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -168,11 +169,11 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                       onClick={() => toggleGroup(item.key)}
                       className={`group flex w-full items-center rounded-lg p-2 transition-colors ${
                         isAnyChildActive && !isGroupOpen
-                          ? 'bg-blue-50/50 text-blue-700 dark:bg-gray-700/50 dark:text-blue-400'
-                          : 'text-gray-900 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700'
+                          ? 'bg-primary-light text-primary'
+                          : 'text-gray-text hover:bg-gray-surface'
                       }`}
                     >
-                      <span className="text-gray-500 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white">
+                      <span className="text-gray-muted group-hover:text-gray-text">
                         <NavIcon type={item.icon!} />
                       </span>
                       <span className="ms-3 flex-1 text-left">
@@ -193,7 +194,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                       </svg>
                     </button>
                     {isGroupOpen && (
-                      <ul className="mt-2 space-y-1 py-1 px-2 border-l-2 ml-4 border-gray-100 dark:border-gray-700">
+                      <ul className="mt-2 space-y-1 py-1 px-2 border-l-2 ml-4 border-gray-border">
                         {item.children.map((child) => {
                           const active = isActive(child.href);
                           return (
@@ -201,10 +202,10 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                               <Link
                                 href={child.href}
                                 onClick={onClose}
-                                className={`flex items-center rounded-lg p-2 text-sm transition-colors ${
+                                className={`flex items-center rounded-lg p-2 text-body transition-colors ${
                                   active
-                                    ? 'bg-blue-50 text-blue-700 font-bold dark:bg-gray-700 dark:text-blue-400'
-                                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white'
+                                    ? 'bg-primary-light text-primary font-bold'
+                                    : 'text-gray-muted hover:bg-gray-surface hover:text-gray-text'
                                 }`}
                               >
                                 <span className="ms-2">{t(child.key)}</span>
@@ -226,15 +227,15 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                     onClick={onClose}
                     className={`group flex items-center rounded-lg p-2 transition-colors ${
                       active
-                        ? 'bg-blue-50 text-blue-700 dark:bg-gray-700 dark:text-blue-400'
-                        : 'text-gray-900 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700'
+                        ? 'bg-primary-light text-primary'
+                        : 'text-gray-text hover:bg-gray-surface'
                     }`}
                   >
                     <span
                       className={`${
                         active
-                          ? 'text-blue-700 dark:text-blue-400'
-                          : 'text-gray-500 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white'
+                          ? 'text-primary'
+                          : 'text-gray-muted group-hover:text-gray-text'
                       }`}
                     >
                       <NavIcon type={item.icon!} />

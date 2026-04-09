@@ -1,10 +1,9 @@
 'use client';
 
-import * as React from 'react';
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
 import { useContracts } from '@/hooks/use-contracts';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { PageHeader } from '@/components/ui/PageHeader';
 
 function GridSkeleton() {
   return (
@@ -12,7 +11,7 @@ function GridSkeleton() {
       {Array.from({ length: 6 }).map((_, i) => (
         <div
           key={i}
-          className="flex flex-col justify-between rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+          className="flex flex-col justify-between rounded-xl border border-gray-border bg-gray-card p-5 shadow-sm"
         >
           <div>
             <div className="mb-3 flex items-center justify-between">
@@ -22,7 +21,7 @@ function GridSkeleton() {
             <Skeleton className="h-5 w-full mb-2" />
             <Skeleton className="h-4 w-32" />
           </div>
-          <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+          <div className="mt-4 pt-4 border-t border-gray-border">
             <div className="flex items-center justify-between">
               <Skeleton className="h-4 w-16" />
               <Skeleton className="h-4 w-24" />
@@ -35,49 +34,45 @@ function GridSkeleton() {
 }
 
 export default function ContractsPage() {
-  const t = useTranslations('Sidebar');
   const { contracts, isLoading } = useContracts();
 
   return (
-    <div className="flex flex-col h-[calc(100vh-112px)] w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-      <div className="flex shrink-0 items-center justify-between border-b border-gray-100 px-5 py-4 dark:border-gray-700">
-        <div>
-          <h1 className="text-lg font-bold tracking-tight text-gray-900 dark:text-white">
-            {t('contracts')}
-          </h1>
-          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            {contracts.length} hợp đồng
-          </p>
-        </div>
-        <Link
-          href="/dashboard/contracts/create"
-          className="inline-flex h-9 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800"
-        >
-          <svg
-            className="mr-2 h-4 w-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+    <div className="flex flex-col h-[calc(100vh-112px)] w-full overflow-hidden rounded-xl border border-gray-border bg-gray-card shadow-sm">
+      <PageHeader
+        variant="split"
+        title="Danh sách Hợp đồng"
+        description={`${contracts.length} hợp đồng`}
+        actions={
+          <Link
+            href="/dashboard/contracts/create"
+            className="inline-flex h-9 items-center justify-center rounded-lg bg-primary px-4 text-body font-medium text-white transition-colors hover:bg-primary-hover focus:outline-none focus:ring-4 focus:ring-primary-light dark:focus:ring-primary-hover"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 4v16m8-8H4"
-            />
-          </svg>
-          Thêm hợp đồng
-        </Link>
-      </div>
+            <svg
+              className="mr-2 h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            Thêm hợp đồng
+          </Link>
+        }
+      />
 
       <div className="flex-1 overflow-y-auto p-5">
         {isLoading ? (
           <GridSkeleton />
         ) : contracts.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center text-center">
-            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 dark:bg-gray-800">
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary-light dark:bg-gray-subtle">
               <svg
-                className="h-8 w-8 text-blue-500/50"
+                className="h-8 w-8 text-primary/50"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -90,10 +85,10 @@ export default function ContractsPage() {
                 />
               </svg>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-200">
+            <h3 className="text-h3 font-medium text-gray-text">
               Chưa có hợp đồng nào
             </h3>
-            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+            <p className="mt-2 text-body text-gray-muted">
               {' '}
               Bắt đầu bằng cách tạo hợp đồng thuê phòng đầu tiên.{' '}
             </p>
@@ -104,14 +99,14 @@ export default function ContractsPage() {
               <Link
                 key={contract.id}
                 href={`/dashboard/contracts/${contract.id}`}
-                className="group flex flex-col justify-between rounded-xl border border-gray-200 bg-white p-5 transition-all hover:border-blue-500 hover:shadow-md dark:border-gray-700 dark:bg-gray-800 dark:hover:border-blue-500"
+                className="group flex flex-col justify-between rounded-xl border border-gray-border bg-gray-card p-5 transition-all hover:border-primary hover:shadow-md dark:hover:border-primary"
               >
                 <div>
                   <div className="mb-3 flex items-center justify-between">
-                    <span className="inline-flex items-center rounded-full bg-green-50 px-2.5 py-0.5 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                    <span className="inline-flex items-center rounded-full bg-success-light px-2.5 py-0.5 text-tiny font-medium text-success dark:bg-success-dark/20 dark:text-success-dark">
                       Hiệu lực
                     </span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                    <span className="text-tiny text-gray-muted">
                       {new Date(contract.created_at).toLocaleDateString(
                         'vi-VN',
                       )}
@@ -119,20 +114,18 @@ export default function ContractsPage() {
                       {new Date(contract.end_date).toLocaleDateString('vi-VN')}
                     </span>
                   </div>
-                  <h3 className="text-base font-semibold text-gray-900 dark:text-white line-clamp-1">
-                    Người thuê: {contract.tenant_name}
+                  <h3 className="text-body font-semibold text-gray-text line-clamp-1">
+                    {contract.tenant_name}
                   </h3>
-                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 line-clamp-1">
+                  <p className="mt-1 text-body text-gray-muted line-clamp-1">
                     Phòng: {contract.room_code}
                   </p>
                 </div>
 
-                <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-500 dark:text-gray-400">
-                      Giá thuê:
-                    </span>
-                    <span className="font-medium text-gray-900 dark:text-white">
+                <div className="mt-4 pt-4 border-t border-gray-border">
+                  <div className="flex items-center justify-between text-tiny">
+                    <span className="text-gray-muted">Tiền phòng:</span>
+                    <span className="font-medium text-gray-text">
                       {contract.monthly_rent.toLocaleString('vi-VN')} đ
                     </span>
                   </div>

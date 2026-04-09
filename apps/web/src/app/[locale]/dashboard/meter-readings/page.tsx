@@ -13,6 +13,7 @@ import {
 import { Building } from '@nhatroso/shared';
 import { metersApi, LandlordMeterReadingDetail } from '@/services/api/meters';
 import { getBuildings } from '@/services/api/buildings';
+import { PageHeader } from '@/components/ui/PageHeader';
 
 export default function MeterReadingsPage() {
   const t = useTranslations('Meters');
@@ -67,61 +68,57 @@ export default function MeterReadingsPage() {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       {/* Header Section */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white flex items-center gap-2">
-            <History className="h-6 w-6 text-blue-600" />
-            {t('ReadingHistory')}
-          </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            {t('ReadingHistoryDesc')}
-          </p>
-        </div>
-
-        <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm text-gray-700 dark:text-gray-300">
-          <Download className="h-4 w-4" />
-          {t('ExportExcel')}
-        </button>
-      </div>
+      <PageHeader
+        variant="full"
+        title={t('ReadingHistory')}
+        description={t('ReadingHistoryDesc')}
+        actions={
+          <button className="flex items-center gap-2 px-4 py-2 bg-gray-card border border-gray-border rounded-xl text-body font-medium hover:bg-gray-surface transition-colors shadow-sm text-gray-text">
+            <Download className="h-4 w-4" />
+            {t('ExportExcel')}
+          </button>
+        }
+      />
 
       {/* Filters Section */}
-      <div className="flex flex-col gap-4 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-200 dark:bg-gray-800 dark:ring-gray-700 sm:flex-row sm:items-center">
+      <div className="flex flex-col gap-4 rounded-2xl bg-gray-card p-5 shadow-sm border border-gray-border sm:flex-row sm:items-center">
         <div className="flex flex-wrap items-center gap-4">
           {/* Search */}
           <div className="flex items-center">
-            <label className="mr-2 text-sm font-medium text-gray-900 dark:text-white">
+            <label className="mr-2 text-body font-medium text-gray-text">
               {t('SearchRoom')}:
             </label>
             <input
               type="text"
               value={searchTerm}
+              placeholder="A101"
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="block w-40 rounded-lg border border-gray-300 bg-white p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+              className="block w-40 rounded-lg border border-gray-border bg-gray-input p-2.5 text-body text-gray-text focus:border-primary focus:ring-primary"
             />
           </div>
 
           {/* Period Filter */}
           <div className="flex items-center">
-            <label className="mr-2 text-sm font-medium text-gray-900 dark:text-white">
+            <label className="mr-2 text-body font-medium text-gray-text">
               {t('Period')}:
             </label>
             <input
               type="month"
               value={selectedPeriod}
               onChange={(e) => setSelectedPeriod(e.target.value)}
-              className="block w-48 rounded-lg border border-gray-300 bg-white p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+              className="block w-48 rounded-lg border border-gray-border bg-gray-input p-2.5 text-body text-gray-text focus:border-primary focus:ring-primary"
             />
           </div>
 
           {/* Building Filter */}
           <div className="flex items-center">
-            <label className="mr-2 text-sm font-medium text-gray-900 dark:text-white">
+            <label className="mr-2 text-body font-medium text-gray-text">
               {t('Building')}:
             </label>
             <select
               value={selectedBuilding}
               onChange={(e) => setSelectedBuilding(e.target.value)}
-              className="block w-48 rounded-lg border border-gray-300 bg-white p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+              className="block w-48 rounded-lg border border-gray-border bg-gray-input p-2.5 text-body text-gray-text focus:border-primary focus:ring-primary"
             >
               <option value="all">-- {t('AllBuildings')} --</option>
               {buildings.map((b) => (
@@ -134,13 +131,13 @@ export default function MeterReadingsPage() {
 
           {/* Status Filter */}
           <div className="flex items-center">
-            <label className="mr-2 text-sm font-medium text-gray-900 dark:text-white">
+            <label className="mr-2 text-body font-medium text-gray-text">
               {t('Status')}:
             </label>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="block w-50 rounded-lg border border-gray-300 bg-white p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+              className="block w-50 rounded-lg border border-gray-border bg-gray-input p-2.5 text-body text-gray-text focus:border-primary focus:ring-primary"
             >
               <option value="all">-- {t('Status_ALL')} --</option>
               <option value="PENDING">{t('Status_PENDING')}</option>
@@ -151,10 +148,10 @@ export default function MeterReadingsPage() {
       </div>
 
       {/* Readings Table */}
-      <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 dark:bg-gray-800 dark:ring-gray-700">
+      <div className="overflow-hidden rounded-2xl bg-gray-card shadow-sm border border-gray-border">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-gray-500 dark:text-gray-400">
-            <thead className="bg-gray-50 dark:bg-gray-900/50 text-gray-700 dark:text-gray-400 font-bold uppercase text-[10px] tracking-wider">
+          <table className="w-full text-left text-body text-gray-muted">
+            <thead className="bg-gray-surface text-gray-muted font-bold uppercase text-tiny tracking-wider">
               <tr>
                 <th className="px-6 py-4">{t('RoomCode')}</th>
                 <th className="px-6 py-4">{t('Service')}</th>
@@ -165,21 +162,21 @@ export default function MeterReadingsPage() {
                 <th className="px-6 py-4 text-center">{t('Evidence')}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-gray-700/50">
+            <tbody className="divide-y divide-gray-border">
               {loading ? (
                 <tr>
                   <td colSpan={7} className="py-20 text-center">
                     <div className="flex flex-col items-center gap-3">
-                      <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
                     </div>
                   </td>
                 </tr>
               ) : filteredReadings.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-20 text-center text-gray-400">
+                  <td colSpan={7} className="py-20 text-center text-gray-muted">
                     <div className="flex flex-col items-center gap-3">
-                      <div className="rounded-full bg-gray-50 p-4 dark:bg-gray-900">
-                        <History className="h-8 w-8 text-gray-300" />
+                      <div className="rounded-full bg-gray-surface p-4">
+                        <History className="h-8 w-8 text-gray-muted/50" />
                       </div>
                       <p>{t('NoReadingsFound')}</p>
                     </div>
@@ -189,58 +186,58 @@ export default function MeterReadingsPage() {
                 filteredReadings.map((r) => (
                   <tr
                     key={r.id}
-                    className="group hover:bg-gray-50 dark:hover:bg-gray-900/40 transition-colors"
+                    className="group hover:bg-gray-surface transition-colors"
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex flex-col">
-                        <span className="font-bold text-gray-900 dark:text-white">
+                        <span className="font-bold text-gray-text">
                           {r.room_code}
                         </span>
-                        <span className="text-[11px] text-gray-400">
+                        <span className="text-tiny text-gray-muted">
                           {r.building_name}
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-gray-600 dark:text-gray-300">
+                    <td className="px-6 py-4 whitespace-nowrap text-gray-muted">
                       <div className="flex items-center gap-2">
                         {r.service_name
                           .toLowerCase()
                           .includes('electricity') ? (
-                          <Zap className="h-4 w-4 text-yellow-500" />
+                          <Zap className="h-4 w-4 text-warning" />
                         ) : (
-                          <Droplets className="h-4 w-4 text-blue-500" />
+                          <Droplets className="h-4 w-4 text-primary" />
                         )}
                         <span>{r.service_name}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-right whitespace-nowrap">
-                      <span className="font-bold text-gray-900 dark:text-white">
+                      <span className="font-bold text-gray-text">
                         {r.reading_value !== null
                           ? Number(r.reading_value).toLocaleString()
                           : '-'}
                       </span>
-                      <span className="ml-1 text-xs text-gray-400 italic">
+                      <span className="ml-1 text-tiny text-gray-muted italic">
                         {r.service_unit}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right whitespace-nowrap">
                       <div className="flex flex-col items-end">
-                        <span className="font-bold text-blue-600 dark:text-blue-400">
+                        <span className="font-bold text-primary">
                           {r.usage !== null
                             ? `+${Number(r.usage).toLocaleString()}`
                             : '-'}
                         </span>
-                        <span className="text-[10px] text-gray-400 uppercase">
+                        <span className="text-tiny text-gray-muted uppercase">
                           {r.period_month}
                         </span>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-center whitespace-nowrap">
                       <span
-                        className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${
+                        className={`px-2 py-1 rounded-full text-tiny font-bold uppercase ${
                           r.status === 'SUBMITTED'
-                            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                            : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                            ? 'bg-success-light text-success'
+                            : 'bg-warning-light text-warning'
                         }`}
                       >
                         {t(`Status_${r.status}`)}
@@ -260,15 +257,13 @@ export default function MeterReadingsPage() {
                     <td className="px-6 py-4 text-center">
                       {r.image_url ? (
                         <button
-                          className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all"
+                          className="p-1.5 text-gray-muted hover:text-primary hover:bg-primary-light rounded-lg transition-all"
                           title="Xem ảnh"
                         >
                           <ImageIcon className="h-5 w-5" />
                         </button>
                       ) : (
-                        <span className="text-gray-300 dark:text-gray-700">
-                          --
-                        </span>
+                        <span className="text-gray-muted/30">--</span>
                       )}
                     </td>
                   </tr>

@@ -21,7 +21,7 @@ export default async function RootLayout({
 
   return (
     <html lang={locale}>
-      <body className="antialiased bg-gray-50 dark:bg-gray-900">
+      <body className="antialiased bg-gray-surface">
         <NextIntlClientProvider messages={messages} locale={locale}>
           <FlowbiteInit />
           {children}
