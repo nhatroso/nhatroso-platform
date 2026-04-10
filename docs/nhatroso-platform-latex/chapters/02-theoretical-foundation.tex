@@ -1,0 +1,84 @@
+% chapters/02-theoretical-foundation.tex
+\chapter{Cơ sở lý thuyết}\label{chapter_theory}
+
+Chương này trình bày các khái niệm nền tảng về quản lý, mô hình kiến trúc, các công nghệ chủ chốt và cơ sở thuật toán được áp dụng trong quá trình xây dựng và phát triển hệ thống Nhatroso Platform.
+
+\section{Khái niệm liên quan}
+
+\subsection{Hệ thống quản lý (Management System)}
+Hệ thống quản lý là một tập hợp các quy trình, công cụ và dữ liệu được tổ chức nhằm tối ưu hóa việc điều hành và giám sát một lĩnh vực cụ thể. Trong ngữ cảnh bất động sản, hệ thống quản lý giúp số hóa các thực thể (phòng, cư dân) và tự động hóa các luồng nghiệp vụ (billing, contract management) nhằm giảm tải thao tác thủ công và hạn chế sai sót.
+
+\subsection{Kiến trúc đa khách thuê (Multi-tenancy)}
+Multi-tenancy là mô hình kiến trúc phần mềm trong đó một thực thể duy nhất của phần mềm phục vụ nhiều nhóm người dùng (tenants) khác nhau. Trong đồ án này, mỗi chủ nhà trọ là một tenant riêng biệt, sở hữu dữ liệu độc lập về phòng và khách thuê, đảm bảo tính bảo mật và cách ly dữ liệu giữa các tài khoản người dùng.
+
+\subsection{Số hóa quy trình quản lý nhà trọ}
+Quy trình quản lý nhà trọ chuẩn bao gồm các giai đoạn: Tiếp nhận khách $\rightarrow$ Lập hợp đồng $\rightarrow$ Theo dõi dịch vụ $\rightarrow$ Chốt chỉ số $\rightarrow$ Phát hành hóa đơn. Nhatroso Platform tập trung vào việc số hóa các điểm chạm này để tạo ra một luồng dữ liệu thông suốt và minh bạch.
+
+\section{Công nghệ sử dụng}
+
+\subsection{Ngôn ngữ lập trình Rust}
+Rust là ngôn ngữ lập trình hệ thống hiện đại, tập trung vào tính an toàn bộ nhớ (memory safety) mà không cần bộ dọn rác (Garbage Collector). Với cơ chế \textit{Ownership} và \textit{Borrow Checker} \cite{RustBook}, Rust giải quyết triệt để các lỗi về truy cập bộ nhớ như null pointers hay buffer overflows.
+Trong đồ án này, Rust được lựa chọn làm ngôn ngữ chủ đạo để xây dựng backend API nhờ khả năng xử lý song song (concurrency) mạnh mẽ và hiệu suất thực thi cao, đảm bảo hệ thống vận hành ổn định dưới tải trọng lớn.
+
+\subsection{Framework Loco.rs}
+Loco là framework phát triển web theo triết lý ``One-person Framework'' cho Rust, được lấy cảm hứng từ Ruby on Rails \cite{LocoRS}. Framework này cung cấp đầy đủ các công cụ từ CLI scaffolding, database migration đến hệ thống worker và mailer.
+Trong Nhatroso Platform, Loco.rs đóng vai trò là khung xương cho Core API, giúp chuẩn hóa cấu trúc mã nguồn và đẩy nhanh tốc độ phát triển các module chức năng.
+
+\subsection{Next.js 16}
+Next.js 16 là nền tảng React hiện đại hỗ trợ \textit{React Server Components} (RSC), giúp tối ưu hóa hiệu năng render phía client và cải thiện tốc độ tải trang \cite{NextJS}.
+Trong đồ án, Next.js được sử dụng để xây dựng Web Dashboard dành cho chủ nhà, cung cấp giao diện quản lý tập trung và các báo cáo doanh thu dưới dạng biểu đồ trực quan.
+
+\subsection{Expo và React Native}
+Expo là một hệ sinh thái mã nguồn mở giúp đơn giản hóa quá trình phát triển ứng dụng di động đa nền tảng bằng JavaScript/TypeScript \cite{Expo}.
+Ứng dụng dành cho người thuê (Tenant App) được xây dựng bằng Expo, cho phép người dùng nộp ảnh chụp chỉ số điện nước và nhận thông báo hóa đơn một cách nhanh chóng trên cả hai nền tảng iOS và Android.
+
+\subsection{Cơ sở dữ liệu PostgreSQL và SeaORM}
+Hệ thống sử dụng PostgreSQL \cite{PostgreSQL} làm cơ sở dữ liệu quan hệ chính nhờ tính tin cậy và khả năng xử lý dữ liệu phức tạp. Để tương tác với cơ sở dữ liệu, SeaORM được sử dụng như một tầng ORM (Object-Relational Mapping) bất đồng bộ \cite{SeaORM}, giúp ánh xạ dữ liệu thành các kiểu dữ liệu mạnh trong Rust.
+
+\section{Mô hình và Thuật toán}
+
+\subsection{Kỹ thuật nhận dạng ký tự quang học (OCR) với AI}
+Nhận dạng ký tự quang học (OCR) là quy trình số hóa văn bản từ hình ảnh vật lý. Để giải quyết bài toán đa dạng về mẫu mã đồng hồ điện nước, hệ thống sử dụng Dịch vụ Google Cloud Vision API \cite{GoogleCloudVision}. Thay vì thực hiện nhận diện bằng các thư viện cục bộ (nhỏ lẻ) thường cho tỷ lệ chính xác thấp, Cloud Vision API ứng dụng mô hình học máy học sâu (Deep Learning) mạnh mẽ của Google, giúp tự động tối ưu hóa hai giai đoạn chính:
+\begin{enumerate}
+    \item \textbf{Phát hiện văn bản (Text Detection):} Xác định chính xác vùng chứa dãy số trên mặt đồng hồ bất chấp góc chụp nghiêng hay ánh sáng kém.
+    \item \textbf{Nhận dạng ký tự (Text Recognition):} Trích xuất chuỗi số dựa trên nhận dạng mẫu phức tạp.
+\end{enumerate}
+Trong hệ thống Nhatroso Platform, OCR được tích hợp tự động để quét ảnh chụp đồng hồ trực tiếp từ người thuê báo lên, giúp giảm thiểu tuyệt đối sai sót do con người và tăng tốc độ xử lý hóa đơn tự động.
+
+\subsection{Internet of Things (IoT) và Giao thức MQTT}
+IoT là mạng lưới các thiết bị vật lý có khả năng thu thập và trao đổi dữ liệu qua internet. Giao thức MQTT (Message Queuing Telemetry Transport) là phương thức truyền tin nhẹ, dựa trên mô hình Publish/Subscribe, cực kỳ hiệu quả cho các thiết bị IoT có băng thông thấp và tài nguyên hạn chế \cite{MQTT}.
+Mặc dù Nhatroso Platform hiện tại tập trung vào quy trình thủ công thông qua ảnh chụp, nhưng kiến trúc IoT với giao thức MQTT được xem là nền tảng lý thuyết để phát triển tính năng đọc chỉ số tự động từ các Smart Meter trong tương lai.
+
+\section{Kiến trúc hệ thống và Bảo mật}
+
+\subsection{Kiến trúc Modular Monolith}
+Kiến trúc Modular Monolith là sự kết hợp giữa tính đơn giản trong triển khai của Monolith và tính tách biệt logic của Microservices \cite{ModularMonolith}.
+\begin{itemize}
+    \item \textbf{Tại sao không dùng Microservices:} Đối với dự án quy mô vừa, Microservices gây ra sự phức tạp quá mức trong việc quản lý hạ tầng, độ trễ mạng và tính nhất quán dữ liệu phân tán.
+    \item \textbf{Lợi ích chọn Modular Monolith:} Cho phép các module (User, Billing, Property) tồn tại độc lập về logic nhưng chia sẻ chung tài nguyên tính toán, giúp tối ưu chi phí vận hành mà vẫn đảm bảo khả năng mở rộng sau này.
+\end{itemize}
+Trong đồ án này, kiến trúc Modular Monolith giúp đội ngũ phát triển quản lý mã nguồn Rust một cách khoa học, dễ dàng bảo trì và kiểm thử từng module riêng biệt.
+
+\subsection{Cơ chế Xác thực JSON Web Token (JWT)}
+JWT là một tiêu chuẩn mở (RFC 7519) \cite{RFC7519} bao gồm ba phần: \textbf{Header} (thuật toán mã hóa), \textbf{Payload} (chứa các claims như user\_id, role) và \textbf{Signature} (chữ ký số để đảm bảo tính toàn vẹn).
+Trong hệ thống, JWT đóng vai trò là phương thức xác thực chính, cho phép Mobile App và Web Dashboard gửi các yêu cầu an toàn tới Backend mà không cần lưu trữ session trên server.
+
+\subsection{Kiến trúc Phân quyền RBAC (Role-Based Access Control)}
+RBAC là phương pháp quản lý quyền truy cập dựa trên vai trò của người dùng trong tổ chức \cite{RBAC}. Cơ chế này ánh xạ từ \textit{User} $\rightarrow$ \textit{Role} $\rightarrow$ \textit{Permissions}.
+Trong Nhatroso Platform, hai vai trò chính được định nghĩa rõ rệt:
+\begin{itemize}
+    \item \textbf{Owner (Chủ nhà):} Có quyền quản lý tòa nhà, hợp đồng và phê duyệt hóa đơn.
+    \item \textbf{Tenant (Người thuê):} Chỉ có quyền xem thông tin cá nhân, nộp chỉ số và xem lịch sử hóa đơn của chính mình.
+\end{itemize}
+Cơ chế này đảm bảo dữ liệu của hệ thống luôn được bảo vệ và truy cập đúng thẩm quyền.
+
+\section{Triển khai và Tích hợp liên tục}
+
+\subsection{Luồng Tích hợp và Triển khai tự động (CI/CD)}
+CI/CD (Continuous Integration / Continuous Deployment) là phương pháp luận kỹ thuật phần mềm nhằm tự động hóa quy trình xây dựng, kiểm thử và phát hành mã nguồn lên môi trường sản xuất.
+Hệ thống sử dụng \textbf{GitHub Actions} \cite{GitHubActions} để đóng gói ứng dụng thành từng container độc lập, thực thi các kịch bản kiểm thử (test suite).
+Bằng cách xây dựng tự động các luồng CI/CD, các thay đổi mã nguồn mới có thể được cập nhật tới môi trường Production với độ ổn định cao và không gây ra thời gian chết (zero-downtime) cho hệ thống Backend.
+
+\subsection{Ảo hóa Container và Nền tảng Đám mây}
+Để đảm bảo môi trường thực thi của phần mềm trên máy trạm máy chủ giống nhau 100\%, hệ thống sử dụng \textbf{Docker} \cite{Docker} làm cơ chế ảo hóa nhân (containerization) mặc định. Toàn bộ mã nguồn, các thư viện phụ thuộc và tiến trình runtime được đóng gói thành các Docker Image gọn nhẹ.
+Việc triển khai những image này được thực thi trên hạ tầng \textbf{Amazon Web Services (AWS)} \cite{AWS}, một nền tảng điện toán đám mây với độ khả dụng, bảo mật và hiệu suất hàng đầu hiện nay. Bằng việc kết hợp AWS, Docker và GitHub Actions, quá trình quản lý vòng đời ứng dụng của nền tảng trở nên linh hoạt và hoàn toàn tự động hóa.

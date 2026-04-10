@@ -26,7 +26,7 @@ Hệ thống cần đáp ứng các yêu cầu chức năng cốt lõi được 
 
 \subsection{Quản lý tài khoản và phân quyền}
 
-Hệ thống hỗ trợ đăng ký tài khoản bằng email hoặc số điện thoại với mật khẩu được bảo mật. Mỗi người dùng được cấp một ID duy nhất kiểu \texttt{i32}. Sau khi đăng nhập, hệ thống phát JWT access token ngắn hạn kết hợp refresh token. Hai vai trò được phân biệt rõ ràng: \textbf{Owner} (chủ nhà) có quyền quản lý toàn bộ tài nguyên của mình thông qua Web Dashboard, còn \textbf{Tenant} (người thuê) sử dụng Mobile App để gửi chỉ số và xem hóa đơn.
+Hệ thống hỗ trợ đăng ký tài khoản bằng email hoặc số điện thoại với mật khẩu được bảo mật. Mỗi người dùng được cấp một mã định danh duy nhất kiểu \textbf{UUID}. Sau khi đăng nhập, hệ thống phát JWT access token ngắn hạn kết hợp refresh token. Hai vai trò được phân biệt rõ ràng: \textbf{Owner} (chủ nhà) có quyền quản lý toàn bộ tài nguyên của mình thông qua Web Dashboard, còn \textbf{Tenant} (người thuê) sử dụng Mobile App để gửi chỉ số và xem hóa đơn.
 
 \subsection{Quản lý bất động sản}
 
@@ -68,7 +68,7 @@ Bảo mật & TLS 1.2+; mật khẩu băm Argon2; JWT access token ngắn hạn;
 Hiệu năng & API phản hồi nhanh nhờ hiệu năng của ngôn ngữ Rust; Next.js 16 tối ưu Client-side Rendering. \\[5pt]
 Độ tin cậy & Idempotency cho tạo hóa đơn dựa trên (contract\_id, period); SeaORM migration đảm bảo nhất quán schema. \\[5pt]
 Kiểm toán & Đảm bảo tính minh bạch thông qua ảnh chụp đồng hồ điện nước không thể xóa sau khi đã chốt hóa đơn. \\[5pt]
-Triển khai & Containerized Docker; hỗ trợ dual-database SQLite (dev) và PostgreSQL (production). \\
+Triển khai & Triển khai tự động hoàn toàn qua \textbf{GitHub Actions}; ảo hóa với \textbf{Docker}; lưu trữ cơ sở dữ liệu bằng \textbf{PostgreSQL} và vận hành trên hệ sinh thái \textbf{AWS}. \\
 \bottomrule
 \end{tabularx}
 \end{table}

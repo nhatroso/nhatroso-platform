@@ -16,11 +16,13 @@
 \definecolor{chaptercolor}{RGB}{0, 70, 140}
 \definecolor{linkblue}{RGB}{0,51,153}
 
-% --- Chapter Title Styling (Template Aligned) ---
 \titleformat{\chapter}[display]
   {\normalfont\huge\bfseries\color{chaptercolor}}
-  {\chaptername\ \thechapter}{20pt}{\Huge}
+  {\chaptertitlename\ \thechapter}{20pt}{\Huge}
 \titlespacing*{\chapter}{0pt}{-20pt}{40pt}
+
+% --- TOC Styling (Leader dots for chapters) ---
+\renewcommand{\cftchapleader}{\cftdotfill{\cftdotsep}}
 
 % --- Header and Footer (Template Aligned) ---
 \pagestyle{fancy}

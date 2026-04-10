@@ -116,35 +116,26 @@
 %% Remember to load babel before loading this package or define the command \abstractname!
 \makeatletter
 \newenvironment{abstract}{
-  \clearpage
-  \@beginparpenalty\@lowpenalty
-  \begin{center}
-	\bfseries \abstractname
-	\@endparpenalty\@M
-  \end{center}}
- {\par\clearpage}
+  \chapter*{\abstractname}
+  \addcontentsline{toc}{chapter}{\abstractname}
+}{}
 \makeatother
 
 \makeatletter
 \newenvironment{acknowledgments}{
-	%\titlepage \null\vfil
-	\small
-	\begin{center}
-	  {\bfseries Lời cảm ơn\vspace{-.5em}\vspace{\z@}}
-	\end{center}
-	\quotation
-  }{}
+  \chapter*{Lời cảm ơn}
+  \addcontentsline{toc}{chapter}{Lời cảm ơn}
+  \quotation
+}{}
 \makeatother
 
 % Declaration
 \makeatletter
 \newenvironment{declaration}{
-	\small
-	\begin{center}
-	  {\bfseries Lời cam đoan\vspace{-.5em}\vspace{\z@}}
-	\end{center}
-	\quotation
-  }{}
+  \chapter*{Lời cam đoan}
+  \addcontentsline{toc}{chapter}{Lời cam đoan}
+  \quotation
+}{}
 \makeatother
 
 % \renewcommand\lstlistingname{Algorithm}

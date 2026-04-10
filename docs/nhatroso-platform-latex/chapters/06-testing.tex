@@ -17,7 +17,7 @@ Tận dụng bộ công cụ kiểm thử tích hợp sẵn của Rust (\texttt{
 
 \textbf{Kiểm thử logic Billing:} Xác minh tính đúng đắn của quy trình tính toán hóa đơn bên trong dịch vụ \texttt{InvoicesService}. Các kịch bản bao gồm: tính toán chênh lệch chỉ số giữa hai kỳ đọc, áp dụng đơn giá từ bảng giá hiệu lực, và xử lý các trường hợp dịch vụ không có đơn giá cố định.
 
-\textbf{Kiểm thử ràng buộc cơ sở dữ liệu:} Sử dụng Loco testing infrastructure để chạy các integration tests trên database thực (SQLite/PostgreSQL). Xác minh các ràng buộc \texttt{unique} trên mã phòng, sự chồng chéo của \texttt{price\_rules} và tính duy nhất của hóa đơn theo kỳ.
+\textbf{Kiểm thử ràng buộc cơ sở dữ liệu:} Sử dụng Loco testing infrastructure để chạy các integration tests trên cơ sở dữ liệu PostgreSQL thực. Xác minh các ràng buộc \texttt{unique} trên mã phòng, sự chồng chéo của \texttt{price\_rules} và tính duy nhất của hóa đơn theo kỳ.
 
 \textbf{Kiểm thử API và Phân quyền:} Kiểm tra các endpoint RESTful để đảm bảo chúng trả về đúng mã trạng thái (200 OK, 403 Forbidden) tùy theo Token người dùng.
 

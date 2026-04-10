@@ -1,13 +1,13 @@
 % frontmatter/abstract.tex
 \begin{abstract}
 
-Quản lý nhà trọ tại Việt Nam hiện vẫn phụ thuộc nhiều vào phương pháp thủ công như sổ sách giấy tờ và bảng tính, dẫn đến sai sót trong ghi nhận chỉ số điện nước, tranh chấp hóa đơn, và dòng tiền kém hiệu quả cho chủ nhà.
+Quản lý nhà trọ tại Việt Nam hiện vẫn đối mặt với nhiều thách thức lớn do phụ thuộc vào các phương pháp thủ công như ghi chép sổ sách và bảng tính Excel. Những phương thức này không chỉ gây tốn kém thời gian mà còn dẫn đến nhiều sai sót trong việc ghi nhận chỉ số điện nước, gây thiếu minh bạch và phát sinh tranh chấp giữa chủ nhà và người thuê, đồng thời làm chậm dòng tiền vận hành.
 
-Đồ án này trình bày quá trình nghiên cứu, phân tích, thiết kế và xây dựng \textbf{Nhatroso Platform} --- một nền tảng quản lý nhà trọ số hóa hiện đại. Hệ thống cung cấp giải pháp ghi nhận chỉ số điện nước minh bạch thông qua bằng chứng ảnh chụp trên thiết bị di động, tự động hóa quy trình lập hóa đơn tháng và hỗ trợ đối soát thanh toán trực tuyến qua Webhook.
+Đồ án này nghiên cứu và phát triển \textbf{Nhatroso Platform} – một giải pháp số hóa toàn diện nhằm hiện đại hóa quy trình quản lý nhà trọ. Nền tảng cung cấp bộ công cụ tối ưu bao gồm: quy trình ghi nhận chỉ số điện nước minh bạch bằng hình ảnh trực tiếp trên thiết bị di động kết hợp cùng công nghệ \textbf{OCR} để tự động hóa việc nhận diện chỉ số, hệ thống tự động hóa lập hóa đơn hàng tháng và cơ chế đối soát thanh toán trực tuyến qua QR code với thông báo Webhook thời gian thực.
 
-Hệ thống được xây dựng theo kiến trúc \textit{Modular Monolith}, triển khai trên nền tảng Docker với trái tim là Core API sử dụng ngôn ngữ lập trình \textbf{Rust} (framework \textbf{Loco.rs}). Dữ liệu được quản lý linh hoạt bởi \textbf{SeaORM} (hỗ trợ PostgreSQL/SQLite). Giao diện quản lý tập trung (Web Dashboard) được phát triển bằng \textbf{Next.js 16} và ứng dụng dành cho người thuê (Mobile App) được xây dựng bằng \textbf{Expo}.
+Về mặt kỹ thuật, hệ thống được thiết kế theo kiến trúc \textit{Modular Monolith} nhằm đảm bảo tính linh hoạt và khả năng mở rộng. Core API được xây dựng bằng ngôn ngữ lập trình \textbf{Rust} với framework \textbf{Loco.rs}, mang lại hiệu suất vượt trội và tính an toàn bộ nhớ cao. Dữ liệu được quản trị thông qua \textbf{SeaORM} trên nền tảng \textbf{PostgreSQL}. Giao diện quản lý tập trung (Web Dashboard) được phát triển bằng \textbf{Next.js 16}, kết hợp cùng ứng dụng di động cho người thuê (Mobile App) xây dựng trên nền tảng \textbf{Expo}, đảm bảo trải nghiệm người dùng mượt mà và đồng nhất.
 
-Kết quả đạt được bao gồm hệ thống phân quyền RBAC phân cấp quản lý bất động sản, quy trình đối soát chỉ số minh bạch giữa Người thuê và Chủ nhà, cơ chế lập hóa đơn linh hoạt dựa trên cấu hình đơn giá theo thời gian thực, và đảm bảo khả năng mở rộng hệ thống trong tương lai.
+Kết quả thực nghiệm cho thấy \textbf{Nhatroso Platform} giúp giảm thiểu đáng kể thời gian xử lý nghiệp vụ hàng tháng, loại bỏ các sai lệch trong ghi nhận chỉ số và cung cấp cho chủ nhà cái nhìn tổng quan về doanh thu cũng như tình trạng bất động sản thông qua hệ thống báo cáo Dashboard trực quan. Hệ thống không chỉ giải quyết các vấn đề vận hành hiện tại bằng sức mạnh của trí tuệ nhân tạo (OCR) mà còn đặt nền móng cho việc ứng dụng công nghệ \textbf{IoT} vào giám sát chỉ số thông minh trong tương lai.
 
 \end{abstract}
 \newpage

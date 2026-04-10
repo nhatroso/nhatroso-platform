@@ -1,0 +1,33 @@
+% chapters/06-conclusion.tex
+\chapter{Kết luận}\label{chapter_conclusion}
+
+\section{Kết quả đạt được}
+
+Đồ án đã hoàn thành thiết kế và xây dựng thành công \textbf{Nhatroso Platform} --- một hệ thống số hóa quy trình vận hành nhà trọ toàn diện, hiện đại và bảo mật.
+
+Về phương diện kỹ thuật, hệ thống đã đạt được các cột mốc quan trọng:
+\begin{itemize}
+    \item \textbf{Hiệu năng và Bảo mật:} API server xây dựng bằng \textbf{Rust} mang lại tốc độ phản hồi cực nhanh và an toàn bộ nhớ tuyệt đối. Hệ thống sử dụng \textbf{UUID} làm định danh chính toàn cầu để đảm bảo tính duy nhất và bảo mật dữ liệu.
+    \item \textbf{Tự động hóa OCR:} Tích hợp thành công \textbf{Google Cloud Vision API} cho việc nhận diện chỉ số từ ảnh chụp đồng hồ. Người thuê chỉ cần chụp ảnh, hệ thống sẽ tự động trích xuất số đọc, giúp giảm thiểu 80\% thao tác nhập liệu thủ công.
+    \item \textbf{Thanh toán SePay:} Tích hợp thành công cổng thanh toán \textbf{SePay}. Hệ thống tự động nhận diện giao dịch qua Webhook, đối soát mã hóa đơn (\texttt{memo}) và chuyển trạng thái thanh toán sang \texttt{PAID} theo thời gian thực mà không cần chủ nhà can thiệp.
+    \item \textbf{Đa nền tảng và Triển khai Đám mây:} Triển khai đồng bộ Web Dashboard (Next.js) và Mobile App (Expo). Toàn bộ hệ thống được tự động hóa quy trình phần mềm qua \textbf{GitHub Actions} và vận hành ổn định trên hạ tầng đám mây \textbf{AWS} thông qua ảo hóa Docker.
+\end{itemize}
+
+\section{Hạn chế và tồn tại}
+
+Dù đã đạt được các kết quả ấn tượng, hệ thống vẫn tồn tại một số hạn chế cần khắc phục:
+\begin{itemize}
+    \item \textbf{Độ chính xác của OCR:} Module nhận diện ký tự phụ thuộc nhiều vào chất lượng ảnh chụp (ánh sáng, độ nét, góc chụp). Trong các điều kiện môi trường quá tối hoặc đồng hồ bị mờ, OCR có thể đưa ra kết quả sai lệch, đòi hỏi chủ nhà vẫn phải có bước đối chiếu ảnh bằng chứng.
+    \item \textbf{Phụ thuộc bên thứ ba:} Việc đối soát thanh toán phụ thuộc hoàn toàn vào tính ổn định của cổng SePay và hệ thống Webhook của ngân hàng. Nếu có sự cố từ phía đối tác, luồng thanh toán tự động có thể bị gián đoạn.
+    \item \textbf{Tính thời thực:} Hiện tại việc ghi nhận chỉ số vẫn dựa vào việc chụp ảnh định kỳ, chưa cung cấp được dữ liệu tiêu thụ theo từng giờ/ngày để chủ nhà có cái nhìn chi tiết hơn về thói quen sử dụng của người thuê.
+\end{itemize}
+
+\section{Hướng phát triển}
+
+Để nâng cấp Nhatroso Platform trở thành một giải pháp Smart Living hoàn thiện, các hướng phát triển tiếp theo bao gồm:
+\begin{itemize}
+    \item \textbf{Tích hợp IoT (Smart Meters):} Thay thế quy trình chụp ảnh thủ công bằng hệ thống phần cứng IoT. Sử dụng các thiết bị đo thông minh hỗ trợ giao thức \textbf{MQTT} hoặc \textbf{LoRaWAN} để truyền dữ liệu tiêu thụ trực tiếp về server theo thời gian thực.
+    \item \textbf{Trí tuệ nhân tạo nâng cao:} Cải thiện mô hình OCR bằng Deep Learning để tăng khả năng nhận diện trong điều kiện ánh sáng yếu và hỗ trợ nhiều loại mặt đồng hồ khác nhau.
+    \item \textbf{Hệ thống phân tích dữ liệu:} Ứng dụng Big Data để phân tích hành vi tiêu thụ điện nước, đưa ra cảnh báo sớm về các trường hợp rò rỉ nước hoặc quá tải điện năng cho chủ trọ.
+    \item \textbf{Mở rộng hệ sinh thái:} Tích hợp các module quản lý dịch vụ bảo trì định kỳ, kết nối cộng đồng người thuê và hỗ trợ tìm kiếm phòng trọ thông minh.
+\end{itemize}
