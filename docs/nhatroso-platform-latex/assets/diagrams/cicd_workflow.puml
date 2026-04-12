@@ -1,0 +1,43 @@
+@startuml cicd_workflow
+
+skinparam linetype ortho
+
+skinparam backgroundColor transparent
+skinparam componentStyle rectangle
+skinparam roundCorner 15
+
+
+together {
+
+package "Continuous Integration (Dev)" as CI {
+
+    [Plan] as Plan #f0f7ff
+    [Code] as Code #f0f7ff
+    [Build] as Build #f0f7ff
+    [Test] as Test #f0f7ff
+
+    Plan -left-> Code
+    Code -down-> Build
+    Build -right-> Test
+
+}
+
+package "Continuous Delivery (Ops)" as CD {
+
+    [Release] as Release #f0fff0
+    [Deploy] as Deploy #f0fff0
+    [Operate] as Operate #f0fff0
+    [Monitor] as Monitor #f0fff0
+
+    Release -right-> Deploy
+    Deploy -up-> Operate
+    Operate -left-> Monitor
+}
+
+}
+
+Test -right-> Release
+Plan <-right- Monitor
+CI -right[hidden]-> CD
+
+@enduml

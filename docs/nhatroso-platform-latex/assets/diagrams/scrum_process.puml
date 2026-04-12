@@ -1,0 +1,40 @@
+@startuml scrum_process
+!define BLUE_COLOR #0056b3
+!define BLACK_COLOR #333333
+!define LIGHT_BLUE #f0f7ff
+
+skinparam backgroundColor white
+skinparam roundcorner 8
+skinparam shadowing false
+skinparam DefaultFontName "Arial"
+skinparam DefaultFontSize 12
+
+skinparam arrowColor BLUE_COLOR
+skinparam activityBorderColor BLUE_COLOR
+skinparam activityBackgroundColor white
+skinparam activityFontColor BLUE_COLOR
+skinparam activityDiamondBorderColor BLACK_COLOR
+skinparam activityDiamondBackgroundColor white
+skinparam partitionBorderColor BLUE_COLOR
+skinparam partitionBackgroundColor white
+skinparam partitionFontColor BLUE_COLOR
+
+title Scrum Process Workflow
+
+|Product Owner|
+:Product Backlog;
+
+|Scrum Team|
+:Sprint Planning;
+:Sprint Backlog;
+
+repeat
+  :Daily Scrum;
+  :Development;
+repeat while (Sprint Duration?) is (Ongoing  ) not (Done)
+
+:Sprint Review;
+:Sprint Retrospective;
+:Increment;
+
+@enduml

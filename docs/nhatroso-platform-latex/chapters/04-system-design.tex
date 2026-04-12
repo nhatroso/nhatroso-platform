@@ -3,7 +3,15 @@
 
 \section{Kiến trúc tổng thể}
 
-Nhatroso Platform được thiết kế theo mô hình \textbf{Modular Monolith} sử dụng ngôn ngữ lập trình Rust. Toàn bộ logic nghiệp vụ được đóng gói trong một API server duy nhất, đảm bảo tính hiệu năng cao, an toàn bộ nhớ và dễ dàng bảo trì. Hệ thống tận dụng nền tảng \textbf{Loco.rs} (với lõi là Axum) để cung cấp các tính năng quản lý cơ sở dữ liệu, xác thực và quản lý background job một cách đồng bộ.
+Nhatroso Platform được thiết kế theo mô hình Modular Monolith sử dụng ngôn ngữ lập trình Rust. Toàn bộ logic nghiệp vụ được đóng gói trong một API server duy nhất, đảm bảo tính hiệu năng cao, an toàn bộ nhớ \cite{RustBook} và dễ dàng bảo trì. Hệ thống tận dụng nền tảng Loco.rs \cite{LocoRS} (với lõi là Axum \cite{Axum}) để cung cấp các tính năng quản lý cơ sở dữ liệu, xác thực và quản lý background job một cách đồng bộ.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\textwidth]{assets/figures/arch.png}
+    \caption{Sơ đồ kiến trúc tổng thể của hệ thống Nhatroso Platform}
+    \label{fig:system_architecture}
+\end{figure}
+
 
 Kiến trúc bao gồm các khối chính được quản lý thông qua Docker:
 
@@ -29,7 +37,7 @@ Authentication & JWT & Cơ chế xác thực thông qua Access \& Refresh Tokens
 
 \section{Thiết kế cơ sở dữ liệu}
 
-Cơ sở dữ liệu được quản lý thông qua \textbf{SeaORM}, sử dụng hệ quản trị cơ sở dữ liệu \textbf{PostgreSQL} để đảm bảo tính nhất quán, bảo mật và hiệu năng cho toàn bộ hệ thống từ môi trường phát triển đến sản xuất. Thiết kế ưu tiên tính toàn vẹn dữ liệu thông qua các ràng buộc khóa ngoại và hệ thống mã định danh duy nhất toàn cầu (\textbf{UUID}).
+Cơ sở dữ liệu được quản lý thông qua SeaORM \cite{SeaORM}, sử dụng hệ quản trị cơ sở dữ liệu PostgreSQL \cite{PostgreSQL} để đảm bảo tính nhất quán, bảo mật và hiệu năng cho toàn bộ hệ thống từ môi trường phát triển đến sản xuất. Thiết kế ưu tiên tính toàn vẹn dữ liệu thông qua các ràng buộc khóa ngoại và hệ thống mã định danh duy nhất toàn cầu (UUID).
 
 \subsection{Sơ đồ quan hệ thực thể}
 
@@ -43,7 +51,7 @@ Các thực thể chính được thiết kế để hỗ trợ quy trình billi
 \toprule
 \textbf{Bảng} & \textbf{Mô tả và ràng buộc quan trọng} \\
 \midrule
-\texttt{users} & Thông tin người dùng, \texttt{role} (OWNER/TENANT). ID kiểu \textbf{UUID}. \\
+\texttt{users} & Thông tin người dùng, \texttt{role} (OWNER/TENANT). ID kiểu UUID. \\
 \texttt{buildings} & Thông tin tòa nhà thuộc sở hữu của chủ trọ. \\
 \texttt{floors} & Phân cấp tầng trong tòa nhà. \\
 \texttt{rooms} & Phòng thuê, trạng thái (VACANT, OCCUPIED, etc.). \\
@@ -97,7 +105,7 @@ Hệ thống đã triển khai thành công tính năng trích xuất chỉ số
 \begin{enumerate}
   \item Hệ thống tạo \texttt{meter\_requests} hằng tháng hoặc kích hoạt nộp khi có yêu cầu.
   \item Người thuê (Tenant) nhận thông báo và chụp ảnh đồng hồ qua ứng dụng Mobile App.
-  \item Ảnh chụp được đẩy lên server, sau đó tương tác với \textbf{Google Cloud Vision API} để thực hiện kỹ thuật OCR nhằm bóc tách chuỗi số và trích xuất chỉ số tự động.
+  \item Ảnh chụp được đẩy lên server, sau đó tương tác với Google Cloud Vision API để thực hiện kỹ thuật OCR nhằm bóc tách chuỗi số và trích xuất chỉ số tự động.
   \item Ảnh bằng chứng được lưu trữ trên Amazon S3 và kết quả trả về được lưu vào Data Model ở trạng thái \texttt{PENDING}.
   \item Chủ nhà (Owner) truy cập Dashboard Web để đối chiếu lại lần cuối và thực hiện \texttt{ACCEPT}.
   \item Chỉ số \texttt{ACCEPTED} trở thành cơ sở tính hóa đơn.
@@ -113,6 +121,6 @@ Hóa đơn được tạo dưới dạng bản nháp (\texttt{calculate}) để 
 
 Quy trình phát triển và vận hành (DevOps) được thiết kế hiện đại trên nền tảng GitHub Actions kết hợp chặt chẽ với AWS và Docker:
 \begin{enumerate}
-    \item \textbf{Continuous Integration (CI):} Bất kỳ thay đổi mã nguồn mới nào khi được đẩy (Push/Merge) lên nhánh chính sẽ kích hoạt quy trình Build mã nguồn Rust tự động, thực hiện kiểm thử (Unit/Integration Testing) và quét bảo mật mã nguồn. Nếu thành công, mã nguồn được đóng gói ra một Docker Image rút gọn.
+    \item \textbf{Continuous Integration (CI):} Bất kỳ thay đổi mã nguồn mới nào khi được đẩy (Push/Merge) lên nhánh chính sẽ kích hoạt quy trình Build mã nguồn Rust tự động, thực hiện kiểm thử (Unit/Integration Testing \cite{RustTesting}) và quét bảo mật mã nguồn. Nếu thành công, mã nguồn được đóng gói ra một Docker Image \cite{Docker} rút gọn.
     \item \textbf{Continuous Deployment (CD):} Docker Image được hệ thống CI tự động đẩy lên Container Registry (như Amazon ECR hoặc Docker Hub). Ngay sau đó tiến trình CD sẽ kích hoạt một lệnh (Webhook/SSH) đến Server Amazon EC2 để tiến hành kéo bản nâng cấp mới về và khởi động lại dịch vụ backend API mà không làm hệ thống ngừng hoạt động (zero-downtime).
 \end{enumerate}

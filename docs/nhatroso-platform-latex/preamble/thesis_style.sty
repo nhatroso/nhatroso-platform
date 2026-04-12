@@ -1,6 +1,6 @@
 \ProvidesPackage{preamble/thesis_style}
 \RequirePackage{graphicx}
-\RequirePackage{vietnam}
+\RequirePackage[utf8]{vietnam}
 \RequirePackage{geometry}
 \usepackage{tikz}
 \usetikzlibrary{calc}
@@ -9,9 +9,11 @@
 \def\thesislayout{
 	\geometry{
 		a4paper,
-		total={160mm,247mm},
 		left=30mm,
 		top=25mm,
+        right=20mm,
+        bottom=25mm,
+        bindingoffset=0.5cm
 	}
 }
 
@@ -40,47 +42,39 @@
 \def\coverpage{
     % --- TikZ Border ---
     \begin{tikzpicture}[remember picture, overlay]
-        % Base coordinates
-        \coordinate (NW) at ($(current page.north west) + (3.0cm,-2.0cm)$);
-        \coordinate (SE) at ($(current page.south east) + (-1.5cm,1.5cm)$);
-        \coordinate (NWinner) at ($(current page.north west) + (3.2cm,-2.2cm)$);
-        \coordinate (SEinner) at ($(current page.south east) + (-1.7cm,1.7cm)$);
+        % Outer border
+        \draw[line width=1.5pt, chaptercolor]
+            ($(current page.north west) + (3.0cm,-2.0cm)$)
+            rectangle
+            ($(current page.south east) + (-1.5cm,1.5cm)$);
+        % Inner border
+        \draw[line width=0.5pt, chaptercolor]
+            ($(current page.north west) + (3.15cm,-2.15cm)$)
+            rectangle
+            ($(current page.south east) + (-1.65cm,1.65cm)$);
 
-        % Main double border
-        \draw[line width=1.2pt, chaptercolor] (NW) rectangle (SE);
-        \draw[line width=2.8pt, chaptercolor] (NWinner) rectangle (SEinner);
 
-        % Corner Ornaments (Manual for parser safety)
-        \begin{scope}[shift={($(current page.north west) + (3.2cm,-2.2cm)$)}, rotate=0]
-            \draw[line width=1pt, chaptercolor] (0, -0.8) -- (0,0) -- (0.8, 0);
-        \end{scope}
-        \begin{scope}[shift={($(current page.north east) + (-1.7cm,-2.2cm)$)}, rotate=-90]
-            \draw[line width=1pt, chaptercolor] (0, -0.8) -- (0,0) -- (0.8, 0);
-        \end{scope}
-        \begin{scope}[shift={($(current page.south east) + (-1.7cm,1.7cm)$)}, rotate=-180]
-            \draw[line width=1pt, chaptercolor] (0, -0.8) -- (0,0) -- (0.8, 0);
-        \end{scope}
-        \begin{scope}[shift={($(current page.south west) + (3.2cm,1.7cm)$)}, rotate=90]
-            \draw[line width=1pt, chaptercolor] (0, -0.8) -- (0,0) -- (0.8, 0);
-        \end{scope}
+        % Simpler ornaments for reliability
+        \draw[line width=1pt, chaptercolor] ($(current page.north west) + (3.15cm,-3.15cm)$) -- ($(current page.north west) + (3.15cm,-2.15cm)$) -- ($(current page.north west) + (4.15cm,-2.15cm)$);
+        \draw[line width=1pt, chaptercolor] ($(current page.north east) + (-1.65cm,-3.15cm)$) -- ($(current page.north east) + (-1.65cm,-2.15cm)$) -- ($(current page.north east) + (-2.65cm,-2.15cm)$);
+        \draw[line width=1pt, chaptercolor] ($(current page.south east) + (-1.65cm,3.15cm)$) -- ($(current page.south east) + (-1.65cm,1.65cm)$) -- ($(current page.south east) + (-2.65cm,1.65cm)$);
+        \draw[line width=1pt, chaptercolor] ($(current page.south west) + (3.15cm,3.15cm)$) -- ($(current page.south west) + (3.15cm,1.65cm)$) -- ($(current page.south west) + (4.15cm,1.65cm)$);
     \end{tikzpicture}
 
     % --- Content ---
     \begin{center}
-        {\fontsize{14}{16}\selectfont \textbf{BỘ GIÁO DỤC VÀ ĐÀO TẠO}}\\[0.4cm]
-        {\fontsize{16}{19}\selectfont \textbf{TRƯỜNG ĐẠI HỌC NHA TRANG}}\\[0.4cm]
-        {\fontsize{14}{16}\selectfont \textbf{\@sdeptname}}\\
-        \textbf{-----------------------------------------}
+        {\fontsize{13}{15}\selectfont \textbf{BỘ GIÁO DỤC VÀ ĐÀO TẠO}}\\[0.2cm]
+        {\fontsize{14}{17}\selectfont \textbf{TRƯỜNG ĐẠI HỌC NHA TRANG}}\\[0.2cm]
+        {\fontsize{13}{15}\selectfont \textbf{\@sdeptname}}\\[0.5cm]
+        \textbf{--------------------------*} \textbf{*--------------------------}
 
         \vfill
-        \includegraphics[width=4.5cm]{assets/figures/ntu_logo.jpg}
+        \includegraphics[width=4.0cm]{assets/figures/ntu_logo.jpg}
         \vfill
 
-        {\fontsize{18}{22}\selectfont \textbf{\@rname}}
+        {\fontsize{16}{20}\selectfont \textbf{\@rname}}\\[1.2cm]
 
-        \vspace{1.5cm}
-
-        \begin{minipage}{0.85\textwidth}
+        \begin{minipage}{0.9\textwidth}
             \centering
             {\fontsize{22}{28}\selectfont \textbf{\color{chaptercolor} \@tname}}
         \end{minipage}
@@ -88,19 +82,17 @@
         \vfill
 
         \begin{flushleft}
-            \hspace{1.5cm}
-            \begin{minipage}{0.8\textwidth}
-                {\fontsize{14}{18}\selectfont
-                {\bfseries Sinh viên thực hiện:} \@stuname\\
-                {\bfseries Lớp:} \@sCouncil\\
-                {\bfseries Giảng viên hướng dẫn:} \@sSupervise
-                }
-            \end{minipage}
+            \hspace{2.5cm}
+            \begin{tabular}{lll}
+                {\fontsize{13}{16}\selectfont \textbf{Giảng viên hướng dẫn}} & {\fontsize{13}{16}\selectfont \textbf{:}} & {\fontsize{13}{16}\selectfont \@sSupervise} \\[0.3cm]
+                {\fontsize{13}{16}\selectfont \textbf{Sinh viên thực hiện}} & {\fontsize{13}{16}\selectfont \textbf{:}} & {\fontsize{13}{16}\selectfont \@stuname} \\[0.3cm]
+                {\fontsize{13}{16}\selectfont \textbf{MSSV}} & {\fontsize{13}{16}\selectfont \textbf{:}} & {\fontsize{13}{16}\selectfont \@sCouncil}
+            \end{tabular}
         \end{flushleft}
 
         \vfill
-        {\fontsize{14}{16}\selectfont \textbf{\@ttime}}
-        \vspace{1cm}
+        {\fontsize{13}{15}\selectfont \textbf{\@ttime}}
+        \vspace{0.8cm}
     \end{center}
     \clearpage
 }

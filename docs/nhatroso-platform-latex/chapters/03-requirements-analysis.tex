@@ -3,72 +3,139 @@
 
 \section{Phân tích stakeholder}
 
-Dự án Nhatroso Platform phục vụ hai nhóm người dùng chính và một nhóm cố vấn học thuật, được tổng hợp trong bảng sau.
+Trong quản lý dự án phần mềm, việc xác định và phân tích các bên liên quan (Stakeholders) là bước tối quan trọng để hiểu rõ kỳ vọng, mức độ ảnh hưởng và xây dựng chiến lược tiếp cận phù hợp. Dự án Nhatroso Platform áp dụng Ma trận Quyền hạn và Mối quan tâm (Power/Interest Matrix)\footnote{Một khung quản trị được sử dụng để phân loại các bên liên quan dựa trên mức độ ảnh hưởng và mức độ quan tâm của họ đối với dự án.} \cite{Mendelow1981} để phân loại các nhóm stakeholder cốt lõi.
 
 \begin{table}[htbp]
 \centering
-\caption{Danh sách stakeholder của hệ thống}
+\caption{Ma trận phân tích stakeholder (Interest Matrix)}
 \label{tab:stakeholders}
-\begin{tabularx}{\textwidth}{l>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X}
+\begin{tabularx}{\textwidth}{l>{\centering\arraybackslash}c>{\centering\arraybackslash}c>{\centering\arraybackslash}c>{\raggedright\arraybackslash}X}
 \toprule
-\textbf{Vai trò} & \textbf{Mối quan tâm chính} & \textbf{Mức ảnh hưởng} \\
+\textbf{Nhóm Stakeholder} & \textbf{Quyền lực} & \textbf{Mối quan tâm} & \textbf{Ưu tiên} & \textbf{Chiến lược tiếp cận} \\
 \midrule
-Chủ nhà / Quản lý nhà trọ & Quản lý phòng, tự động hóa điện nước--hóa đơn, giảm tranh chấp, báo cáo doanh thu & Rất cao \\[5pt]
-Người thuê phòng & Minh bạch hóa đơn, thanh toán nhanh, theo dõi hợp đồng dễ dàng & Cao \\[5pt]
-Giảng viên hướng dẫn & Chất lượng chuyên môn, phương pháp luận, kết quả đồ án & Cao \\
+Người cho thuê (Chủ nhà) & Cao & Rất cao & 1 & Quản lý chặt chẽ (Key Players) \\[5pt]
+Sinh viên phát triển & Cao & Rất cao & 1 & Quản lý chặt chẽ (Key Players) \\[5pt]
+Giảng viên cố vấn & Cao & Trung bình & 2 & Làm hài lòng (Keep Satisfied) \\[5pt]
+Người thuê trọ & Thấp & Cao & 2 & Giữ thông tin (Keep Informed) \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-\section{Yêu cầu chức năng}
+\subsection{Chi tiết các nhóm stakeholder}
 
-Hệ thống cần đáp ứng các yêu cầu chức năng cốt lõi được trình bày theo từng nhóm nghiệp vụ dưới đây.
-
-\subsection{Quản lý tài khoản và phân quyền}
-
-Hệ thống hỗ trợ đăng ký tài khoản bằng email hoặc số điện thoại với mật khẩu được bảo mật. Mỗi người dùng được cấp một mã định danh duy nhất kiểu \textbf{UUID}. Sau khi đăng nhập, hệ thống phát JWT access token ngắn hạn kết hợp refresh token. Hai vai trò được phân biệt rõ ràng: \textbf{Owner} (chủ nhà) có quyền quản lý toàn bộ tài nguyên của mình thông qua Web Dashboard, còn \textbf{Tenant} (người thuê) sử dụng Mobile App để gửi chỉ số và xem hóa đơn.
-
-\subsection{Quản lý bất động sản}
-
-Chủ nhà có thể tạo và quản lý theo cấu trúc phân cấp: Tòa nhà $\rightarrow$ Tầng $\rightarrow$ Phòng. Mỗi phòng có một mã định danh duy nhất trong tòa nhà và trạng thái thể hiện vòng đời: \texttt{VACANT} (trống), \texttt{DEPOSITED} (đã đặt cọc), \texttt{OCCUPIED} (đang ở), \texttt{MAINTENANCE} (bảo trì).
-
-\subsection{Danh mục dịch vụ và bảng giá}
-
-Chủ nhà cấu hình danh mục dịch vụ với đơn vị tính và logic tương ứng (điện, nước tính theo số; internet, vệ sinh tính theo tháng). Bảng giá được thiết lập linh hoạt cho từng phòng, hỗ trợ đơn giá thay đổi theo thời gian hiệu lực (\texttt{effective\_start/end}).
-
-\subsection{Hợp đồng thuê}
-
-Hệ thống đảm bảo mỗi phòng chỉ có duy nhất một hợp đồng \texttt{ACTIVE} tại một thời điểm. Hợp đồng liên kết giữa chủ nhà, phòng và các thành viên thuê phòng. Khi kết hợp cùng \texttt{meter\_readings}, đây là căn cứ pháp lý và dữ liệu để tạo hóa đơn.
-
-\subsection{Ghi nhận chỉ số và quy trình Mobile-to-Web}
-
-Quy trình số hóa chỉ số tập trung vào tính minh bạch:
 \begin{itemize}
-    \item Hệ thống mở kỳ nộp số hằng tháng (\texttt{meter\_requests}).
-    \item Người thuê chụp ảnh đồng hồ và nộp kèm số đọc qua Mobile App.
-    \item Chủ nhà xem ảnh bằng chứng và phê duyệt chỉ số trên Web Dashboard.
-    \item Dữ liệu sau khi phê duyệt (\texttt{ACCEPTED}) sẽ được khóa để đảm bảo tính bất biến.
+    \item \textbf{Người cho thuê (Quản lý nhà trọ):} Đây là nhóm người dùng trung tâm, đóng vai trò quyết định trong việc áp dụng hệ thống vào thực tế kinh doanh. Họ quan tâm đến khả năng tự động hóa quy trình quản lý phòng, minh bạch hóa đơn điện nước và báo cáo tài chính chính xác để giảm thiểu rủi ro và tranh chấp với người thuê.
+    \item \textbf{Người thuê trọ (Thanh niên/Sinh viên):} Nhóm người dùng trực tiếp sử dụng Mobile App để tương tác với chủ nhà. Mối quan tâm lớn nhất của họ là tính minh bạch trong việc tính toán chỉ số, sự thuận tiện khi gửi dữ liệu và theo dõi lịch sử thanh toán một cách dễ dàng, nhanh chóng.
+    \item \textbf{Giảng viên cố vấn:} Đóng vai trò giám sát về mặt chuyên môn và học thuật. Họ cung cấp định hướng về phương pháp luận, kiểm soát chất lượng kỹ thuật của giải pháp và đánh giá sự tuân thủ các quy chuẩn kỹ thuật trong khuôn khổ đồ án tốt nghiệp.
+    \item \textbf{Sinh viên chịu trách nhiệm dự án:} Là người trực tiếp thiết kế, triển khai và vận hành hệ thống. Người này có quyền tự quyết về mặt kiến trúc và công nghệ, đồng thời có mối quan tâm cao nhất đến sự thành công, tính ổn định và khả năng mở rộng của nền tảng Nhatroso.
 \end{itemize}
 
-\subsection{Lập hóa đơn và vòng đời trạng thái}
+\section{Yêu cầu chức năng}
 
-Hệ thống hỗ trợ tính toán trước giá trị hóa đơn (\texttt{calculate}) để chủ nhà kiểm tra số tiền trước khi chính thức phát hành. Mỗi hóa đơn gắn với một hợp đồng và một kỳ thanh toán duy nhất. Trạng thái hóa đơn gồm: \texttt{UNPAID} (chờ thanh toán), \texttt{PAID} (đã thanh toán), và \texttt{VOIDED} (hóa đơn bị hủy).
+Dựa trên thực tế nghiệp vụ quản lý nhà trọ và các thành phần kỹ thuật đã được triển khai trong mã nguồn dự án Nhatroso Platform, các yêu cầu chức năng cốt lõi được hệ thống hóa thành sáu nhóm chính dưới đây.
+
+\subsection{Quản lý người dùng và phân quyền (Authentication \& RBAC)}
+Hệ thống cung cấp cơ chế bảo mật và phân tách vai trò rõ ràng để đảm bảo tính riêng tư của dữ liệu:
+\begin{itemize}
+    \item \textbf{Đăng ký và Đăng nhập:} Hỗ trợ xác thực qua Email và Số điện thoại với cơ chế băm mật khẩu Argon2 \cite{Argon2}. Hệ thống sử dụng JWT (JSON Web Token)\footnote{Một tiêu chuẩn mã nguồn mở dùng để tạo các mã xác thực phi trạng thái, giúp truyền tải thông tin giữa các bên dưới dạng đối tượng JSON một cách an toàn.} \cite{RFC7519} để duy trì phiên làm việc cho cả Web Dashboard và Mobile App.
+    \item \textbf{Phân quyền dựa trên vai trò (RBAC):} Phân chia người dùng thành hai nhóm chính: Chủ nhà (\texttt{Owner}) có toàn quyền quản lý tài nguyên và Người thuê (\texttt{Tenant}) có quyền truy cập hạn chế vào thông tin hóa đơn và phòng ở của cá nhân.
+    \item \textbf{Quản lý hồ sơ:} Cho phép người dùng cập nhật thông tin cá nhân và lưu trữ an toàn các tài liệu định danh (căn cước công dân) phục vụ cho việc lập hợp đồng.
+\end{itemize}
+
+\subsection{Quản lý hạ tầng bất động sản (Property Management)}
+Module này giúp số hóa toàn bộ cấu trúc vật lý của cơ sở cho thuê:
+\begin{itemize}
+    \item \textbf{Quản lý phân cấp tòa nhà:} Hỗ trợ cấu hình sơ đồ theo cấu trúc: Tòa nhà $\rightarrow$ Tầng $\rightarrow$ Phòng. Mỗi thực thể đều có mã định danh và thuộc tính riêng biệt.
+    \item \textbf{Theo dõi trạng thái phòng:} Mỗi phòng có trạng thái thực tế (\texttt{Empty}, \texttt{Occupied}, \texttt{Reserved}, \texttt{Maintenance}) được cập nhật tự động theo vòng đời hợp đồng hoặc thao tác thủ công của chủ nhà.
+\end{itemize}
+
+\subsection{Quản lý dịch vụ và bảng giá (Service \& Pricing Management)}
+Thành phần này đảm bảo tính linh hoạt trong việc cấu hình các khoản phí phát sinh:
+\begin{itemize}
+    \item \textbf{Cấu hình dịch vụ không giới hạn:} Cho phép chủ nhà thiết lập các loại dịch vụ như điện, nước, internet, vệ sinh với các phương thức tính toán khác nhau (theo chỉ số hoặc theo tháng).
+    \item \textbf{Quản lý bảng giá theo thời gian:} Hỗ trợ việc điều chỉnh đơn giá dịch vụ và tiền thuê phòng theo từng giai đoạn hiệu lực (\texttt{effective\_start/end}), đảm bảo dữ liệu lịch sử luôn được bảo toàn khi truy xuất hóa đơn cũ.
+\end{itemize}
+
+\subsection{Quản lý hợp đồng và người thuê (Contract Management)}
+Hợp đồng là căn cứ pháp lý và dữ liệu quan trọng nhất để kích hoạt các tiến trình tự động hóa khác:
+\begin{itemize}
+    \item \textbf{Khởi tạo hợp đồng thuê:} Liên kết giữa Chủ nhà, Phòng và một hoặc nhiều Người thuê. Hợp đồng quy định rõ ngày bắt đầu, ngày kết thúc, giá thuê và các chỉ số đầu kỳ.
+    \item \textbf{Quản lý trạng thái hợp đồng:} Hệ thống tự động kiểm soát sự duy nhất (một phòng chỉ có một hợp đồng hiệu lực tại một thời điểm) và hỗ trợ các thao tác chốt hợp đồng, gia hạn hoặc thanh lý.
+\end{itemize}
+
+\subsection{Quản lý chỉ số điện nước (Meter Reading Management)}
+Module này giải quyết bài toán minh bạch thông tin thông qua việc số hóa quy trình thu thập số liệu:
+\begin{itemize}
+    \item \textbf{Khởi tạo yêu cầu (\texttt{Meter Request}):} Định kỳ hằng tháng, hệ thống tự động tạo các yêu cầu nộp chỉ số gửi tới Mobile App của từng người thuê.
+    \item \textbf{Nộp số bằng hình ảnh và AI OCR:} Người thuê chụp ảnh đồng hồ qua ứng dụng. Backend tích hợp Google Cloud Vision API để tự động nhận diện chỉ số từ ảnh, giảm thiểu sai sót nhập liệu.
+    \item \textbf{Phê duyệt và khóa dữ liệu:} Chủ nhà kiểm chứng qua hình ảnh và phê duyệt trên Dashboard. Sau khi phê duyệt, chỉ số sẽ được khóa (\texttt{Locked}) để đảm bảo tính bất biến làm căn cứ lập hóa đơn.
+\end{itemize}
+
+\subsection{Quản lý hóa đơn và thanh toán (Invoice \& Payment Management)}
+Quy trình tài chính được tự động hóa để đảm bảo tính chính xác và nhanh chóng:
+\begin{itemize}
+    \item \textbf{Tính toán hóa đơn tự động:} Hệ thống tự động tổng hợp tiền phòng, tiền dịch vụ dựa trên chênh lệch chỉ số và đơn giá hiệu lực để tạo bản nháp hóa đơn.
+    \item \textbf{Phát hành và thông báo:} Hóa đơn được phát hành với mã định danh duy nhất. Hệ thống tự động đẩy thông báo (\texttt{Push Notification}) và gửi email kèm liên kết xem chi tiết hóa đơn tới người thuê.
+    \item \textbf{Thanh toán và QR Code:} Mỗi hóa đơn tích hợp VietQR \cite{VietQR} động tương ứng với số tiền và nội dung chuyển khoản, hỗ trợ đối soát tự động qua Webhook từ ngân hàng.
+    \item \textbf{Vòng đời trạng thái:} Kiểm soát chặt chẽ các trạng thái hóa đơn (\texttt{Unpaid}, \texttt{Paid}, \texttt{Void}, \texttt{Overdue}) để chủ nhà dễ dàng theo dõi công nợ.
+\end{itemize}
 
 \section{Yêu cầu phi chức năng}
 
+Bên cạnh các yêu cầu về nghiệp vụ, nền tảng Nhatroso Platform được thiết kế để đáp ứng các tiêu chuẩn kỹ thuật nghiêm ngặt nhằm đảm bảo tính bền vững và khả năng vận hành lâu dài. Các yêu cầu phi chức năng được cụ thể hóa thông qua năm trụ cột chính dưới đây.
+
+\subsection{Tính bảo mật (Security)}
+Bảo mật là yếu tố tiên quyết khi hệ thống xử lý các dữ liệu nhạy cảm như thông tin định danh cá nhân và hóa đơn tài chính:
+\begin{itemize}
+    \item \textbf{Xác thực và Ủy quyền:} Sử dụng cơ chế JSON Web Token (JWT) với thời gian sống ngắn cho access token. Mật khẩu người dùng được băm bằng thuật toán Argon2 trước khi lưu vào cơ sở dữ liệu.
+    \item \textbf{Kiểm soát truy cập tài nguyên:} Áp dụng cơ chế kiểm tra quyền sở hữu (\texttt{Ownership Verification}) tại tầng Backend. Đảm bảo chủ nhà chỉ có thể thao tác với dữ liệu của tòa nhà mình quản lý và người thuê chỉ nhìn thấy hóa đơn của chính mình.
+    \item \textbf{An toàn dữ liệu:} Toàn bộ luồng dữ liệu giữa Client và Server được mã hóa qua giao thức TLS 1.2+. Các tệp tin bằng chứng (ảnh đồng hồ) được lưu trữ với quyền truy cập có thời hạn (S3 Presigned URLs).
+\end{itemize}
+
+\subsection{Hiệu năng và Khả năng mở rộng (Performance \& Scalability)}
+Hệ thống được tối ưu để xử lý mượt mà ngay cả khi số lượng phòng và người thuê tăng lên:
+\begin{itemize}
+    \item \textbf{Hiệu năng Backend:} Lựa chọn ngôn ngữ Rust (Framework Loco) giúp tối ưu hóa tài nguyên phần cứng, đảm bảo thời gian phản hồi (Latency) thấp hơn 200ms cho các truy vấn thông thường.
+    \item \textbf{Tối ưu hóa Frontend:} Ứng dụng công nghệ Next.js với cơ chế Client-side Rendering và tối ưu hóa hình ảnh giúp giảm thiểu dung lượng tải trang và tăng tốc độ hiển thị giao diện người dùng.
+    \item \textbf{Mở rộng hạ tầng:} Thiết kế dựa trên Docker container giúp hệ thống dễ dàng triển khai đa phiên bản (Replicas) trên môi trường đám mây khi lưu lượng truy cập tăng đột biến.
+\end{itemize}
+
+\subsection{Độ tin cậy và Tính nhất quán (Reliability \& Integrity)}
+Đảm bảo hệ thống hoạt động chính xác và không làm mất mát dữ liệu của người dùng:
+\begin{itemize}
+    \item \textbf{Tính nhất quán dữ liệu:} Sử dụng PostgreSQL với các ràng buộc về toàn vẹn (Foreign Keys, Unique Constraints). Mọi thao tác tài chính đều được thực hiện trong phạm vi Giao dịch (Database Transaction) để tránh trạng thái dữ liệu dở dang.
+    \item \textbf{Cơ chế Idempotency:}\footnote{Tính chất của một thao tác mà khi thực hiện nhiều lần vẫn mang lại kết quả giống như thực hiện một lần duy nhất, tránh lỗi trùng lặp dữ liệu.} Việc khởi tạo hóa đơn hàng tháng được kiểm soát chặt chẽ dựa trên cặp giá trị (Mã hợp đồng, Kỳ thanh toán) để đảm bảo không bao giờ xảy ra tình trạng lập hóa đơn trùng lặp cho một phòng.
+\end{itemize}
+
+\subsection{Khả năng bảo trì và Tiến hóa (Maintainability)}
+Dự án tuân thủ các quy chuẩn kỹ thuật để dễ dàng nâng cấp và chuyển giao:
+\begin{itemize}
+    \item \textbf{Quy trình CI/CD:} Tự động hóa hoàn toàn luồng tích hợp và triển khai thông qua GitHub Actions. Mọi thay đổi mã nguồn đều được kiểm tra tính đúng đắn qua các kịch bản kiểm thử tự động trước khi đẩy lên môi trường Production.
+    \item \textbf{Kiến trúc mã nguồn:} Áp dụng mô hình Modular Monolith với cấu trúc thư mục rõ ràng, phân tách giữa logic nghiệp vụ và tầng dữ liệu, giúp giảm thiểu rủi ro khi thay đổi các tính năng hiện có.
+\end{itemize}
+
+\subsection{Trải nghiệm người dùng và Tính tương thích (Usability)}
+Đảm bảo hệ thống tiếp cận được đa dạng đối tượng người dùng:
+\begin{itemize}
+    \item \textbf{Sự tương thích đa nền tảng:} Web Dashboard được thiết kế theo phong cách Responsive, hiển thị tốt trên cả máy tính bàn và máy tính bảng. Mobile App hỗ trợ tốt trên hai nền tảng phổ biến nhất là Android và iOS.
+    \item \textbf{Tính trực quan:} Giao diện tối giản, tập trung vào các hành động trung tâm như "Chụp ảnh nộp số" hay "Thanh toán hóa đơn" để ngay cả những chủ nhà không rành về công nghệ cũng có thể sử dụng dễ dàng.
+\end{itemize}
+
+Bảng \ref{tab:nfr_summary} dưới đây tóm tắt các chỉ số kỹ thuật then chốt của dự án.
+
 \begin{table}[htbp]
 \centering
-\caption{Yêu cầu phi chức năng (Implemented)}
-\label{tab:nfr}
+\caption{Tóm tắt các chỉ số yêu cầu phi chức năng}
+\label{tab:nfr_summary}
 \begin{tabularx}{\textwidth}{lX}
 \toprule
-\textbf{Loại} & \textbf{Yêu cầu} \\
+\textbf{Nhóm yêu cầu} & \textbf{Thông số kỹ thuật / Giải pháp} \\
 \midrule
-Bảo mật & TLS 1.2+; mật khẩu băm Argon2; JWT access token ngắn hạn; Ownership check ở tầng backend API. \\[5pt]
-Hiệu năng & API phản hồi nhanh nhờ hiệu năng của ngôn ngữ Rust; Next.js 16 tối ưu Client-side Rendering. \\[5pt]
-Độ tin cậy & Idempotency cho tạo hóa đơn dựa trên (contract\_id, period); SeaORM migration đảm bảo nhất quán schema. \\[5pt]
-Kiểm toán & Đảm bảo tính minh bạch thông qua ảnh chụp đồng hồ điện nước không thể xóa sau khi đã chốt hóa đơn. \\[5pt]
-Triển khai & Triển khai tự động hoàn toàn qua \textbf{GitHub Actions}; ảo hóa với \textbf{Docker}; lưu trữ cơ sở dữ liệu bằng \textbf{PostgreSQL} và vận hành trên hệ sinh thái \textbf{AWS}. \\
+Bảo mật & TLS 1.3, Argon2ID, JWT RBAC, S3 Presigned URL. \\[5pt]
+Hiệu năng & Response time $<$ 200ms, CPU/RAM footprint cực thấp (Rust). \\[5pt]
+Độ tin cậy & Database Transaction, 99.9\% Uptime, Auto-backup. \\[5pt]
+Bảo trì & GitHub Actions CI/CD, Docker Containerization, Clean Architecture. \\[5pt]
+Trải nghiệm & 100\% Responsive Web, Cross-platform Mobile (React Native). \\
 \bottomrule
 \end{tabularx}
 \end{table}

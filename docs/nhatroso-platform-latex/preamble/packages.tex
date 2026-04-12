@@ -22,10 +22,12 @@
 \usepackage{multirow}
 \usepackage{array}
 \usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{xltabular}
 \usepackage{colortbl}
 \usepackage[titles]{tocloft}
 \usepackage{float}
-\usepackage[a4paper, margin=1in, bindingoffset=0.5cm]{geometry}
+\usepackage{geometry}
 
 % --- Graphics and Aesthetic ---
 \usepackage{graphicx}
@@ -57,7 +59,9 @@
     urlcolor=Black,
     citecolor=NavyBlue,
     linkcolor=Black,
-    pdfborder={0 0 0}
+    pdfborder={0 0 0},
+    pdfencoding=auto,
+    unicode=true
 }
 \usepackage{bookmark}
 \usepackage{cleveref}           % Must load after hyperref
