@@ -1,12 +1,12 @@
 import * as React from 'react';
 import { useTranslations } from 'next-intl';
 import {
-  getMeterConfig,
-  updateMeterConfig,
-} from '@/services/api/meter-automation';
+  getAutoInvoiceConfig,
+  updateAutoInvoiceConfig,
+} from '@/services/api/auto-invoice-configs';
 
-export function useMeterConfig() {
-  const t = useTranslations('MeterRequests.Config');
+export function useAutoInvoiceConfig() {
+  const t = useTranslations('Invoices.automation');
   const [loading, setLoading] = React.useState(true);
   const [saving, setSaving] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -26,7 +26,7 @@ export function useMeterConfig() {
   const fetchConfig = React.useCallback(async () => {
     try {
       setLoading(true);
-      const config = await getMeterConfig();
+      const config = await getAutoInvoiceConfig();
       if (config) {
         const data = {
           auto_generate: config.auto_generate,
@@ -39,7 +39,7 @@ export function useMeterConfig() {
         setInitialData(data);
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : t('LoadError');
+      const msg = err instanceof Error ? err.message : t('error');
       setError(msg);
     } finally {
       setLoading(false);
@@ -71,13 +71,13 @@ export function useMeterConfig() {
         day_of_month: dayOfMonth,
         grace_days: graceDays,
       };
-      await updateMeterConfig(data);
+      await updateAutoInvoiceConfig(data);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
       setInitialData(data);
       setIsDirty(false);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : t('SaveError');
+      const msg = err instanceof Error ? err.message : t('error');
       setError(msg);
     } finally {
       setSaving(false);

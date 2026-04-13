@@ -47,6 +47,7 @@ impl Hooks for App {
 
     fn routes(_ctx: &AppContext) -> AppRoutes {
         AppRoutes::empty()
+            .add_route(controllers::auto_invoice_configs::routes())
             .add_route(controllers::meter_request_configs::routes())
             .add_route(controllers::meter_requests::routes())
             .add_route(controllers::meters::routes())
@@ -73,6 +74,7 @@ impl Hooks for App {
 
     fn register_tasks(tasks: &mut Tasks) {
         tasks.register(tasks::seed_data::SeedData);
+        tasks.register(tasks::auto_generate_invoices::AutoGenerateInvoices);
     }
 
     async fn truncate(_ctx: &AppContext) -> Result<()> {

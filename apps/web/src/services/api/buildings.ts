@@ -6,10 +6,10 @@ import {
   CreateFloorInput,
   UpdateFloorInput,
 } from '@nhatroso/shared';
-import { apiFetch, API_BASE_URL } from './base';
+import { apiFetch } from './base';
 
 export async function getBuildings(): Promise<Building[]> {
-  const res = await apiFetch(`${API_BASE_URL}/buildings`, {
+  const res = await apiFetch(`/buildings`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -26,7 +26,7 @@ export async function getBuildings(): Promise<Building[]> {
 export async function createBuilding(
   data: CreateBuildingInput,
 ): Promise<Building> {
-  const res = await apiFetch(`${API_BASE_URL}/buildings`, {
+  const res = await apiFetch(`/buildings`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -45,7 +45,7 @@ export async function updateBuilding(
   id: string,
   data: UpdateBuildingInput,
 ): Promise<Building> {
-  const res = await apiFetch(`${API_BASE_URL}/buildings/${id}`, {
+  const res = await apiFetch(`/buildings/${id}`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
@@ -64,7 +64,7 @@ export async function updateBuilding(
 }
 
 export async function archiveBuilding(id: string): Promise<Building> {
-  const res = await apiFetch(`${API_BASE_URL}/buildings/${id}/archive`, {
+  const res = await apiFetch(`/buildings/${id}/archive`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -86,7 +86,7 @@ export async function archiveBuilding(id: string): Promise<Building> {
 // ==========================================
 
 export async function getAllFloors(): Promise<Floor[]> {
-  const res = await apiFetch(`${API_BASE_URL}/floors`, {
+  const res = await apiFetch(`/floors`, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
   });
@@ -95,7 +95,7 @@ export async function getAllFloors(): Promise<Floor[]> {
 }
 
 export async function getFloors(buildingId: string): Promise<Floor[]> {
-  const res = await apiFetch(`${API_BASE_URL}/buildings/${buildingId}/floors`, {
+  const res = await apiFetch(`/buildings/${buildingId}/floors`, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
   });
@@ -107,7 +107,7 @@ export async function createFloor(
   buildingId: string,
   data: CreateFloorInput,
 ): Promise<Floor> {
-  const res = await apiFetch(`${API_BASE_URL}/buildings/${buildingId}/floors`, {
+  const res = await apiFetch(`/buildings/${buildingId}/floors`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -120,7 +120,7 @@ export async function updateFloor(
   id: string,
   data: UpdateFloorInput,
 ): Promise<Floor> {
-  const res = await apiFetch(`${API_BASE_URL}/floors/${id}`, {
+  const res = await apiFetch(`/floors/${id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),

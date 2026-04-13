@@ -1,4 +1,4 @@
-import { apiFetch, API_BASE_URL } from './base';
+import { apiFetch } from './base';
 
 export interface InvoiceDetail {
   id: number;
@@ -34,7 +34,7 @@ export interface Invoice {
 }
 
 export async function getInvoices(): Promise<Invoice[]> {
-  const res = await apiFetch(`${API_BASE_URL}/invoices`, {
+  const res = await apiFetch(`/invoices`, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
   });
@@ -43,7 +43,7 @@ export async function getInvoices(): Promise<Invoice[]> {
 }
 
 export async function getInvoice(id: number): Promise<Invoice> {
-  const res = await apiFetch(`${API_BASE_URL}/invoices/${id}`, {
+  const res = await apiFetch(`/invoices/${id}`, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
   });
@@ -54,7 +54,7 @@ export async function getInvoice(id: number): Promise<Invoice> {
 export async function createInvoice(
   payload: Partial<Invoice>,
 ): Promise<Invoice> {
-  const res = await apiFetch(`${API_BASE_URL}/invoices`, {
+  const res = await apiFetch(`/invoices`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -72,7 +72,7 @@ export async function calculateInvoice(
   details: { description: string; amount: string }[];
   total_amount: string;
 }> {
-  const res = await apiFetch(`${API_BASE_URL}/invoices/calculate`, {
+  const res = await apiFetch(`/invoices/calculate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ room_id: roomId, period_month: periodMonth }),
@@ -85,7 +85,7 @@ export async function voidInvoice(
   id: number,
   reason: string,
 ): Promise<Invoice> {
-  const res = await apiFetch(`${API_BASE_URL}/invoices/${id}/void`, {
+  const res = await apiFetch(`/invoices/${id}/void`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ reason }),
@@ -95,7 +95,7 @@ export async function voidInvoice(
 }
 
 export async function payInvoice(id: number): Promise<Invoice> {
-  const res = await apiFetch(`${API_BASE_URL}/invoices/${id}/pay`, {
+  const res = await apiFetch(`/invoices/${id}/pay`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
   });

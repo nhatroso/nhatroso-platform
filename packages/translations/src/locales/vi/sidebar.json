@@ -9,10 +9,12 @@
   "meters": "Danh sách chỉ số",
   "meter_readings": "Lịch sử chỉ số",
   "meter_requests": "Lịch sử yêu cầu",
-  "meter_settings": "Cài đặt tự động",
+  "meter_settings": "Gửi yêu cầu tự động",
   "meter_management": "Quản lý chỉ số",
   "service_catalog": "Danh sách dịch vụ",
   "room_services": "Dịch vụ phòng",
   "invoices": "Quản lý hóa đơn",
+  "invoice_list": "Danh sách hóa đơn",
+  "auto_invoices": "Xuất hóa đơn tự động",
   "logout": "Đăng xuất"
 }

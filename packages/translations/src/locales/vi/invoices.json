@@ -32,5 +32,18 @@
   "period": "Kỳ thanh toán",
   "calculate_btn": "Tính thử hóa đơn",
   "calculationFailed": "Tính toán thất bại. Hãy đảm bảo phòng có hợp đồng và khách thuê đang ở.",
-  "createInvoice": "Tạo Hóa đơn"
+  "createInvoice": "Tạo Hóa đơn",
+  "automation": {
+    "title": "Tự động xuất hóa đơn",
+    "description": "Thiết lập tự động xuất hóa đơn hàng tháng cho tài khoản của bạn",
+    "enable": "Kích hoạt tự động xuất hóa đơn",
+    "dayOfMonth": "Ngày lập hóa đơn hàng tháng",
+    "dayOfMonthDesc": "Hệ thống sẽ tự động tạo hóa đơn vào ngày này mỗi tháng.",
+    "graceDays": "Số ngày đến hạn thanh toán",
+    "graceDaysDesc": "Số ngày cho phép thanh toán trước khi hóa đơn bị quá hạn.",
+    "save": "Lưu thiết lập",
+    "saving": "Đang lưu...",
+    "success": "Lưu thiết lập thành công!",
+    "error": "Có lỗi xảy ra khi lưu thiết lập"
+  }
 }

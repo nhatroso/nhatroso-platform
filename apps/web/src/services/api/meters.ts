@@ -6,17 +6,17 @@ import {
   LandlordMeterSummary,
   LandlordMeterDetail,
 } from '@nhatroso/shared';
-import { apiFetch, API_BASE_URL } from './base';
+import { apiFetch } from './base';
 
 export const metersApi = {
   listByRoom: async (roomId: string): Promise<Meter[]> => {
-    const res = await apiFetch(`${API_BASE_URL}/meters/room/${roomId}`);
+    const res = await apiFetch(`/meters/room/${roomId}`);
     if (!res.ok) throw new Error('Failed to fetch meters');
     return res.json();
   },
 
   create: async (data: CreateMeterInput): Promise<Meter> => {
-    const res = await apiFetch(`${API_BASE_URL}/meters`, {
+    const res = await apiFetch(`/meters`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -26,7 +26,7 @@ export const metersApi = {
   },
 
   listReadings: async (meterId: string): Promise<MeterReading[]> => {
-    const res = await apiFetch(`${API_BASE_URL}/meters/${meterId}/readings`);
+    const res = await apiFetch(`/meters/${meterId}/readings`);
     if (!res.ok) throw new Error('Failed to fetch readings');
     return res.json();
   },
@@ -35,7 +35,7 @@ export const metersApi = {
     meterId: string,
     data: RecordReadingInput,
   ): Promise<MeterReading> => {
-    const res = await apiFetch(`${API_BASE_URL}/meters/${meterId}/readings`, {
+    const res = await apiFetch(`/meters/${meterId}/readings`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -47,7 +47,7 @@ export const metersApi = {
   getLandlordSummary: async (
     periodMonth?: string,
   ): Promise<LandlordMeterSummary> => {
-    let url = `${API_BASE_URL}/meters/landlord/summary`;
+    let url = `/meters/landlord/summary`;
     if (periodMonth) {
       url += `?period_month=${encodeURIComponent(periodMonth)}`;
     }
@@ -60,7 +60,7 @@ export const metersApi = {
     buildingId?: string,
     periodMonth?: string,
   ): Promise<LandlordMeterDetail[]> => {
-    let url = `${API_BASE_URL}/meters/landlord/list`;
+    let url = `/meters/landlord/list`;
     const params = new URLSearchParams();
     if (buildingId && buildingId !== 'all') {
       params.append('building_id', buildingId);
@@ -80,7 +80,7 @@ export const metersApi = {
   },
 
   updateStatus: async (id: string, status: string): Promise<void> => {
-    const res = await apiFetch(`${API_BASE_URL}/meters/${id}/status`, {
+    const res = await apiFetch(`/meters/${id}/status`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status }),
@@ -97,7 +97,7 @@ export const metersApi = {
       query.append('building_id', params.buildingId);
     if (params.periodMonth) query.append('period_month', params.periodMonth);
     const res = await apiFetch(
-      `${API_BASE_URL}/meters/landlord/readings?${query.toString()}`,
+      `/meters/landlord/readings?${query.toString()}`,
     );
     if (!res.ok) throw new Error('Failed to fetch landlord readings');
     return res.json();

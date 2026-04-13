@@ -2,6 +2,7 @@
 
 pub mod prelude;
 
+pub mod auto_invoice_configs;
 pub mod buildings;
 pub mod contract_tenants;
 pub mod contracts;

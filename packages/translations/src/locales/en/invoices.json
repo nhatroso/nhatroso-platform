@@ -32,5 +32,18 @@
   "period": "Billing Period",
   "calculate_btn": "Calculate Preview",
   "calculationFailed": "Failed to calculate. Ensure room has active contract & tenant.",
-  "createInvoice": "Create Invoice"
+  "createInvoice": "Create Invoice",
+  "automation": {
+    "title": "Auto Invoice Generation",
+    "description": "Set up monthly automatic invoice generation for your account",
+    "enable": "Enable auto invoice generation",
+    "dayOfMonth": "Monthly Billing Day",
+    "dayOfMonthDesc": "The system will automatically scan and generate invoices on this day each month.",
+    "graceDays": "Grace Days for Payment",
+    "graceDaysDesc": "Number of days the tenant has to pay after the invoice is generated (due date).",
+    "save": "Save Settings",
+    "saving": "Saving...",
+    "success": "Settings saved successfully!",
+    "error": "Failed to save settings"
+  }
 }

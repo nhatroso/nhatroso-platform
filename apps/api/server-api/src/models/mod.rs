@@ -1,6 +1,7 @@
 pub mod _entities;
 pub mod refresh_tokens;
 pub mod users;
+pub mod auto_invoice_configs;
 pub mod rooms;
 pub mod floors;
 pub mod buildings;

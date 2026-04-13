@@ -20,7 +20,14 @@ type NavItem = {
 const navItems: NavItem[] = [
   { key: 'dashboard', href: '/dashboard', icon: 'grid' },
   { key: 'contracts', href: '/dashboard/contracts', icon: 'document' },
-  { key: 'invoices', href: '/dashboard/invoices', icon: 'document' },
+  {
+    key: 'invoices',
+    icon: 'document',
+    children: [
+      { key: 'invoice_list', href: '/dashboard/invoices' },
+      { key: 'auto_invoices', href: '/dashboard/invoices/automation' },
+    ],
+  },
   {
     key: 'properties',
     icon: 'building',
@@ -34,16 +41,16 @@ const navItems: NavItem[] = [
     key: 'meter_management',
     icon: 'activity',
     children: [
-      { key: 'meter_readings', href: '/dashboard/meter-readings' },
-      { key: 'meter_requests', href: '/dashboard/meter-requests' },
-      { key: 'meter_settings', href: '/dashboard/meter-settings' },
+      { key: 'meter_readings', href: '/dashboard/meters/readings' },
+      { key: 'meter_requests', href: '/dashboard/meters/requests' },
+      { key: 'meter_settings', href: '/dashboard/meters/settings' },
     ],
   },
   {
     key: 'services',
     icon: 'server',
     children: [
-      { key: 'room_services', href: '/dashboard/room-services' },
+      { key: 'room_services', href: '/dashboard/services/room-services' },
       { key: 'service_catalog', href: '/dashboard/services' },
     ],
   },
@@ -132,10 +139,24 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     if (!href) return false;
     // Strip locale prefix for comparison
     const pathWithoutLocale = pathname.replace(/^\/[a-z]{2}/, '');
-    if (href === '/dashboard') {
-      return pathWithoutLocale === '/dashboard';
+
+    if (pathWithoutLocale === href) return true;
+
+    if (href === '/dashboard') return false;
+
+    // Check if the current path exactly matches another defined menu item
+    const allHrefs = navItems
+      .flatMap((group) => [
+        group.href,
+        ...(group.children?.map((c) => c.href) || []),
+      ])
+      .filter(Boolean) as string[];
+
+    if (allHrefs.includes(pathWithoutLocale)) {
+      return false;
     }
-    return pathWithoutLocale.startsWith(href);
+
+    return pathWithoutLocale.startsWith(`${href}/`);
   };
 
   return (

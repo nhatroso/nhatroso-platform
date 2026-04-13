@@ -1,9 +1,9 @@
 import { CreateContractParams, ContractResponse } from '@nhatroso/shared';
-import { apiFetch, API_BASE_URL } from './base';
+import { apiFetch } from './base';
 
 export const contractsService = {
   create: async (data: CreateContractParams): Promise<ContractResponse> => {
-    const res = await apiFetch(`${API_BASE_URL}/contracts`, {
+    const res = await apiFetch(`/contracts`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -16,7 +16,7 @@ export const contractsService = {
   },
 
   getById: async (id: string): Promise<ContractResponse> => {
-    const res = await apiFetch(`${API_BASE_URL}/contracts/${id}`, {
+    const res = await apiFetch(`/contracts/${id}`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
     });
@@ -29,7 +29,7 @@ export const contractsService = {
   },
 
   list: async (): Promise<ContractResponse[]> => {
-    const res = await apiFetch(`${API_BASE_URL}/contracts`, {
+    const res = await apiFetch(`/contracts`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
     });

@@ -7,6 +7,7 @@ pub mod rooms;
 pub mod services;
 pub mod users;
 pub mod room_services;
+pub mod auto_invoice_configs;
 pub mod meters;
 pub mod uploads;
 pub mod meter_requests;
