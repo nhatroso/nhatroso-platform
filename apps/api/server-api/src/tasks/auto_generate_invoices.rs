@@ -76,11 +76,15 @@ impl Task for AutoGenerateInvoices {
                     match InvoiceModel::calculate_amounts(&ctx.db, &calc_params, config.landlord_id).await {
                         Ok(calc_res) => {
                             let create_params = crate::views::invoices::CreateInvoiceParams {
+                                room_id: Some(room.id),
                                 room_code: Some(calc_res.room_code),
                                 tenant_name: Some(calc_res.tenant_name),
                                 details: calc_res.details,
                                 total_amount: Some(calc_res.total_amount),
+                                grace_days: None,
                             };
+
+
                             if let Err(e) = InvoiceModel::create(&ctx.db, &create_params, config.landlord_id).await {
                                 tracing::error!("Failed to save invoice for room {}: {}", room.id, e);
                             }

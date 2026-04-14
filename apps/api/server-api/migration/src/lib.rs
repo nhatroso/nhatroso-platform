@@ -42,6 +42,8 @@ mod m20260408_034155_remove_breakdown_from_invoices;
 mod m20260413_031556_auto_invoice_configs;
 mod m20260413_035548_add_grace_days_to_auto_invoice_configs;
 mod m20260413_100000_add_invoice_generation_date_to_buildings;
+mod m20260414_022436_add_relational_fields_to_invoices;
+mod m20260414_030000_add_due_date_to_invoices;
 pub struct Migrator;
 
 #[async_trait::async_trait]
@@ -85,7 +87,10 @@ impl MigratorTrait for Migrator {
             Box::new(m20260408_034155_remove_breakdown_from_invoices::Migration),
             Box::new(m20260413_031556_auto_invoice_configs::Migration),
             Box::new(m20260413_035548_add_grace_days_to_auto_invoice_configs::Migration),
-            Box::new(m20260413_100000_add_invoice_generation_date_to_buildings::Migration)
+            Box::new(m20260413_100000_add_invoice_generation_date_to_buildings::Migration),
+            Box::new(m20260414_022436_add_relational_fields_to_invoices::Migration),
+            Box::new(m20260414_030000_add_due_date_to_invoices::Migration)
         ]
     }
 }
+

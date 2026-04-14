@@ -25,7 +25,9 @@ use loco_rs::model::{ModelResult, ModelError};
 use rust_decimal::Decimal;
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, ConnectionTrait, EntityTrait, LoaderTrait, QueryFilter, QueryOrder, Set, TransactionTrait,
+    QuerySelect, QueryTrait, Condition,
 };
+
 use uuid::Uuid;
 
 #[async_trait::async_trait]
@@ -52,15 +54,53 @@ impl Model {
     ) -> ModelResult<InvoiceResponse> {
         let txn = db.begin().await?;
 
+        let landlord_id = if let Some(room_id) = params.room_id {
+            // Fetch room to get building_id -> landlord_id
+            let room_data = super::_entities::rooms::Entity::find()
+                .filter(super::_entities::rooms::Column::Id.eq(room_id))
+                .one(&txn)
+                .await?
+                .ok_or_else(|| ModelError::EntityNotFound)?;
+
+            let building = super::_entities::buildings::Entity::find_by_id(room_data.building_id)
+                .one(&txn)
+                .await?
+                .ok_or_else(|| ModelError::EntityNotFound)?;
+
+            building.owner_id
+
+        } else {
+            owner_id // Default to the caller if no room is provided (manual adjustment)
+        };
+
+        let grace_days = if let Some(g) = params.grace_days {
+            g
+        } else {
+            let auto_config = super::_entities::auto_invoice_configs::Entity::find()
+                .filter(super::_entities::auto_invoice_configs::Column::LandlordId.eq(landlord_id))
+                .one(&txn)
+                .await?;
+
+            auto_config.map(|c| c.grace_days).unwrap_or(0)
+        };
+
+        let due_date = chrono::Utc::now() + chrono::Duration::days(grace_days as i64);
+
+
         let new_invoice = InvoiceActiveModel {
+            room_id: Set(params.room_id),
+            landlord_id: Set(Some(landlord_id)),
             room_code: Set(params.room_code.clone()),
             tenant_name: Set(params.tenant_name.clone()),
             total_amount: Set(params.total_amount),
             status: Set(Some("UNPAID".to_string())),
+            due_date: Set(Some(due_date.into())),
             ..Default::default()
         };
 
+
         let invoice = new_invoice.insert(&txn).await?;
+
 
         let mut saved_details = vec![];
         for detail in &params.details {
@@ -93,11 +133,28 @@ impl Model {
         })
     }
 
-    pub async fn list(db: &DatabaseConnection, _owner_id: Uuid) -> ModelResult<Vec<InvoiceResponse>> {
+    pub async fn list(db: &DatabaseConnection, user_id: Uuid) -> ModelResult<Vec<InvoiceResponse>> {
+        // Query as Landlord (owner) OR as Tenant (via contract)
         let invoices = Entity::find()
+            .filter(
+                Condition::any()
+                    .add(InvoiceColumn::LandlordId.eq(user_id))
+                    .add(
+                        InvoiceColumn::RoomId.in_subquery(
+                            super::_entities::contracts::Entity::find()
+                                .join(sea_orm::JoinType::InnerJoin, super::_entities::contracts::Relation::ContractTenants.def())
+                                .filter(super::_entities::contract_tenants::Column::TenantId.eq(user_id))
+                                .select_only()
+                                .column(super::_entities::contracts::Column::RoomId)
+                                .into_query()
+                        )
+                    )
+
+            )
             .order_by_desc(InvoiceColumn::CreatedAt)
             .all(db)
             .await?;
+
 
         let details_nested = invoices.load_many(DetailEntity, db).await?;
         let histories_nested = invoices.load_many(HistoryEntity, db).await?;
@@ -117,8 +174,25 @@ impl Model {
         Ok(resp)
     }
 
-    pub async fn get_one(db: &DatabaseConnection, id: i32, _owner_id: Uuid) -> ModelResult<InvoiceResponse> {
-        let invoice_opt = Entity::find_by_id(id).one(db).await?;
+    pub async fn get_one(db: &DatabaseConnection, id: i32, user_id: Uuid) -> ModelResult<InvoiceResponse> {
+        let invoice_opt = Entity::find_by_id(id)
+            .filter(
+                Condition::any()
+                    .add(InvoiceColumn::LandlordId.eq(user_id))
+                    .add(
+                        InvoiceColumn::RoomId.in_subquery(
+                            super::_entities::contracts::Entity::find()
+                                .join(sea_orm::JoinType::InnerJoin, super::_entities::contracts::Relation::ContractTenants.def())
+                                .filter(super::_entities::contract_tenants::Column::TenantId.eq(user_id))
+                                .select_only()
+                                .column(super::_entities::contracts::Column::RoomId)
+                                .into_query()
+                        )
+                    )
+
+            )
+            .one(db).await?;
+
         match invoice_opt {
             Some(inv) => {
                 let details = inv.find_related(DetailEntity).all(db).await?;

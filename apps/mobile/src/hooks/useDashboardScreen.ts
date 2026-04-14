@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { meterService } from '@/src/api/meter';
+import { invoiceService } from '@/src/api/invoice';
 
 export function useServiceLabel() {
   const { t } = useTranslation();
@@ -24,16 +25,37 @@ export function useDashboardScreen() {
     queryFn: meterService.getReadingRequests,
   });
 
+  const { data: invoices, isLoading: isLoadingInvoices } = useQuery({
+    queryKey: ['my-invoices'],
+    queryFn: invoiceService.getMyInvoices,
+  });
+
   const activeRequest = Array.isArray(readingRequests)
-    ? readingRequests.find((r) => r.status === 'PENDING' || r.status === 'LATE')
+    ? readingRequests.find((r) => r.status === 'PENDING')
     : null;
 
   const isRequestCompleted = !activeRequest;
+
+  // Find all unpaid/partial invoices
+  const unpaidInvoices = Array.isArray(invoices)
+    ? invoices.filter((inv) => inv.status === 'UNPAID')
+    : [];
+
+  const totalUnpaidAmount = unpaidInvoices.reduce(
+    (acc, inv) => acc + (Number(inv.total_amount) || 0),
+    0,
+  );
+
+  const latestUnpaidInvoice =
+    unpaidInvoices.length > 0 ? unpaidInvoices[0] : null;
 
   return {
     meters,
     isLoadingMeters,
     activeRequest,
     isRequestCompleted,
+    latestUnpaidInvoice,
+    totalUnpaidAmount,
+    isLoadingInvoices,
   };
 }

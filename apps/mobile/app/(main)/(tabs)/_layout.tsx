@@ -1,5 +1,6 @@
 import { Tabs } from 'expo-router';
 import { Home, Bed, User } from '@/src/lib/icons';
+
 import { useTranslation } from 'react-i18next';
 
 export default function TabLayout() {

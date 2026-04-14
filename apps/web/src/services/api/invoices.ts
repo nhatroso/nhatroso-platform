@@ -23,8 +23,13 @@ export interface InvoiceStatusHistory {
 
 export interface Invoice {
   id: number;
+  room_id?: string;
+  landlord_id?: string;
+  grace_days?: number;
   room_code: string;
   tenant_name: string;
+  due_date: string | null;
+
   details: InvoiceDetail[];
   histories: InvoiceStatusHistory[];
   total_amount: string;

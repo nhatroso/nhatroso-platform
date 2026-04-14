@@ -15,10 +15,12 @@ pub struct InvoiceDetailParams {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct CreateInvoiceParams {
+    pub room_id: Option<Uuid>,
     pub room_code: Option<String>,
     pub tenant_name: Option<String>,
     pub details: Vec<InvoiceDetailParams>,
     pub total_amount: Option<Decimal>,
+    pub grace_days: Option<i32>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

@@ -26,8 +26,13 @@
     "recordedAt": "Recorded at",
     "electricity": "Electricity",
     "water": "Water",
-    "pendingUpdate": "Not updated"
+    "pendingUpdate": "Not updated",
+    "noDue": "No due",
+    "unpaidInvoiceAlert": "Unpaid Invoice",
+    "invoiceTotalDue": "Total due: {{amount}}",
+    "payNow": "Pay Now"
   },
+
   "profile": {
     "guest": "Guest",
     "phonePrefix": "Phone: ",
@@ -55,6 +60,7 @@
   "tabs": {
     "dashboard": "Dashboard",
     "room": "My Room",
-    "profile": "Profile"
+    "profile": "Profile",
+    "invoices": "Invoices"
   }
 }

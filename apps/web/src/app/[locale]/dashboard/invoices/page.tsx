@@ -113,9 +113,14 @@ export default function InvoicesPage() {
               <tr>
                 <th className="px-6 py-4">{t('tenantInfo')}</th>
                 <th className="px-6 py-4">{t('totalAmount')}</th>
-                <th className="px-6 py-4 text-center">Status</th>
-                <th className="px-6 py-4 text-center">Created At</th>
-                <th className="px-6 py-4 text-center">Actions</th>
+                <th className="px-6 py-4 text-center">
+                  {t('status_label', { defaultValue: 'Status' })}
+                </th>
+                <th className="px-6 py-4 text-center">{t('createdAt')}</th>
+                <th className="px-6 py-4 text-center">{t('dueDate')}</th>
+                <th className="px-6 py-4 text-center">
+                  {t('details', { defaultValue: 'Details' })}
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-border">
@@ -174,6 +179,11 @@ export default function InvoicesPage() {
                     </td>
                     <td className="px-6 py-4 text-center whitespace-nowrap">
                       {new Date(inv.created_at).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 text-center whitespace-nowrap text-danger font-medium">
+                      {inv.due_date
+                        ? new Date(inv.due_date).toLocaleDateString()
+                        : 'N/A'}
                     </td>
                     <td className="px-6 py-4 text-center">
                       <button

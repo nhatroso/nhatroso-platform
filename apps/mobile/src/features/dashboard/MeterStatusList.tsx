@@ -51,7 +51,7 @@ export function MeterStatusList({
             key={m.id}
             onPress={() =>
               router.push({
-                pathname: '/meter-history',
+                pathname: '/meters/history',
                 params: {
                   meterId: m.id,
                   serviceName: String(serviceLabel),

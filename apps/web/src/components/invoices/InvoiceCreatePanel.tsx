@@ -24,6 +24,8 @@ export function InvoiceCreatePanel({
   const [periodMonth, setPeriodMonth] = React.useState(
     new Date().toISOString().substring(0, 7), // Default to YYYY-MM
   );
+  const [graceDays, setGraceDays] = React.useState(0);
+
   const [isLoading, setIsLoading] = React.useState(false);
   const [isCalculating, setIsCalculating] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -69,6 +71,8 @@ export function InvoiceCreatePanel({
     setIsLoading(true);
     try {
       await createInvoice({
+        room_id: selectedRoomId,
+        grace_days: graceDays,
         room_code: calculatedData.room_code,
         tenant_name: calculatedData.tenant_name,
         total_amount: calculatedData.total_amount,
@@ -135,6 +139,23 @@ export function InvoiceCreatePanel({
               onChange={(e) => setPeriodMonth(e.target.value)}
               className="block w-full rounded-xl border border-gray-border bg-gray-input p-3 text-body text-gray-text focus:ring-2 focus:ring-primary focus:border-primary transition-all"
             />
+          </div>
+
+          <div>
+            <label className="block text-body font-medium text-gray-muted mb-2 uppercase tracking-wider text-[11px]">
+              {t('graceDays', { defaultValue: 'Grace Days' })}
+            </label>
+            <select
+              value={graceDays}
+              onChange={(e) => setGraceDays(Number(e.target.value))}
+              className="block w-full rounded-xl border border-gray-border bg-gray-input p-3 text-body text-gray-text focus:ring-2 focus:ring-primary focus:border-primary transition-all"
+            >
+              {[...Array(10)].map((_, i) => (
+                <option key={i} value={i + 1}>
+                  {i + 1}
+                </option>
+              ))}
+            </select>
           </div>
 
           <button

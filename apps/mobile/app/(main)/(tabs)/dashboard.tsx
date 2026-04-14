@@ -11,8 +11,8 @@ import {
   AlertCircle,
   MessageSquare,
   ChevronRight,
-  CheckCircle2,
 } from '@/src/lib/icons';
+
 import { useAuth } from '@/src/context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import {
@@ -20,14 +20,22 @@ import {
   useServiceLabel,
 } from '@/src/hooks/useDashboardScreen';
 import { MeterStatusList } from '@/src/features/dashboard/MeterStatusList';
+import { formatCurrency, formatDate } from '@/src/utils/format';
 
 export default function DashboardScreen() {
   const { user } = useAuth();
   const router = useRouter();
   const { t } = useTranslation();
   const getServiceLabel = useServiceLabel();
-  const { meters, isLoadingMeters, activeRequest, isRequestCompleted } =
-    useDashboardScreen();
+  const {
+    meters,
+    isLoadingMeters,
+    activeRequest,
+    isRequestCompleted,
+    latestUnpaidInvoice,
+    totalUnpaidAmount,
+    isLoadingInvoices,
+  } = useDashboardScreen();
 
   return (
     <ScrollView className="flex-1 bg-background p-6">
@@ -45,7 +53,7 @@ export default function DashboardScreen() {
         <TouchableOpacity
           onPress={() =>
             router.push({
-              pathname: '/meter-submission',
+              pathname: '/meters/submission',
               params: { period_month: activeRequest.period_month },
             })
           }
@@ -69,6 +77,29 @@ export default function DashboardScreen() {
         </TouchableOpacity>
       )}
 
+      {/* Unpaid Invoice Alert */}
+      {latestUnpaidInvoice && (
+        <TouchableOpacity
+          onPress={() => router.push('/invoices')}
+          className="mb-8 bg-error/10 border border-error/20 p-5 rounded-3xl flex-row items-center"
+        >
+          <View className="h-12 w-12 bg-error/20 rounded-2xl items-center justify-center mr-4">
+            <CreditCard size={28} className="text-error" />
+          </View>
+          <View className="flex-1">
+            <Text className="text-error font-bold text-lg">
+              {t('Dashboard.tenant.unpaidInvoiceAlert')}
+            </Text>
+            <Text className="text-error/70 font-medium">
+              {t('Dashboard.tenant.invoiceTotalDue', {
+                amount: formatCurrency(totalUnpaidAmount),
+              })}
+            </Text>
+          </View>
+          <ChevronRight size={20} className="text-error/50" />
+        </TouchableOpacity>
+      )}
+
       {/* Stats Grid */}
       <View className="flex-row flex-wrap gap-4 mb-8">
         <View className="flex-1 min-w-[45%] bg-background p-5 rounded-2xl border border-border shadow-sm">
@@ -78,7 +109,17 @@ export default function DashboardScreen() {
           <Text className="text-muted text-xs font-bold uppercase tracking-widest">
             {t('Dashboard.tenant.rentBalance')}
           </Text>
-          <Text className="text-text text-2xl font-extrabold mt-1">$1,200</Text>
+          {isLoadingInvoices ? (
+            <ActivityIndicator
+              size="small"
+              color="#3b82f6"
+              className="mt-2 self-start"
+            />
+          ) : (
+            <Text className="text-text text-2xl font-extrabold mt-1">
+              {formatCurrency(totalUnpaidAmount)}
+            </Text>
+          )}
         </View>
 
         <View className="flex-1 min-w-[45%] bg-background p-5 rounded-2xl border border-border shadow-sm">
@@ -88,9 +129,22 @@ export default function DashboardScreen() {
           <Text className="text-muted text-xs font-bold uppercase tracking-widest">
             {t('Dashboard.tenant.dueDate')}
           </Text>
-          <Text className="text-error text-2xl font-extrabold mt-1">
-            Mar 25
-          </Text>
+          {isLoadingInvoices ? (
+            <ActivityIndicator
+              size="small"
+              color="#ef4444"
+              className="mt-2 self-start"
+            />
+          ) : (
+            <Text className="text-error text-2xl font-extrabold mt-1">
+              {latestUnpaidInvoice
+                ? formatDate(
+                    latestUnpaidInvoice.due_date ||
+                      latestUnpaidInvoice.created_at,
+                  )
+                : t('Dashboard.tenant.noDue')}
+            </Text>
+          )}
         </View>
       </View>
 
@@ -99,6 +153,7 @@ export default function DashboardScreen() {
         <Text className="text-xl font-bold text-text mb-4">
           {t('Dashboard.tenant.metersStatus')}
         </Text>
+
         {isLoadingMeters ? (
           <ActivityIndicator size="small" color="#3b82f6" />
         ) : (
@@ -116,26 +171,6 @@ export default function DashboardScreen() {
         {t('Dashboard.tenant.quickActions')}
       </Text>
       <View className="gap-y-4 mb-8">
-        <TouchableOpacity
-          onPress={() =>
-            router.push({
-              pathname: '/meter-submission',
-              params: { period_month: activeRequest?.period_month },
-            })
-          }
-          className="flex-row items-center justify-between bg-background p-5 rounded-2xl border border-border shadow-sm active:bg-input"
-        >
-          <View className="flex-row items-center">
-            <View className="h-10 w-10 bg-success/10 rounded-xl items-center justify-center mr-4">
-              <CheckCircle2 size={20} className="text-success" />
-            </View>
-            <Text className="text-text font-bold text-base">
-              {t('Dashboard.tenant.reportMeterReading')}
-            </Text>
-          </View>
-          <ChevronRight size={20} className="text-icon" />
-        </TouchableOpacity>
-
         <TouchableOpacity className="flex-row items-center justify-between bg-background p-5 rounded-2xl border border-border shadow-sm active:bg-input">
           <View className="flex-row items-center">
             <View className="h-10 w-10 bg-warning/10 rounded-xl items-center justify-center mr-4">

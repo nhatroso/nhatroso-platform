@@ -82,7 +82,7 @@ export default function AutoInvoicesPage() {
                 >
                   {Array.from({ length: 28 }, (_, i) => i + 1).map((d) => (
                     <option key={d} value={d}>
-                      Ngày {d}
+                      {d}
                     </option>
                   ))}
                 </select>
@@ -102,7 +102,7 @@ export default function AutoInvoicesPage() {
                 >
                   {Array.from({ length: 10 }, (_, i) => i + 1).map((d) => (
                     <option key={d} value={d}>
-                      {d} ngày
+                      {d}
                     </option>
                   ))}
                 </select>

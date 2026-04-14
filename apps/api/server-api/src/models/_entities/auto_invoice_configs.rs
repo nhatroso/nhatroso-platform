@@ -10,10 +10,10 @@ pub struct Model {
     pub id: Uuid,
     pub landlord_id: Uuid,
     pub day_of_month: i32,
-    pub grace_days: i32,
     pub auto_generate: bool,
     pub created_at: DateTimeWithTimeZone,
     pub updated_at: DateTimeWithTimeZone,
+    pub grace_days: i32,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

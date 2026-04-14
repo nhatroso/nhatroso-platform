@@ -14,7 +14,11 @@ pub struct Model {
     pub tenant_name: Option<String>,
     pub total_amount: Option<Decimal>,
     pub status: Option<String>,
+    pub room_id: Option<Uuid>,
+    pub landlord_id: Option<Uuid>,
+    pub due_date: Option<DateTimeWithTimeZone>,
 }
+
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
@@ -22,6 +26,22 @@ pub enum Relation {
     InvoiceDetails,
     #[sea_orm(has_many = "super::invoice_status_histories::Entity")]
     InvoiceStatusHistories,
+    #[sea_orm(
+        belongs_to = "super::rooms::Entity",
+        from = "Column::RoomId",
+        to = "super::rooms::Column::Id",
+        on_update = "Cascade",
+        on_delete = "Cascade"
+    )]
+    Rooms,
+    #[sea_orm(
+        belongs_to = "super::users::Entity",
+        from = "Column::LandlordId",
+        to = "super::users::Column::Id",
+        on_update = "Cascade",
+        on_delete = "Cascade"
+    )]
+    Users,
 }
 
 impl Related<super::invoice_details::Entity> for Entity {
@@ -35,3 +55,18 @@ impl Related<super::invoice_status_histories::Entity> for Entity {
         Relation::InvoiceStatusHistories.def()
     }
 }
+
+impl Related<super::rooms::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Rooms.def()
+    }
+}
+
+impl Related<super::users::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Users.def()
+    }
+}
+
+
+

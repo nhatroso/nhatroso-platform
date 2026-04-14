@@ -12,6 +12,7 @@ import {
   AlertCircle,
   MessageSquare,
   ChevronRight,
+  Clock,
   Zap,
   User,
   Settings,
@@ -33,6 +34,8 @@ import {
   Image,
   Download,
   Loader2,
+  FileText,
+  Filter,
 } from 'lucide-react-native';
 
 const iconList = [
@@ -48,6 +51,7 @@ const iconList = [
   AlertCircle,
   MessageSquare,
   ChevronRight,
+  Clock,
   Zap,
   User,
   Settings,
@@ -69,6 +73,8 @@ const iconList = [
   Image,
   Download,
   Loader2,
+  FileText,
+  Filter,
 ];
 
 iconList.forEach((icon) => {
@@ -95,6 +101,7 @@ export {
   AlertCircle,
   MessageSquare,
   ChevronRight,
+  Clock,
   Zap,
   User,
   Settings,
@@ -116,4 +123,6 @@ export {
   Image,
   Download,
   Loader2,
+  FileText,
+  Filter,
 };

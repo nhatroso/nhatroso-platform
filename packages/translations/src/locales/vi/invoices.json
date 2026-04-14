@@ -16,7 +16,7 @@
   "cancel": "Hủy",
   "invoiceDetails": "Chi tiết Hóa đơn",
   "idPrefix": "ID: ",
-  "totalAmount": "Tổng Số Tiền Cần Thanh Toán",
+  "totalAmount": "Tổng tiền",
   "tenantInfo": "Thông tin khách thuê",
   "breakdown": "Ghi chú chi tiết",
   "noBreakdown": "Không có thông tin chi tiết",
@@ -33,6 +33,11 @@
   "calculate_btn": "Tính thử hóa đơn",
   "calculationFailed": "Tính toán thất bại. Hãy đảm bảo phòng có hợp đồng và khách thuê đang ở.",
   "createInvoice": "Tạo Hóa đơn",
+  "graceDays": "Số ngày đến hạn thanh toán",
+  "createdAt": "Ngày tạo",
+  "dueDate": "Hạn thanh toán",
+  "status_label": "Trạng thái",
+  "details": "Chi tiết",
   "automation": {
     "title": "Tự động xuất hóa đơn",
     "description": "Thiết lập tự động xuất hóa đơn hàng tháng cho tài khoản của bạn",
@@ -45,5 +50,13 @@
     "saving": "Đang lưu...",
     "success": "Lưu thiết lập thành công!",
     "error": "Có lỗi xảy ra khi lưu thiết lập"
-  }
+  },
+  "empty": "Không có hóa đơn nào",
+  "empty_desc": "Bạn hiện không có hóa đơn nào cần thanh toán hoặc lịch sử thanh toán.",
+  "status": {
+    "paid": "Đã thanh toán",
+    "unpaid": "Chưa thanh toán",
+    "voided": "Đã hủy"
+  },
+  "payNow": "Thanh toán ngay"
 }

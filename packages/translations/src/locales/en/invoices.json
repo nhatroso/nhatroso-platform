@@ -33,6 +33,11 @@
   "calculate_btn": "Calculate Preview",
   "calculationFailed": "Failed to calculate. Ensure room has active contract & tenant.",
   "createInvoice": "Create Invoice",
+  "graceDays": "Grace Days",
+  "createdAt": "Created At",
+  "dueDate": "Due Date",
+  "status_label": "Status",
+  "details": "Details",
   "automation": {
     "title": "Auto Invoice Generation",
     "description": "Set up monthly automatic invoice generation for your account",
@@ -45,5 +50,13 @@
     "saving": "Saving...",
     "success": "Settings saved successfully!",
     "error": "Failed to save settings"
-  }
+  },
+  "empty": "No invoices found",
+  "empty_desc": "You currently have no invoices or payment history.",
+  "status": {
+    "paid": "Paid",
+    "unpaid": "Unpaid",
+    "voided": "Voided"
+  },
+  "payNow": "Pay Now"
 }
