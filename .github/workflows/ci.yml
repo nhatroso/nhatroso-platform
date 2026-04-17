@@ -7,64 +7,98 @@ on:
     branches: [main]
 
 jobs:
-  ci:
-    name: CI
+  setup:
+    name: Setup
     runs-on: ubuntu-latest
+    outputs:
+      cache-key: ${{ steps.cache-key.outputs.key }}
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: 'pnpm'
 
-      - name: Turborepo Cache
-        uses: actions/cache@v4
+      - name: Generate cache key
+        id: cache-key
+        run: echo "key=${{ hashFiles('**/pnpm-lock.yaml') }}" >> $GITHUB_OUTPUT
+
+      - uses: actions/cache@v4
         with:
           path: .turbo
-          key: turbo-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            turbo-${{ runner.os }}-
+          key: turbo-${{ runner.os }}-${{ steps.cache-key.outputs.key }}
 
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy, rustfmt
 
-      - name: Rust Cache
-        uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@v2
 
-      - name: Cache Mobile Native (Android)
-        uses: actions/cache@v4
+      - uses: actions/cache@v4
         with:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+          key: ${{ runner.os }}-gradle-${{ steps.cache-key.outputs.key }}
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile
+
+  check:
+    name: Check
+    runs-on: ubuntu-latest
+    needs: setup
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - run: pnpm install --frozen-lockfile
 
       - name: Run Validation (PR)
         if: github.event_name == 'pull_request'
         run: pnpm turbo run check --filter=...[origin/main]
 
+      - name: Full Check (Push Main)
+        if: github.event_name == 'push'
+        run: pnpm turbo run check
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: setup
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - run: pnpm install --frozen-lockfile
+
       - name: Build Affected (PR)
         if: github.event_name == 'pull_request'
         run: pnpm turbo run build --filter=...[origin/main]
 
-      - name: Full Validation & Build (Push Main)
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: |
-          pnpm turbo run check
-          pnpm turbo run build
+      - name: Full Build (Push Main)
+        if: github.event_name == 'push'
+        run: pnpm turbo run build
