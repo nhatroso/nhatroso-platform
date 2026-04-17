@@ -38,6 +38,29 @@
   "dueDate": "Hạn thanh toán",
   "status_label": "Trạng thái",
   "details": "Chi tiết",
+  "payment": {
+    "amountToPay": "Số tiền cần thanh toán",
+    "back": "Quay lại",
+    "transferInfo": "Thông tin chuyển khoản",
+    "bank": "Ngân hàng",
+    "accountNo": "Số tài khoản",
+    "accountName": "Chủ tài khoản",
+    "content": "Nội dung",
+    "successTitle": "Thành công!",
+    "successDesc": "Hóa đơn #{{id}} của bạn đã được thanh toán thông qua SePay.",
+    "transactionDetails": "Chi tiết giao dịch",
+    "paymentMethod": "Hình thức",
+    "vietqr": "Chuyển khoản VietQR",
+    "paymentTime": "Thời gian",
+    "justNow": "Vừa xong",
+    "redirecting": "Đang chuyển về trang chủ...",
+    "initializingQR": "Đang khởi tạo mã QR...",
+    "qrExpired": "Mã QR đã hết hạn theo dõi",
+    "waitingPayment": "Đang chờ thanh toán...",
+    "reconnecting": "Đang kết nối lại...",
+    "expiresIn": "Hết hạn sau: {{time}}",
+    "scanToPay": "Vui lòng quét mã QR bằng ứng dụng ngân hàng của bạn để thanh toán."
+  },
   "automation": {
     "title": "Tự động xuất hóa đơn",
     "description": "Thiết lập tự động xuất hóa đơn hàng tháng cho tài khoản của bạn",
@@ -58,5 +81,14 @@
     "unpaid": "Chưa thanh toán",
     "voided": "Đã hủy"
   },
-  "payNow": "Thanh toán ngay"
+  "payNow": "Thanh toán ngay",
+  "dashboard": "Bảng điều khiển",
+  "description_label": "Mô tả",
+  "amount_label": "Số tiền",
+  "reason_label": "Lý do",
+  "availableActions": "Các thao tác khả dụng",
+  "noActionsAvailable": "Không có thao tác nào khả dụng",
+  "latest": "Mới nhất",
+  "tenant": "Khách thuê",
+  "voidReason_label": "Lý do hủy"
 }

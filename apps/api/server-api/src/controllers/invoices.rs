@@ -124,33 +124,13 @@ pub async fn calculate(
     }
 }
 
-pub async fn webhook(
-    State(ctx): State<AppContext>,
-    Path(id): Path<i32>,
-) -> Result<Response> {
-    match InvoiceModel::webhook(&ctx.db, id).await {
-        Ok(invoice) => format::json(invoice),
-        Err(msg) => {
-            if msg == "INVOICE_NOT_FOUND" {
-                error_response("INVOICE_NOT_FOUND", axum::http::StatusCode::NOT_FOUND)
-            } else if msg == "INVALID_STATUS_TRANSITION" {
-                error_response("INVALID_STATUS_TRANSITION", axum::http::StatusCode::CONFLICT)
-            } else {
-                tracing::error!(error = msg, "Failed to process webhook");
-                error_response("INTERNAL_SERVER_ERROR", axum::http::StatusCode::INTERNAL_SERVER_ERROR)
-            }
-        }
-    }
-}
-
 pub fn routes() -> Routes {
     Routes::new()
         .prefix("api/v1/invoices")
         .add("/", post(create))
         .add("/", get(list))
-        .add("/{id}", get(get_one))
         .add("/calculate", post(calculate))
+        .add("/{id}", get(get_one))
         .add("/{id}/void", post(void_invoice))
         .add("/{id}/pay", post(pay_invoice))
-        .add("/{id}/webhook", post(webhook))
 }

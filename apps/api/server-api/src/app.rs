@@ -62,9 +62,21 @@ impl Hooks for App {
             .add_route(controllers::users::routes())
             .add_route(controllers::uploads::routes())
             .add_route(controllers::invoices::routes())
+            .add_route(controllers::payments::routes())
     }
 
-    async fn after_routes(router: axum::Router, _ctx: &AppContext) -> Result<axum::Router> {
+    async fn after_routes(router: axum::Router, ctx: &AppContext) -> Result<axum::Router> {
+        let ctx = ctx.clone();
+        tokio::spawn(async move {
+            let mut interval = tokio::time::interval(tokio::time::Duration::from_secs(60));
+            loop {
+                interval.tick().await;
+                if let Err(e) = crate::models::payments::Model::update_expired(&ctx.db).await {
+                    tracing::error!(error = ?e, "[Worker] Payment expiration job failed");
+                }
+            }
+        });
+
         Ok(router.nest_service("/static", tower_http::services::ServeDir::new("static")))
     }
 

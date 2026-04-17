@@ -18,3 +18,4 @@ pub mod meter_request_configs;
 pub mod invoice_status_histories;
 pub mod invoices;
 pub mod invoice_details;
+pub mod payments;

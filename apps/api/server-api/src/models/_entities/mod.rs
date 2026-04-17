@@ -15,6 +15,7 @@ pub mod meter_request_configs;
 pub mod meter_requests;
 pub mod meters;
 pub mod price_rules;
+pub mod payments;
 pub mod refresh_tokens;
 pub mod room_services;
 pub mod rooms;

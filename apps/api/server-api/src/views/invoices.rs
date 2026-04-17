@@ -42,10 +42,44 @@ pub struct InvoiceCalculationResponse {
     pub total_amount: Decimal,
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct SePayWebhookPayload {
+    pub id: i64,
+    pub gateway: String,
+    #[serde(rename = "transactionDate")]
+    pub transaction_date: String,
+    #[serde(rename = "accountNumber")]
+    pub account_number: String,
+    pub content: String,
+    #[serde(rename = "transferType")]
+    pub transfer_type: String,
+    #[serde(rename = "transferAmount")]
+    pub transfer_amount: Decimal,
+    pub accumulated: Decimal,
+    pub code: Option<String>,
+    #[serde(rename = "subAccount")]
+    pub sub_account: Option<String>,
+    pub reference_code: Option<String>,
+    pub description: Option<String>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct AutomationWebhookPayload {
+    pub event: String,
+    pub invoice_id: String,
+    pub amount: Decimal,
+    pub status: String,
+}
+
 #[derive(Serialize)]
 pub struct InvoiceResponse {
     #[serde(flatten)]
     pub invoice: InvoiceModel,
     pub details: Vec<DetailModel>,
     pub histories: Vec<HistoryModel>,
+}
+
+#[derive(Serialize)]
+pub struct WsTicketResponse {
+    pub token: String,
 }

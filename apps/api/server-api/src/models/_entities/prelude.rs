@@ -13,6 +13,7 @@ pub use super::meter_request_configs::Entity as MeterRequestConfigs;
 pub use super::meter_requests::Entity as MeterRequests;
 pub use super::meters::Entity as Meters;
 pub use super::price_rules::Entity as PriceRules;
+pub use super::payments::Entity as Payments;
 pub use super::refresh_tokens::Entity as RefreshTokens;
 pub use super::room_services::Entity as RoomServices;
 pub use super::rooms::Entity as Rooms;

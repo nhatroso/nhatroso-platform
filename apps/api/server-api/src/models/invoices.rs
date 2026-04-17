@@ -175,8 +175,10 @@ impl Model {
     }
 
     pub async fn get_one(db: &DatabaseConnection, id: i32, user_id: Uuid) -> ModelResult<InvoiceResponse> {
-        let invoice_opt = Entity::find_by_id(id)
-            .filter(
+        let mut query = Entity::find_by_id(id);
+
+        if user_id != Uuid::nil() {
+            query = query.filter(
                 Condition::any()
                     .add(InvoiceColumn::LandlordId.eq(user_id))
                     .add(
@@ -189,9 +191,10 @@ impl Model {
                                 .into_query()
                         )
                     )
+            );
+        }
 
-            )
-            .one(db).await?;
+        let invoice_opt = query.one(db).await?;
 
         match invoice_opt {
             Some(inv) => {
@@ -283,21 +286,51 @@ impl Model {
         Self::get_one(db, updated_invoice.id, owner_id).await.map_err(|e| e.to_string())
     }
 
-    pub async fn webhook(
+    pub async fn sepay_webhook(
         db: &DatabaseConnection,
-        id: i32,
+        payload: &crate::views::invoices::SePayWebhookPayload,
     ) -> Result<InvoiceResponse, String> {
         let txn = db.begin().await.map_err(|e| e.to_string())?;
 
-        let invoice_opt = Entity::find_by_id(id).one(&txn).await.map_err(|e| e.to_string())?;
-        let invoice = match invoice_opt {
-            Some(inv) => inv,
-            None => return Err("INVOICE_NOT_FOUND".into()),
-        };
+        // 1. Identify Invoice from content. Logic: Collect all numeric sequences and match against unpaid invoices.
+        let mut candidates = Vec::new();
+        if let Some(code) = &payload.code {
+            if let Ok(id) = code.chars().filter(|c| c.is_ascii_digit()).collect::<String>().parse::<i32>() {
+                candidates.push(id);
+            }
+        }
+        candidates.extend(
+            payload.content
+                .split(|c: char| !c.is_ascii_digit())
+                .filter_map(|s| s.parse::<i32>().ok())
+        );
+
+        let mut matched_invoice = None;
+        for id in candidates {
+            if let Ok(Some(inv)) = Entity::find_by_id(id).one(&txn).await {
+                let status = inv.status.as_deref();
+                if status == Some("UNPAID") || status == Some("PENDING_CONFIRMATION") {
+                    matched_invoice = Some(inv);
+                    break;
+                }
+            }
+        }
+
+        let invoice = matched_invoice.ok_or_else(|| {
+            tracing::error!(content = %payload.content, "No matching UNPAID invoice found for SePay candidates");
+            "INVOICE_NOT_FOUND".to_string()
+        })?;
+
+        // 2. Verify amount
+        let total_amount = invoice.total_amount.unwrap_or_default();
+        if payload.transfer_amount < total_amount {
+             return Err("INSUFFICIENT_AMOUNT".into());
+        }
 
         let from_status = invoice.status.clone();
         if from_status.as_deref() != Some("UNPAID") && from_status.as_deref() != Some("PENDING_CONFIRMATION") {
-            return Err("INVALID_STATUS_TRANSITION".into());
+            // Already paid or voided
+            return Self::get_one(db, invoice.id, Uuid::nil()).await.map_err(|e| e.to_string());
         }
 
         let mut active_invoice: InvoiceActiveModel = invoice.into();
@@ -308,7 +341,56 @@ impl Model {
             invoice_id: Set(updated_invoice.id),
             from_status: Set(from_status),
             to_status: Set(Some("PAID".to_string())),
-            reason: Set(Some("Webhook automated payment".to_string())),
+            reason: Set(Some(format!("SePay Webhook: {} (Ref: {:?})", payload.gateway, payload.reference_code))),
+            timestamp: Set(Some(chrono::Utc::now().into())),
+            ..Default::default()
+        };
+        history.insert(&txn).await.map_err(|e| e.to_string())?;
+
+        txn.commit().await.map_err(|e| e.to_string())?;
+
+        Self::get_one(db, updated_invoice.id, Uuid::nil()).await.map_err(|e| e.to_string())
+    }
+
+    pub async fn automation_webhook(
+        db: &DatabaseConnection,
+        payload: &crate::views::invoices::AutomationWebhookPayload,
+    ) -> Result<InvoiceResponse, String> {
+        let txn = db.begin().await.map_err(|e| e.to_string())?;
+
+        // 1. Identify Invoice from invoice_id string (e.g., "INV123" -> 123)
+        let id_str = payload.invoice_id.to_uppercase();
+        let id_numeric = id_str
+            .trim_start_matches("INV")
+            .parse::<i32>()
+            .map_err(|_| format!("INVALID_INVOICE_ID_FORMAT: {}", payload.invoice_id))?;
+
+        let invoice_opt = Entity::find_by_id(id_numeric).one(&txn).await.map_err(|e| e.to_string())?;
+        let invoice = match invoice_opt {
+            Some(inv) => inv,
+            None => return Err("INVOICE_NOT_FOUND".into()),
+        };
+
+        // 2. Verify event/status
+        if payload.event != "payment_success" && payload.status != "paid" {
+            return Err("IGNORE_EVENT".into());
+        }
+
+        // 3. Idempotency check
+        let from_status = invoice.status.clone();
+        if from_status.as_deref() == Some("PAID") {
+            return Self::get_one(db, invoice.id, Uuid::nil()).await.map_err(|e| e.to_string());
+        }
+
+        let mut active_invoice: InvoiceActiveModel = invoice.into();
+        active_invoice.status = Set(Some("PAID".to_string()));
+        let updated_invoice = active_invoice.update(&txn).await.map_err(|e| e.to_string())?;
+
+        let history = HistoryActiveModel {
+            invoice_id: Set(updated_invoice.id),
+            from_status: Set(from_status),
+            to_status: Set(Some("PAID".to_string())),
+            reason: Set(Some(format!("Automation Webhook: payment_success (Amount: {})", payload.amount))),
             timestamp: Set(Some(chrono::Utc::now().into())),
             ..Default::default()
         };

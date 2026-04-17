@@ -38,6 +38,29 @@
   "dueDate": "Due Date",
   "status_label": "Status",
   "details": "Details",
+  "payment": {
+    "amountToPay": "Amount to pay",
+    "back": "Back",
+    "transferInfo": "Transfer Information",
+    "bank": "Bank",
+    "accountNo": "Account Number",
+    "accountName": "Account Name",
+    "content": "Description",
+    "successTitle": "Success!",
+    "successDesc": "Your invoice #{{id}} has been paid via SePay.",
+    "transactionDetails": "Transaction Details",
+    "paymentMethod": "Payment Method",
+    "vietqr": "VietQR Transfer",
+    "paymentTime": "Payment Time",
+    "justNow": "Just now",
+    "redirecting": "Redirecting to dashboard...",
+    "initializingQR": "Initializing QR code...",
+    "qrExpired": "QR code has expired",
+    "waitingPayment": "Waiting for payment...",
+    "reconnecting": "Reconnecting...",
+    "expiresIn": "Expires in: {{time}}",
+    "scanToPay": "Please scan the QR code using your banking app to pay."
+  },
   "automation": {
     "title": "Auto Invoice Generation",
     "description": "Set up monthly automatic invoice generation for your account",
@@ -58,5 +81,14 @@
     "unpaid": "Unpaid",
     "voided": "Voided"
   },
-  "payNow": "Pay Now"
+  "payNow": "Pay Now",
+  "dashboard": "Dashboard",
+  "description_label": "Description",
+  "amount_label": "Amount",
+  "reason_label": "Reason",
+  "availableActions": "Available Actions",
+  "noActionsAvailable": "No actions available",
+  "latest": "Latest",
+  "tenant": "Tenant",
+  "voidReason_label": "Void Reason"
 }
