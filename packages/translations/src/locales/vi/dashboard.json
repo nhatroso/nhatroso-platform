@@ -6,6 +6,7 @@
   "monthlyRevenue": "Doanh thu tháng",
   "pendingBills": "Hóa đơn chờ",
   "occupancyRate": "Tỉ lệ lấp đầy",
+  "Invoices": "Hóa đơn",
   "tenant": {
     "welcome": "Xin chào, {{name}}",
     "todayOverview": "Đây là tổng quan hôm nay của bạn",
@@ -25,8 +26,13 @@
     "recordedAt": "Ghi nhận lúc",
     "electricity": "Điện",
     "water": "Nước",
-    "pendingUpdate": "Chưa cập nhật"
+    "pendingUpdate": "Chưa cập nhật",
+    "noDue": "Không có nợ",
+    "unpaidInvoiceAlert": "Hóa đơn chưa thanh toán",
+    "invoiceTotalDue": "Tổng nợ: {{amount}}",
+    "payNow": "Thanh toán ngay"
   },
+
   "profile": {
     "guest": "Khách",
     "phonePrefix": "SĐT: ",
@@ -54,6 +60,7 @@
   "tabs": {
     "dashboard": "Tổng quan",
     "room": "Phòng của tôi",
-    "profile": "Cá nhân"
+    "profile": "Cá nhân",
+    "invoices": "Hóa đơn"
   }
 }

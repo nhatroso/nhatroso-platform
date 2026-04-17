@@ -25,6 +25,8 @@ pub struct Model {
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
+    #[sea_orm(has_many = "super::auto_invoice_configs::Entity")]
+    AutoInvoiceConfigs,
     #[sea_orm(has_many = "super::buildings::Entity")]
     Buildings,
     #[sea_orm(has_many = "super::contract_tenants::Entity")]
@@ -39,6 +41,12 @@ pub enum Relation {
     RefreshTokens,
     #[sea_orm(has_many = "super::services::Entity")]
     Services,
+}
+
+impl Related<super::auto_invoice_configs::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::AutoInvoiceConfigs.def()
+    }
 }
 
 impl Related<super::buildings::Entity> for Entity {

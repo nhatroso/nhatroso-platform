@@ -1,6 +1,7 @@
 pub mod _entities;
 pub mod refresh_tokens;
 pub mod users;
+pub mod auto_invoice_configs;
 pub mod rooms;
 pub mod floors;
 pub mod buildings;
@@ -14,3 +15,7 @@ pub mod meter_readings;
 
 pub mod meter_requests;
 pub mod meter_request_configs;
+pub mod invoice_status_histories;
+pub mod invoices;
+pub mod invoice_details;
+pub mod payments;

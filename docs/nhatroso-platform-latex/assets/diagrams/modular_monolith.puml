@@ -1,0 +1,63 @@
+@startuml Modular Monolith Architectural Pattern
+' Standardizing styles based on user preference
+!define BLUE_COLOR #0056b3
+!define BLACK_COLOR #333333
+!define LIGHT_BLUE #f0f7ff
+
+skinparam backgroundColor transparent
+skinparam componentStyle rectangle
+skinparam roundCorner 10
+skinparam defaultFontName "Arial"
+
+skinparam component {
+    BackgroundColor LIGHT_BLUE
+    BorderColor BLUE_COLOR
+    ArrowColor BLACK_COLOR
+    FontColor BLACK_COLOR
+}
+
+skinparam package {
+    BackgroundColor #F9F9F9
+    BorderColor BLACK_COLOR
+    FontSize 14
+}
+
+skinparam Database {
+    BackgroundColor #FFFFFF
+    BorderColor BLUE_COLOR
+}
+
+package "Single Deployment Unit (Modular Monolith Application)" as monolith {
+
+    package "Module A" as modA {
+        [API A]
+        [Business Logic A]
+        [Data Access A]
+    }
+
+    package "Module B" as modB {
+        [API B]
+        [Business Logic B]
+        [Data Access B]
+    }
+
+    package "Module C" as modC {
+        [API C]
+        [Business Logic C]
+        [Data Access C]
+    }
+
+    [API A] <.. [API B] : "In-process Public API call"
+}
+
+database "Relational Database" as DB {
+    folder "Schema A (Logical Ownership)" as schemaA
+    folder "Schema B (Logical Ownership)" as schemaB
+    folder "Schema C (Logical Ownership)" as schemaC
+}
+
+[Data Access A] --> schemaA
+[Data Access B] --> schemaB
+[Data Access C] --> schemaC
+
+@enduml

@@ -29,15 +29,15 @@ export function LocaleSwitcher() {
 
   return (
     <div className="flex items-center">
-      <div className="flex h-8 items-center rounded-lg border border-gray-200 bg-gray-50 p-1 dark:border-gray-700 dark:bg-gray-700/50">
+      <div className="flex h-8 items-center rounded-lg border border-gray-border bg-gray-surface p-1">
         {i18nConfig.locales.map((loc) => (
           <button
             key={loc}
             onClick={() => handleLocaleChange(loc)}
-            className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-all ${
+            className={`rounded-lg px-2.5 py-1 text-tiny font-bold transition-all ${
               locale === loc
-                ? 'bg-white text-blue-600 shadow-sm dark:bg-gray-600 dark:text-blue-400'
-                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                ? 'bg-gray-card text-primary shadow-sm'
+                : 'text-gray-muted hover:text-gray-text'
             }`}
           >
             {loc.toUpperCase()}

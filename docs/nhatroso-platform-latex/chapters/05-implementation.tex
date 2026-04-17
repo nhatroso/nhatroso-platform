@@ -1,0 +1,56 @@
+% chapters/04-implementation.tex
+\chapter{Cài đặt và triển khai}\label{chapter_impl}
+
+\section{Công nghệ sử dụng}
+
+Lựa chọn công nghệ tập trung vào tính hiệu suất, an toàn và khả năng bảo trì lâu dài của hệ thống.
+
+\subsection{Backend API (Rust - Loco.rs)}
+
+Hệ thống sử dụng ngôn ngữ lập trình Rust kết hợp với framework Loco.rs. Rust mang lại hiệu năng tương đương C++ nhưng đảm bảo an toàn bộ nhớ tuyệt đối thông qua cơ chế Ownership. Loco.rs cung cấp cấu trúc MVC (Model-View-Controller) giúp đẩy nhanh tiến độ phát triển mà vẫn giữ được sự chặt chẽ của mã nguồn. SeaORM được sử dụng làm lớp ORM, hỗ trợ truy vấn bất đồng bộ và quản lý migration một cách nhất quán.
+
+\subsection{Owner Dashboard (Next.js)}
+
+Giao diện cho chủ nhà được phát triển bằng Next.js 16 (App Router) và TailwindCSS v4. Hệ thống sử dụng \texttt{next-intl} để hỗ trợ đa ngôn ngữ (vi/en) và \texttt{TanStack Query} để quản lý trạng thái dữ liệu từ API.
+
+\subsection{Tenant Mobile App (Expo)}
+
+Ứng dụng cho người thuê được xây dựng trên nền tảng Expo (React Native 0.83). Việc sử dụng Expo giúp rút ngắn thời gian phát triển cho cả hai nền tảng iOS và Android từ một cơ sở mã nguồn duy nhất, tích hợp NativeWind để đồng bộ hóa phong cách thiết kế với phiên bản Web.
+
+\section{Hạ tầng và Triển khai Đám mây}
+
+Hệ thống được thiết kế vòng đời triển khai (DevOps) theo hướng Cloud-Native, ứng dụng ảo hóa Docker, luồng CI/CD tự động và lưu trữ trên AWS.
+
+\begin{table}[htbp]
+\centering
+\caption{Hạ tầng triển khai (Implemented)}
+\label{tab:infra}
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+\textbf{Thành phần} & \textbf{Chi tiết} \\
+\midrule
+CI/CD Pipeline & Sử dụng GitHub Actions tự động chạy Test, Build Docker image và Deploy. \\
+Máy chủ (Hosting) & Amazon EC2 chạy các Docker Container độc lập (\texttt{api}, \texttt{web}). \\
+Cơ sở dữ liệu & Amazon RDS (PostgreSQL) đảm bảo lưu trữ an toàn, High Availability. \\
+Object Storage & Amazon S3 lưu trữ hình ảnh đồng hồ và ảnh chứng từ OCR. \\
+Web Server & Nginx đóng vai trò Reverse proxy, cấu hình bảo mật SSL Let's Encrypt. \\
+OCR Engine & Google Cloud Vision API đảm nhận xử lý trích xuất chữ viết (OCR). \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Cấu trúc module Backend (Loco.rs)}
+
+Backend được tổ chức theo cấu trúc module hóa của Loco, tách biệt rõ ràng giữa logic nghiệp vụ (Services/Models) và giao diện lập trình (Controllers).
+
+\textbf{Authentication Module:} Sử dụng JWT (JSON Web Token) với cơ chế Access/Refresh token. Mật khẩu được mã hóa an toàn bằng Argon2. Logic xác thực được triển khai qua các Loco Hook tích hợp sẵn.
+
+\textbf{Property Management:} Quản lý phân cấp Buildings -> Floors -> Rooms. Ràng buộc quan hệ được thực thi chặt chẽ ở tầng Model thông qua SeaORM active models.
+
+\textbf{Meter \& Service Management:} Module quản lý \texttt{room\_services} và \texttt{price\_rules}. Hệ thống hỗ trợ tra cứu đơn giá linh hoạt theo thời gian thực tại thời điểm phát hành hóa đơn.
+
+\textbf{Billing \& Invoices:} Logic tính toán hóa đơn được tập trung tại \texttt{InvoicesService}. Quy trình bao gồm: lấy chỉ số điện nước từ \texttt{meter\_readings}, tính toán chênh lệch, áp đơn giá từ quy tắc hiệu lực và tạo các \texttt{invoice\_details}.
+
+\section{Bảo mật và Phân quyền}
+
+Hệ thống áp dụng cơ chế xác thực tập trung và phân quyền dựa trên vai trò (RBAC). Mọi yêu cầu đến API đều phải đi qua lớp middleware kiểm tra tính hợp lệ của Token. Đối với vai trò Chủ nhà (Owner), hệ thống thực hiện kiểm tra quyền sở hữu (\textit{Ownership Check}) đối với mọi tài nguyên tòa nhà/phòng trước khi cho phép thay đổi dữ liệu. Đối với Người thuê (Tenant), phạm vi truy cập bị giới hạn trong phạm vi hợp đồng thuê hiện hữu.

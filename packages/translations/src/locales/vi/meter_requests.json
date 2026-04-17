@@ -21,12 +21,12 @@
     "Success": "Đã lưu cấu hình thành công!",
     "LoadError": "Lỗi khi tải cấu hình.",
     "SaveError": "Lỗi khi lưu cấu hình.",
-    "Enable": "Kích hoạt tự động",
+    "Enable": "Kích hoạt tự động gửi yêu cầu chốt số",
     "EnableDesc": "Tự động tạo yêu cầu mỗi tháng",
     "DayOfMonth": "Ngày chốt số",
-    "DayOfMonthDesc": "Yêu cầu sẽ được gửi vào ngày này hàng tháng (1-31)",
-    "GracePeriod": "Thời gian gia hạn (Ngày)",
-    "GracePeriodDesc": "Số ngày cho phép trước khi yêu cầu bị đánh dấu là QUÁ HẠN",
+    "DayOfMonthDesc": "Yêu cầu sẽ được gửi vào ngày này hàng tháng.",
+    "GracePeriod": "Số ngày đến hạn nộp chỉ số",
+    "GracePeriodDesc": "Số ngày cho phép nộp chỉ số trước khi yêu cầu bị đánh dấu là quá hạn.",
     "Save": "Lưu cấu hình"
   },
   "Manual": {
@@ -44,7 +44,7 @@
   "Page": {
     "RequestsTitle": "Yêu cầu chốt số",
     "RequestsDesc": "Theo dõi tiến độ nộp chỉ số của người thuê và các yêu cầu định kỳ",
-    "SettingsTitle": "Cấu hình chốt số",
+    "SettingsTitle": "Tự động gửi yêu cầu chốt số",
     "SettingsDesc": "Quản lý lịch trình tự động gửi yêu cầu chốt chỉ số điện nước",
     "ManualButton": "Tạo yêu cầu thủ công"
   },

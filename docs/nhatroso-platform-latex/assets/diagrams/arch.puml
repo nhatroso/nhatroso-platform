@@ -1,0 +1,53 @@
+@startuml arch
+!pragma smetana
+skinparam backgroundColor white
+skinparam roundcorner 8
+skinparam shadowing false
+skinparam DefaultFontName "Arial"
+skinparam DefaultFontSize 12
+
+' Define Palettes (Black, Blue, White)
+!define BLUE_COLOR #0056b3
+!define BLACK_COLOR #333333
+!define LIGHT_BLUE #f0f7ff
+
+' Global Styles
+skinparam arrowColor BLUE_COLOR
+skinparam packageBorderColor BLUE_COLOR
+skinparam packageBackgroundColor white
+skinparam packageFontColor BLUE_COLOR
+skinparam packageHeaderBackgroundColor LIGHT_BLUE
+
+skinparam componentBorderColor BLUE_COLOR
+skinparam componentBackgroundColor white
+skinparam componentFontColor BLUE_COLOR
+
+skinparam databaseBorderColor BLACK_COLOR
+skinparam databaseBackgroundColor white
+skinparam databaseFontColor BLACK_COLOR
+
+skinparam storageBorderColor BLACK_COLOR
+skinparam storageBackgroundColor white
+skinparam storageFontColor BLACK_COLOR
+
+package "Tầng ứng dụng khách (Frontend/Mobile)" {
+    [Owner Dashboard\n(Next.js)] as Web
+    [Tenant App\n(Expo Mobile)] as Mobile
+}
+
+package "Tầng trung tâm (API Server)" {
+    [Core API Server\n(Rust - Loco.rs)] as Backend
+    [OCR Service\n(Google Vision)] as OCR
+}
+
+database "PostgreSQL\n(Amazon RDS)" as DB
+storage "Amazon S3\n(Lưu trữ ảnh)" as S3
+
+Web <--> Backend : HTTP/REST
+Mobile <--> Backend : HTTP/REST
+
+Backend <--> DB : SQL / SeaORM
+Backend <--> OCR : Data/OCR
+Backend --> S3 : Upload images
+
+@enduml

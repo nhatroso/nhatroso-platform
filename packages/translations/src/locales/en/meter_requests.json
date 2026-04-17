@@ -44,7 +44,7 @@
   "Page": {
     "RequestsTitle": "Meter Requests",
     "RequestsDesc": "Monitor tenant readings and scheduled requests",
-    "SettingsTitle": "Meter Settings",
+    "SettingsTitle": "Auto Meter Requests",
     "SettingsDesc": "Manage automation schedules for utility readings",
     "ManualButton": "Generate Manually"
   },

@@ -1,0 +1,31 @@
+@startuml sdlc_cycle
+!define BLUE_COLOR #0056b3
+!define BLACK_COLOR #333333
+!define LIGHT_BLUE #f0f7ff
+
+skinparam backgroundColor white
+skinparam roundcorner 8
+skinparam shadowing false
+skinparam DefaultFontName "Arial"
+skinparam DefaultFontSize 12
+
+skinparam arrowColor BLUE_COLOR
+skinparam activityBorderColor BLUE_COLOR
+skinparam activityBackgroundColor white
+skinparam activityFontColor BLUE_COLOR
+skinparam activityDiamondBorderColor BLACK_COLOR
+skinparam activityDiamondBackgroundColor white
+
+title Software Development Life Cycle (SDLC)
+
+start
+:Planning;
+:Analysis;
+:Design;
+:Implementation;
+:Testing;
+:Deployment;
+:Maintenance;
+stop
+
+@enduml

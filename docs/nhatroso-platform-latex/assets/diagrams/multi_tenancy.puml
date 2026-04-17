@@ -1,0 +1,80 @@
+@startuml multi_tenancy_generic
+!define BLUE_COLOR #0056b3
+!define BLACK_COLOR #333333
+!define LIGHT_BLUE #f0f7ff
+
+skinparam backgroundColor white
+skinparam roundcorner 8
+skinparam shadowing false
+skinparam DefaultFontName "Arial"
+skinparam DefaultFontSize 12
+
+skinparam arrowColor BLUE_COLOR
+skinparam packageBorderColor BLUE_COLOR
+skinparam packageBackgroundColor white
+skinparam packageFontColor BLUE_COLOR
+skinparam packageHeaderBackgroundColor LIGHT_BLUE
+
+skinparam componentBorderColor BLUE_COLOR
+skinparam componentBackgroundColor white
+skinparam componentFontColor BLUE_COLOR
+
+skinparam databaseBorderColor BLACK_COLOR
+skinparam databaseBackgroundColor white
+skinparam databaseFontColor BLACK_COLOR
+
+skinparam storageBorderColor BLACK_COLOR
+skinparam storageBackgroundColor white
+skinparam storageFontColor BLACK_COLOR
+
+skinparam rectangle {
+    BorderColor BLUE_COLOR
+    BackgroundColor white
+    FontColor BLUE_COLOR
+}
+
+title Mô hình Tổng quát Kiến trúc Đa khách thuê (Multi-tenancy)
+
+package "Tầng Khách thuê (Tenants)" {
+    rectangle "Tenant 1" as T1
+    rectangle "Tenant 2" as T2
+    rectangle "Tenant N" as TN
+}
+
+package "Tầng Ứng dụng (Shared Application Layer)" {
+    component "Giao diện (UI)" as UI
+    component "Logic Nghiệp vụ (Business Logic)" as Logic
+    component "Bộ định tuyến Khách thuê (Tenant Router)" as Router
+}
+
+package "Tầng Dữ liệu (Generic Data Isolation Models)" {
+    frame "Mô hình 1: Shared Database" as M1 {
+        database "Shared DB" as SDB1
+        note bottom of SDB1: Phân tách bằng Tenant ID
+    }
+
+    frame "Mô hình 2: Separate Schema" as M2 {
+        database "Database" as DB2 {
+            rectangle "Schema 1" as S1
+            rectangle "Schema 2" as S2
+        }
+    }
+
+    frame "Mô hình 3: Separate Database" as M3 {
+        database "DB Tenant 1" as TDB1
+        database "DB Tenant 2" as TDB2
+    }
+}
+
+T1 --> UI
+T2 --> UI
+TN --> UI
+
+UI --> Logic
+Logic --> Router
+
+Router ..> M1 : Yêu cầu thấp
+Router ..> M2 : Yêu cầu trung bình
+Router ..> M3 : Yêu cầu cao (Bảo mật/Hiệu năng)
+
+@enduml

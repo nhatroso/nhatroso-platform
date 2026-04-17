@@ -2,6 +2,7 @@
 #![allow(clippy::wildcard_imports)]
 pub use sea_orm_migration::prelude::*;
 
+
 mod m20260304_034518_users;
 mod m20260304_034525_create_refresh_tokens;
 mod m20260305_153000_add_name_to_users;
@@ -34,6 +35,17 @@ mod m20260401_031812_add_usage_to_meter_readings;
 mod m20260401_035027_add_period_to_meter_readings;
 mod m20260402_085249_fix_meter_unique_index;
 mod m20260404_043345_add_status_and_nullable_readings_to_meter_readings;
+mod m20260408_031256_invoices;
+mod m20260408_031422_invoice_status_histories;
+mod m20260408_034031_invoice_details;
+mod m20260408_034155_remove_breakdown_from_invoices;
+mod m20260413_031556_auto_invoice_configs;
+mod m20260413_035548_add_grace_days_to_auto_invoice_configs;
+mod m20260413_100000_add_invoice_generation_date_to_buildings;
+mod m20260414_022436_add_relational_fields_to_invoices;
+mod m20260414_030000_add_due_date_to_invoices;
+mod m20260416_104500_create_payments;
+
 pub struct Migrator;
 
 #[async_trait::async_trait]
@@ -71,6 +83,16 @@ impl MigratorTrait for Migrator {
             Box::new(m20260401_035027_add_period_to_meter_readings::Migration),
             Box::new(m20260402_085249_fix_meter_unique_index::Migration),
             Box::new(m20260404_043345_add_status_and_nullable_readings_to_meter_readings::Migration),
+            Box::new(m20260408_031256_invoices::Migration),
+            Box::new(m20260408_031422_invoice_status_histories::Migration),
+            Box::new(m20260408_034031_invoice_details::Migration),
+            Box::new(m20260408_034155_remove_breakdown_from_invoices::Migration),
+            Box::new(m20260413_031556_auto_invoice_configs::Migration),
+            Box::new(m20260413_035548_add_grace_days_to_auto_invoice_configs::Migration),
+            Box::new(m20260413_100000_add_invoice_generation_date_to_buildings::Migration),
+            Box::new(m20260414_022436_add_relational_fields_to_invoices::Migration),
+            Box::new(m20260414_030000_add_due_date_to_invoices::Migration),
+            Box::new(m20260416_104500_create_payments::Migration)
         ]
     }
 }

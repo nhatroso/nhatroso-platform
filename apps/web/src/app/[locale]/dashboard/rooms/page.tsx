@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { useRooms } from '@/hooks/use-rooms';
 import { RoomCard } from '@/components/buildings/RoomCard';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { PageHeader } from '@/components/ui/PageHeader';
 
 function RoomGridSkeleton() {
   return (
@@ -13,7 +14,7 @@ function RoomGridSkeleton() {
       {Array.from({ length: 10 }).map((_, i) => (
         <div
           key={i}
-          className="flex flex-col justify-between overflow-hidden rounded-xl bg-white p-5 shadow-sm ring-1 ring-inset ring-gray-100 dark:bg-gray-800 dark:ring-gray-700"
+          className="flex flex-col justify-between overflow-hidden rounded-xl bg-gray-card p-5 shadow-sm ring-1 ring-inset ring-gray-border"
         >
           <div>
             <div className="mb-3 flex items-center justify-between">
@@ -23,7 +24,7 @@ function RoomGridSkeleton() {
             <Skeleton className="h-6 w-24 mb-2" />
             <Skeleton className="h-4 w-32" />
           </div>
-          <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+          <div className="mt-4 pt-4 border-t border-gray-border">
             <div className="flex items-center justify-between">
               <Skeleton className="h-4 w-16" />
               <Skeleton className="h-4 w-24" />
@@ -71,20 +72,15 @@ function RoomsPageContent() {
   });
 
   return (
-    <div className="flex h-[calc(100vh-112px)] w-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-      <div className="flex shrink-0 flex-col gap-4 border-b border-gray-200 px-6 py-5 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">
-              {t('Rooms')}
-            </h1>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              {filteredRooms.length} {t('Rooms').toLowerCase()}
-            </p>
-          </div>
+    <div className="flex h-[calc(100vh-112px)] w-full flex-col overflow-hidden rounded-xl border border-gray-border bg-gray-card shadow-sm">
+      <PageHeader
+        variant="split"
+        title={t('Rooms')}
+        description={`${filteredRooms.length} ${t('Rooms').toLowerCase()}`}
+        actions={
           <button
             onClick={() => setIsCreateModalOpen(true)}
-            className="inline-flex items-center rounded-lg bg-blue-700 px-4 py-2 text-center text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+            className="inline-flex items-center rounded-lg bg-primary px-4 py-2 text-center text-body font-medium text-white hover:bg-primary-hover focus:outline-none focus:ring-4 focus:ring-primary-light"
           >
             <svg
               className="mr-2 h-4 w-4"
@@ -101,17 +97,17 @@ function RoomsPageContent() {
             </svg>
             {t('AddRoom') || 'Add Room'}
           </button>
-        </div>
-
+        }
+      >
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center">
-            <label className="mr-2 text-sm font-medium text-gray-900 dark:text-white">
+            <label className="mr-2 text-body font-medium text-gray-text">
               {t('Building') || 'Building'}:
             </label>
             <select
               value={selectedBuildingId}
               onChange={(e) => setSelectedBuildingId(e.target.value)}
-              className="block w-48 rounded-lg border border-gray-300 bg-white p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+              className="block w-48 rounded-lg border border-gray-border bg-gray-input p-2.5 text-body text-gray-text focus:border-primary focus:ring-primary"
             >
               <option value="all">
                 -- {t('AllBuildings') || 'All Buildings'} --
@@ -125,13 +121,13 @@ function RoomsPageContent() {
           </div>
 
           <div className="flex items-center">
-            <label className="mr-2 text-sm font-medium text-gray-900 dark:text-white">
+            <label className="mr-2 text-body font-medium text-gray-text">
               {t('Floor') || 'Floor'}:
             </label>
             <select
               value={selectedFloorId}
               onChange={(e) => setSelectedFloorId(e.target.value)}
-              className="block w-48 rounded-lg border border-gray-300 bg-white p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+              className="block w-48 rounded-lg border border-gray-border bg-gray-input p-2.5 text-body text-gray-text focus:border-primary focus:ring-primary"
             >
               <option value="all">
                 -- {t('AllFloors') || 'All Floors'} --
@@ -144,13 +140,13 @@ function RoomsPageContent() {
             </select>
           </div>
           <div className="flex items-center">
-            <label className="mr-2 text-sm font-medium text-gray-900 dark:text-white">
+            <label className="mr-2 text-body font-medium text-gray-text">
               {t('Status') || 'Status'}:
             </label>
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="block w-40 rounded-lg border border-gray-300 bg-white p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+              className="block w-40 rounded-lg border border-gray-border bg-gray-input p-2.5 text-body text-gray-text focus:border-primary focus:ring-primary"
             >
               <option value="all">
                 -- {t('AllStatus') || 'Tất cả trạng thái'} --
@@ -165,7 +161,7 @@ function RoomsPageContent() {
             selectedStatus !== 'all') && (
             <button
               onClick={handleClearFilters}
-              className="inline-flex items-center text-sm font-medium text-red-600 hover:text-red-800 dark:text-red-500 dark:hover:text-red-400"
+              className="inline-flex items-center text-body font-medium text-danger hover:text-danger-hover"
             >
               <svg
                 className="mr-1 h-4 w-4"
@@ -184,13 +180,13 @@ function RoomsPageContent() {
             </button>
           )}
         </div>
-      </div>
+      </PageHeader>
 
-      <div className="flex-1 overflow-y-auto p-6 bg-gray-50/50 dark:bg-gray-900/50">
+      <div className="flex-1 overflow-y-auto p-6 bg-gray-surface">
         {loading ? (
           <RoomGridSkeleton />
         ) : filteredRooms.length === 0 ? (
-          <div className="rounded-lg border-2 border-dashed border-gray-300 p-12 text-center text-gray-500 dark:border-gray-700 dark:text-gray-400">
+          <div className="rounded-lg border-2 border-dashed border-gray-border p-12 text-center text-gray-muted">
             {t('EmptyRooms')}
           </div>
         ) : (
@@ -215,17 +211,17 @@ function RoomsPageContent() {
       </div>
 
       {isCreateModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden bg-gray-900/50 p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden bg-gray-strong/50 p-4">
           <div className="relative w-full max-w-md h-full md:h-auto">
-            <div className="relative rounded-lg bg-white shadow dark:bg-gray-800">
-              <div className="flex items-start justify-between rounded-t border-b p-4 dark:border-gray-600">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+            <div className="relative rounded-lg bg-gray-card shadow border border-gray-border">
+              <div className="flex items-start justify-between rounded-t border-b border-gray-border p-4">
+                <h3 className="text-h2 font-semibold text-gray-text">
                   {t('AddRoom')}
                 </h3>
                 <button
                   type="button"
                   onClick={() => setIsCreateModalOpen(false)}
-                  className="ml-auto inline-flex items-center rounded-lg bg-transparent p-1.5 text-sm text-gray-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-600 dark:hover:text-white"
+                  className="ml-auto inline-flex items-center rounded-lg bg-transparent p-1.5 text-body text-gray-muted hover:bg-gray-surface hover:text-gray-text"
                 >
                   <svg
                     className="h-5 w-5"
@@ -244,14 +240,14 @@ function RoomsPageContent() {
 
               <form onSubmit={handleCreate} className="p-6 space-y-6">
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
-                    {t('Building')} <span className="text-red-500">*</span>
+                  <label className="mb-2 block text-body font-medium text-gray-text">
+                    {t('Building')} <span className="text-danger">*</span>
                   </label>
                   <select
                     required
                     value={newBuildingId}
                     onChange={(e) => setNewBuildingId(e.target.value)}
-                    className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                    className="block w-full rounded-lg border border-gray-border bg-gray-input p-2.5 text-body text-gray-text focus:border-primary focus:ring-primary"
                   >
                     <option value="" disabled>
                       -- {t('SelectPropertyFirst')} --
@@ -265,15 +261,15 @@ function RoomsPageContent() {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
-                    {t('Floor')} <span className="text-red-500">*</span>
+                  <label className="mb-2 block text-body font-medium text-gray-text">
+                    {t('Floor')} <span className="text-danger">*</span>
                   </label>
                   <select
                     required
                     disabled={!newBuildingId}
                     value={newFloorId}
                     onChange={(e) => setNewFloorId(e.target.value)}
-                    className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                    className="block w-full rounded-lg border border-gray-border bg-gray-input p-2.5 text-body text-gray-text focus:border-primary focus:ring-primary disabled:opacity-50"
                   >
                     <option value="" disabled>
                       -- Chọn tầng --
@@ -287,8 +283,8 @@ function RoomsPageContent() {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
-                    {t('Code')} <span className="text-red-500">*</span>
+                  <label className="mb-2 block text-body font-medium text-gray-text">
+                    {t('Code')} <span className="text-danger">*</span>
                   </label>
                   <input
                     required
@@ -296,24 +292,24 @@ function RoomsPageContent() {
                     value={newRoomCode}
                     onChange={(e) => setNewRoomCode(e.target.value)}
                     placeholder={t('PlaceholderRoomCode')}
-                    className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                    className="block w-full rounded-lg border border-gray-border bg-gray-input p-2.5 text-body text-gray-text focus:border-primary focus:ring-primary"
                   />
                 </div>
 
-                <div className="flex items-center gap-3 pt-4 border-t border-gray-200 dark:border-gray-600">
+                <div className="flex items-center gap-3 pt-4 border-t border-gray-border">
                   <button
                     type="submit"
                     disabled={
                       isSubmitting || !newFloorId || !newRoomCode.trim()
                     }
-                    className="rounded-lg bg-blue-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 disabled:opacity-50 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                    className="rounded-lg bg-primary-hover px-5 py-2.5 text-center text-body font-medium text-white hover:bg-primary-dark focus:outline-none focus:ring-4 focus:ring-primary-light disabled:opacity-50"
                   >
                     {isSubmitting ? t('Saving') : t('Creating')}
                   </button>
                   <button
                     type="button"
                     onClick={() => setIsCreateModalOpen(false)}
-                    className="rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:border-gray-500 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white dark:focus:ring-gray-600"
+                    className="rounded-lg border border-gray-border bg-gray-card px-5 py-2.5 text-body font-medium text-gray-muted hover:bg-gray-surface hover:text-gray-text focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-border"
                   >
                     Cancel
                   </button>
@@ -332,7 +328,7 @@ export default function RoomsPage() {
     <React.Suspense
       fallback={
         <div className="flex h-screen items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         </div>
       }
     >

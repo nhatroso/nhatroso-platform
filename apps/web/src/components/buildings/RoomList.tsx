@@ -58,7 +58,7 @@ export function RoomList({ floorId }: { floorId: string }) {
         className="flex w-full items-center justify-center py-4"
         role="progressbar"
       >
-        <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-200 border-t-teal-600" />
+        <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-subtle border-t-primary" />
       </div>
     );
   }
@@ -66,14 +66,14 @@ export function RoomList({ floorId }: { floorId: string }) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h5 className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+        <h5 className="text-tiny font-semibold uppercase tracking-wider text-gray-muted">
           {t('Rooms')}
         </h5>
       </div>
 
       <div className="space-y-2">
         {rooms.length === 0 ? (
-          <div className="rounded border border-dashed border-gray-300 p-4 text-center text-xs text-gray-400 dark:border-gray-700 dark:text-gray-500">
+          <div className="rounded border border-dashed border-gray-border p-4 text-center text-tiny text-gray-muted">
             {t('EmptyRooms')}
           </div>
         ) : (
@@ -85,9 +85,9 @@ export function RoomList({ floorId }: { floorId: string }) {
         )}
       </div>
 
-      <div className="mt-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+      <div className="mt-4 rounded-xl border border-gray-border bg-gray-card p-4 shadow-sm">
         {errorMsg && (
-          <div className="mb-3 rounded-lg bg-red-50 p-3 text-sm text-red-800 dark:bg-red-900/30 dark:text-red-400">
+          <div className="mb-3 rounded-lg bg-danger-light p-3 text-body text-danger dark:bg-danger-dark/10 dark:text-danger-dark">
             {errorMsg}
           </div>
         )}
@@ -97,13 +97,13 @@ export function RoomList({ floorId }: { floorId: string }) {
             value={newCode}
             onChange={(e) => setNewCode(e.target.value)}
             placeholder={t('PlaceholderRoomCode')}
-            className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+            className="block w-full rounded-lg border border-gray-border bg-gray-input p-2.5 text-body text-gray-text focus:border-primary focus:ring-primary"
             disabled={isCreating}
           />
           <button
             type="submit"
             disabled={isCreating || !newCode.trim()}
-            className="shrink-0 rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 disabled:opacity-50 dark:bg-blue-600 dark:hover:bg-blue-700 transition-colors"
+            className="shrink-0 rounded-lg bg-primary px-5 py-2.5 text-body font-medium text-white hover:bg-primary-hover focus:outline-none focus:ring-4 focus:ring-primary-light disabled:opacity-50 dark:bg-primary dark:hover:bg-primary-hover transition-colors"
           >
             {t('AddRoom')}
           </button>

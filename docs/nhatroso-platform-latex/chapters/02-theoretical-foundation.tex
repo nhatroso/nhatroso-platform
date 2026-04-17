@@ -1,0 +1,250 @@
+% chapters/02-theoretical-foundation.tex
+\chapter{Cơ sở lý thuyết}\label{chapter_theory}
+
+Chương này trình bày các khái niệm nền tảng về quản lý, mô hình kiến trúc, các công nghệ chủ chốt và cơ sở thuật toán được áp dụng trong quá trình xây dựng và phát triển hệ thống Nhatroso Platform.
+
+\section{Khái niệm liên quan}
+
+\subsection{Hệ thống quản lý (Management System)}
+Hệ thống quản lý là một tập hợp các quy trình, công cụ và dữ liệu được tổ chức nhằm tối ưu hóa việc điều hành và giám sát một lĩnh vực cụ thể. Trong ngữ cảnh bất động sản, hệ thống quản lý giúp số hóa các thực thể (phòng, cư dân) và tự động hóa các luồng nghiệp vụ (billing, contract management) nhằm giảm tải thao tác thủ công và hạn chế sai sót.
+
+\subsection{Kiến trúc đa khách thuê (Multi-tenancy)}
+Multi-tenancy\footnote{Kiến trúc đa khách thuê là một mô hình trong đó một thực thể vật lý của phần mềm phục vụ nhiều nhóm người dùng khác nhau, giúp tối ưu hóa tài nguyên và chi phí vận hành.} \cite{MultiTenancyPrinciples} là mô hình kiến trúc phần mềm trong đó một phiên bản duy nhất (single instance) của ứng dụng phục vụ nhiều khách hàng hoặc nhóm người dùng khác nhau (tenants). Mỗi khách thuê được cung cấp một không gian làm việc ảo với dữ liệu và cấu hình được cách ly hoàn toàn, mặc dù họ đang chia sẻ chung hạ tầng phần cứng và tài nguyên tính toán.
+
+Trong kiến trúc đa khách thuê, việc lựa chọn mô hình cách ly dữ liệu đóng vai trò then chốt:
+\begin{itemize}
+    \item \textbf{Cơ sở dữ liệu riêng (Database-per-tenant):} Mỗi khách thuê sở hữu một cơ sở dữ liệu vật lý riêng biệt. Đây là mức độ cách ly cao nhất, đảm bảo tính bảo mật và hiệu suất nhưng khó khăn trong việc mở rộng và bảo trì.
+    \item \textbf{Schema riêng (Schema-per-tenant):} Các khách thuê chia sẻ chung một cơ sở dữ liệu nhưng sử dụng các schema (không gian tên) khác nhau. Mô hình này cân bằng giữa tính cách ly và khả năng quản lý.
+    \item \textbf{Dùng chung cơ sở dữ liệu (Shared Database, Shared Schema):} Toàn bộ khách thuê lưu trữ dữ liệu trong cùng một tập hợp các bảng, được phân biệt thông qua một cột định danh (\textit{Tenant ID}). Đây là mô hình tối ưu về chi phí và tài nguyên nhất nhưng yêu cầu kiểm soát chặt chẽ ở tầng phần mềm để tránh rò rỉ dữ liệu.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{assets/figures/multi_tenancy.png}
+    \caption{Mô hình kiến trúc tổng quát của hệ thống Đa khách thuê}
+    \label{fig:multi_tenancy}
+\end{figure}
+
+\subsection{Số hóa quy trình quản lý nhà trọ}
+Quy trình quản lý nhà trọ truyền thống thường đối mặt với nhiều thách thức như: sai sót trong tính toán thủ công, mất mát dữ liệu giấy tờ và thiếu tính minh bạch trong đối soát dịch vụ. Nhatroso Platform giải quyết các vấn đề này bằng cách số hóa toàn bộ các điểm chạm (touchpoints) trong vòng đời thuê trọ, tạo ra một hệ thống dữ liệu tập trung và thông suốt.
+
+\subsubsection{Số hóa hợp đồng thuê trọ}
+Hợp đồng thuê trọ trực tuyến được xây dựng dựa trên các biểu mẫu chuẩn pháp lý Việt Nam, cho phép lưu trữ dưới dạng dữ liệu có cấu trúc thay vì văn bản thuần túy. Việc số hóa hợp đồng giúp hệ thống tự động trích xuất các thông tin quan trọng như: giá thuê, kỳ hạn thanh toán, tiền đặt cọc và danh sách cư dân. Đây là dữ liệu đầu vào quan trọng để kích hoạt các luồng nghiệp vụ tự động tiếp theo như tính toán hóa đơn và quản lý kỳ hạn.
+
+\subsubsection{Tự động hóa quản lý chỉ số điện nước}
+Đây là khâu dễ phát sinh tranh chấp nhất trong quản lý nhà trọ. Nhatroso Platform số hóa quy trình này thông qua mô hình tương tác giữa Chủ nhà và Người thuê:
+\begin{itemize}
+    \item Hệ thống tự động gửi yêu cầu báo số định kỳ tới ứng dụng di động của người thuê.
+    \item Người thuê thực hiện chụp ảnh đồng hồ và gửi trực tiếp qua ứng dụng. Hình ảnh này phục vụ như bằng chứng vật lý, giúp tăng tính minh bạch.
+    \item Dữ liệu sau khi chủ nhà phê duyệt sẽ được lưu trữ kèm ảnh chụp, làm cơ sở để tính toán chi phí tiêu thụ chính xác dựa trên các cấu hình giá bậc thang hoặc giá cố định.
+\end{itemize}
+
+\subsubsection{Phát hành hóa đơn và Đối soát tự động}
+Hệ thống tự động tổng hợp tất cả các khoản chi phí bao gồm: tiền thuê phòng (từ hợp đồng), phí dịch vụ cố định (vệ sinh, internet) và phí biến đổi (điện, nước dựa trên chỉ số). Hóa đơn số được phát hành với mã định danh duy nhất và gửi thông báo tức thời tới người thuê.
+
+Mỗi hóa đơn trải qua một vòng đời trạng thái được kiểm soát chặt chẽ: \textit{Chưa thanh toán (Unpaid)} $\rightarrow$ \textit{Đang xác nhận (Pending)} $\rightarrow$ \textit{Đã thanh toán (Paid)} hoặc \textit{Huỷ (Voided)}. Toàn bộ quá trình thay đổi trạng thái đều được ghi lại trong nhật ký hệ thống (Audit trail), đảm bảo khả năng truy xuất nguồn gốc và minh bạch tài chính cho cả hai bên.
+
+\section{Công nghệ sử dụng}
+
+\subsection{Ngôn ngữ lập trình Rust}
+Rust là ngôn ngữ lập trình hệ thống hiện đại, tập trung vào ba yếu tố cốt lõi: hiệu suất, sự an toàn và tính song song. Với cơ chế \textit{Ownership}\footnote{Quyền sở hữu (Ownership) là tập hợp các quy tắc quản lý bộ nhớ của Rust mà không cần bộ dọn rác, đảm bảo an toàn bộ nhớ ngay tại thời điểm biên dịch.} (Quyền sở hữu) và \textit{Borrow Checker} \cite{RustBook}, Rust giải quyết triệt để các lỗi về truy cập bộ nhớ phổ biến như null pointers, buffer overflows hay data races mà không cần đến bộ dọn rác (Garbage Collector).
+
+\textbf{Lý do lựa chọn:}
+\begin{itemize}
+    \item \textbf{Độ tin cậy tuyệt đối:} Với một hệ thống quản lý tài chính và hợp đồng như Nhatroso, tính toàn vẹn của dữ liệu và sự ổn định của hệ thống là ưu tiên hàng đầu. Rust đảm bảo an toàn bộ nhớ ở mức biên dịch, giúp giảm thiểu rủi ro lỗi runtime.
+    \item \textbf{Hiệu suất tối ưu:} Tốc độ thực thi của Rust tương đương với C++, cho phép hệ thống xử lý hàng ngàn yêu cầu đồng thời với mức tiêu thụ tài nguyên cực thấp, giúp tối ưu chi phí vận hành trên hạ tầng đám mây.
+    \item \textbf{Hệ sinh thái hiện đại:} Công cụ quản lý gói Cargo và hệ thống kiểu dữ liệu mạnh mẽ giúp việc phát triển các module nghiệp vụ phức tạp trở nên khoa học và ít lỗi hơn.
+\end{itemize}
+
+\subsection{Framework Loco.rs}
+Loco là framework phát triển web theo triết lý ``One-person Framework'' dành cho Rust, được lấy cảm hứng mạnh mẽ từ Ruby on Rails \cite{LocoRS}. Framework này cung cấp đầy đủ các thành phần cần thiết để xây dựng một ứng dụng web hoàn chỉnh từ CLI scaffolding, database migration đến hệ thống background jobs và mailer. Theo triết lý ``Convention over Configuration''\footnote{Quy ước hơn cấu hình là một mô hình thiết kế phần mềm nhằm giảm thiểu số lượng quyết định mà lập lập trình viên phải thực hiện mà không làm mất đi tính linh hoạt.}, Loco giúp đồng bộ hóa cấu trúc dự án một cách nhanh chóng.
+
+\textbf{Lý do lựa chọn:}
+\begin{itemize}
+    \item \textbf{Nâng cao năng suất phát triển:} Rust thường bị xem là có tốc độ phát triển chậm do tính phức tạp. Loco.rs giải quyết vấn đề này bằng cách đưa ra các quy tắc ``Convention over Configuration'' (Quy ước hơn cấu hình), giúp lập trình viên tập trung vào logic nghiệp vụ thay vì các cấu trúc hạ tầng API.
+    \item \textbf{Kiến trúc Modular:} Loco khuyến khích cách tổ chức mã nguồn theo hướng module hóa, hoàn toàn phù hợp với kiến trúc Modular Monolith mà đề tài hướng tới.
+    \item \textbf{Tích hợp sẵn các công cụ mạnh:} Việc tích hợp sẵn Axum (HTTP engine) và SeaORM giúp việc xây dựng các REST API bất đồng bộ (async) trở nên dễ dàng và chuẩn hóa.
+\end{itemize}
+
+\subsection{Next.js 16}
+Next.js 16 là nền tảng React hiện đại nhất hiện nay, tiên phong trong việc hỗ trợ \textit{React Server Components}\footnote{RSC là các thành phần React được thực thi hoàn toàn trên máy chủ, giúp giảm kích thước gói tin JavaScript gửi đến trình duyệt và cải thiện hiệu năng.} (RSC) và \textit{App Router}, giúp tối ưu hóa hiệu năng render phía máy chủ và cải thiện đáng kể tốc độ tải trang đầu tiên (FCP) \cite{NextJS}.
+
+\textbf{Lý do lựa chọn:}
+\begin{itemize}
+    \item \textbf{Trải nghiệm người dùng mượt mà:} Với khả năng Server-side Rendering (SSR) và Static Site Generation (SSG), hệ thống Dashboard dành cho chủ nhà có tốc độ phản hồi nhanh, mượt mà như một ứng dụng desktop.
+    \item \textbf{Tích hợp full-stack:} Next.js cung cấp các API Routes và Middleware mạnh mẽ, cho phép xử lý các tác vụ như Internationalization (i18n) và xác thực JWT một cách đồng bộ từ backend đến frontend.
+    \item \textbf{Cộng đồng và công cụ hỗ trợ:} Hệ sinh thái TailwindCSS v4 và các thư viện UI như Flowbite giúp việc xây dựng các dashboard chuyên nghiệp, trực quan trở nên nhanh chóng và chuẩn mực.
+\end{itemize}
+
+\subsection{Expo và React Native}
+Expo là một hệ sinh thái mã nguồn mở mạnh mẽ giúp đơn giản hóa quá trình phát triển ứng dụng di động đa nền tảng bằng JavaScript/TypeScript \cite{Expo}. React Native cho phép xây dựng ứng dụng di động với hiệu năng gần như bản địa (native performance).
+
+\textbf{Lý do lựa chọn:}
+\begin{itemize}
+    \item \textbf{Phát triển đa nền tảng (Cross-platform):} Chỉ với một codebase duy nhất, hệ thống có thể triển khai đồng thời trên cả iOS và Android, giúp tiết kiệm 50\% nguồn lực và thời gian phát triển so với lập trình native truyền thống.
+    \item \textbf{Chia sẻ mã nguồn (Code sharing):} Việc sử dụng cùng ngôn ngữ TypeScript với Frontend Web cho phép chia sẻ các kiểu dữ liệu, logic xử lý và các bản dịch đa ngôn ngữ, giảm thiểu sai lệch giữa các nền tảng.
+    \item \textbf{Ecosystem ổn định:} Expo cung cấp các module sẵn có để tương tác với phần cứng như Camera (quét đồng hồ điện), Secure Store (lưu trữ token) và hệ thống thông báo Push Notifications, giúp đẩy nhanh tiến độ hoàn thiện app.
+\end{itemize}
+
+\subsection{Cơ sở dữ liệu PostgreSQL và SeaORM}
+Hệ thống sử dụng PostgreSQL \cite{PostgreSQL} làm cơ sở dữ liệu quan hệ chính nhờ tính tin cậy tuyệt đối, khả năng xử lý giao dịch (ACID) mạnh mẽ và cộng đồng hỗ trợ rộng lớn. SeaORM là thư viện ORM bất đồng bộ được xây dựng riêng cho Rust \cite{SeaORM}.
+
+\textbf{Lý do lựa chọn:}
+\begin{itemize}
+    \item \textbf{Tính toàn vẹn dữ liệu:} PostgreSQL hỗ trợ các ràng buộc (constraints) và kiểu dữ liệu phức tạp, đảm bảo các quan hệ giữa Phòng - HĐ - Hóa đơn luôn chính xác.
+    \item \textbf{Lập trình kiểu mạnh (Type-safe ORM):} SeaORM ánh xạ dữ liệu trực tiếp vào các structs trong Rust ngay khi biên dịch, giúp phát hiện sớm các lỗi sai lệch schema trước khi triển khai.
+    \item \textbf{Tính bất đồng bộ (Async):} Kết hợp với Rust async runtime, SeaORM cho phép xử lý hàng ngàn kết nối cơ sở dữ liệu đồng thời mà không gây nghẽn tiến trình, phù hợp cho quy trình billing quy mô lớn.
+\end{itemize}
+
+\section{Mô hình và Thuật toán}
+
+\subsection{Kỹ thuật nhận dạng ký tự quang học (OCR) với AI}
+Nhận dạng ký tự quang học (OCR - Optical Character Recognition) là quy trình chuyển đổi hình ảnh chứa văn bản thành dữ liệu văn bản có cấu trúc mà máy tính có thể xử lý. Trong bối cảnh quản lý nhà trọ, việc trích xuất chỉ số từ ảnh chụp đồng hồ điện, nước là một bài toán thách thức do sự đa dạng về chủng loại đồng hồ, điều kiện ánh sáng kém và góc chụp không cố định.
+
+Hệ thống Nhatroso Platform lựa chọn giải pháp \textbf{Google Cloud Vision API}\footnote{Dịch vụ thị giác máy tính dựa trên nền tảng đám mây của Google, cung cấp các mô hình học máy được huấn luyện sẵn để nhận diện vật thể và văn bản.} \cite{GoogleCloudVision} — một dịch vụ cung cấp mô hình học máy dưới dạng giao diện lập trình (Model-as-a-Service) — thay vì tự huấn luyện một mô hình học máy riêng biệt. Các lý do chủ chốt cho quyết định này bao gồm:
+
+\begin{itemize}
+    \item \textbf{Tối ưu hóa nguồn lực và thời gian:} Việc huấn luyện một mô hình học máy (như CNN hay Transformer) cho bài toán OCR yêu cầu một tập dữ liệu (dataset) khổng lồ gồm hàng chục ngàn ảnh chụp đồng hồ đã được gán nhãn chính xác. Sử dụng API có sẵn giúp đội ngũ phát triển bỏ qua giai đoạn thu thập dữ liệu và huấn luyện phức tạp, tập trung hoàn toàn vào việc xây dựng luồng nghiệp vụ.
+    \item \textbf{Độ chính xác và tính bền vững (Robustness):} Google Cloud Vision API ứng dụng các mô hình học sâu (Deep Learning) tiên tiến nhất, được huấn luyện trên quy mô dữ liệu toàn cầu. Nhờ đó, hệ thống có khả năng xử lý tốt các tình huống khó khăn như: góc chụp bị nghiêng (perspective distortion), bề mặt kính đồng hồ bị lóa hoặc trầy xước, và các điều kiện ánh sáng yếu.
+    \item \textbf{Khả năng tự động tối ưu hóa:} Google liên tục cập nhật và cải thiện các thuật toán nhận dạng mà không yêu cầu nhà phát triển phải can thiệp. Việc sử dụng dịch vụ đám mây còn giúp hệ thống tự động mở rộng (auto-scaling) theo lượng tải thực tế mà không cần quản lý hạ tầng phần cứng (GPU/CPU).
+    \item \textbf{Mô hình chi phí hiệu quả:} Với mô hình trả phí theo lượt sử dụng (Pay-as-you-go), dự án tránh được các chi phí đầu tư ban đầu cho máy chủ huấn luyện và giảm thiểu rủi ro vận hành.
+\end{itemize}
+
+Quy trình OCR trong hệ thống được thực hiện qua hai giai đoạn tự động:
+\begin{enumerate}
+    \item \textbf{Phát hiện văn bản (Text Detection):} Xác định tọa độ (bounding boxes) của các dãy số trên mặt đồng hồ.
+    \item \textbf{Nhận dạng ký tự (Text Recognition):} Chuyển đổi các vùng ảnh đã phát hiện thành chuỗi số thực tế, phục vụ cho việc tính toán hóa đơn.
+\end{enumerate}
+
+Mặc dù trong phiên bản MVP, OCR được hỗ trợ như một công cụ gợi ý để chủ nhà phê duyệt lần cuối, việc nền tảng hóa quy trình này đặt cơ sở vững chắc cho khả năng tự động hóa hoàn toàn trong các giai đoạn phát triển tiếp theo của Nhatroso Platform.
+
+\subsection{Internet of Things (IoT) và Giao thức MQTT}
+IoT là mạng lưới các thiết bị vật lý có khả năng thu thập và trao đổi dữ liệu qua internet. Giao thức MQTT (Message Queuing Telemetry Transport) là phương thức truyền tin nhẹ, dựa trên mô hình Publish/Subscribe, cực kỳ hiệu quả cho các thiết bị IoT có băng thông thấp và tài nguyên hạn chế \cite{MQTT}.
+Mặc dù Nhatroso Platform hiện tại tập trung vào quy trình thủ công thông qua ảnh chụp, nhưng kiến trúc IoT với giao thức MQTT được xem là nền tảng lý thuyết để phát triển tính năng đọc chỉ số tự động từ các Smart Meter trong tương lai.
+
+\section{Quy trình phát triển phần mềm}
+
+\subsection{Vòng đời phát triển phần mềm (SDLC)}
+Vòng đời phát triển phần mềm (The Software Development Life Cycle - SDLC) là một quy trình chuẩn hóa được sử dụng để thiết kế, xây dựng và kiểm thử phần mềm có chất lượng cao \cite{SommervilleSE}. Mục tiêu của SDLC là cung cấp một sản phẩm đáp ứng đầy đủ yêu cầu của người dùng, hoàn thành trong thời gian và ngân sách dự kiến.
+
+Một chu trình SDLC tiêu chuẩn thường bao gồm các giai đoạn chính sau:
+\begin{itemize}
+    \item \textbf{Lập kế hoạch (Planning):} Đây là giai đoạn khởi đầu nhằm xác định tầm nhìn và tính khả thi của dự án. Các hoạt động chính bao gồm: định nghĩa mục tiêu cốt lõi, xác định phạm vi công việc (scope), ước lượng nguồn lực (nhân sự, thời gian, ngân sách) và đánh giá các rủi ro tiềm ẩn. Kết quả của giai đoạn này là bản kế hoạch tổng thể giúp định hướng cho toàn bộ quá trình phát triển.
+    \item \textbf{Phân tích yêu cầu (Analysis):} Giai đoạn này tập trung vào việc hiểu rõ nhu cầu của các bên liên quan (stakeholders). Các kỹ sư phần mềm thực hiện thu thập, phân loại và chi tiết hóa các yêu cầu chức năng (functional requirements) và yêu cầu phi chức năng (non-functional requirements). Sản phẩm quan trọng nhất là Tài liệu Đặc tả yêu cầu phần mềm (SRS), đóng vai trò là "kim chỉ nam" cho việc thiết kế và kiểm thử.
+    \item \textbf{Thiết kế (Design):} Dựa trên tài liệu SRS, giai đoạn thiết kế sẽ cụ thể hóa cấu trúc kỹ thuật của hệ thống. Các hoạt động bao gồm: thiết kế kiến trúc tổng thể (Architecture Design), thiết kế cơ sở dữ liệu (Database Schema), thiết kế giao diện (UI/UX Design) và các sơ đồ logic nghiệp vụ. Giai đoạn này giúp chuyển đổi các yêu cầu trừu tượng thành các bản vẽ kỹ thuật chi tiết.
+    \item \textbf{Cài đặt (Implementation):} Đây là giai đoạn trực tiếp tạo ra sản phẩm thông qua việc lập trình (coding). Các lập trình viên sử dụng các ngôn ngữ và công nghệ đã chọn để thực hiện các module tính năng dựa trên bản thiết kế. Việc tuân thủ các tiêu chuẩn lập trình (coding standards) và sử dụng hệ thống quản lý phiên bản (Git) là yêu cầu bắt buộc để đảm bảo chất lượng mã nguồn.
+    \item \textbf{Kiểm thử (Testing):} Sau khi cài đặt, phần mềm phải trải qua quy trình kiểm thử nghiêm ngặt để phát hiện và khắc phục lỗi (bugs). Quy trình này bao gồm nhiều cấp độ: kiểm thử đơn vị (Unit Test) cho các hàm/lớp riêng lẻ, kiểm thử tích hợp (Integration Test) cho sự tương tác giữa các module, và kiểm thử hệ thống (System Test) trên toàn bộ ứng dụng để đảm bảo đáp ứng đúng các yêu cầu ban đầu.
+    \item \textbf{Triển khai và Bảo trì (Deployment \& Maintenance):} Khi phần mềm đạt yêu cầu chất lượng, nó sẽ được triển khai lên môi trường sản xuất (Production). Sau khi phát hành, hệ thống cần được giám sát, bảo trì định kỳ để khắc phục các vấn đề phát sinh và cập nhật các tính năng mới theo phản hồi của người dùng thực tế.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{assets/figures/sdlc_cycle.png}
+    \caption{Các giai đoạn trong vòng đời phát triển phần mềm (SDLC)}
+    \label{fig:sdlc_cycle}
+\end{figure}
+
+\subsection{Mô hình Agile Scrum}
+Agile là một triết lý phát triển phần mềm tập trung vào việc chuyển giao giá trị nhanh chóng thông qua các chu kỳ lặp và sự cộng tác liên tục. Scrum là một khung làm việc (framework) cho phép các nhóm giải quyết những vấn đề phức tạp, trong khi vẫn cung cấp các sản phẩm có giá trị cao nhất một cách sáng tạo \cite{ScrumGuide}. Scrum dựa trên lý thuyết quản lý tiến trình thực nghiệm (Empiricism) với ba trụ cột chính: \textit{Sự minh bạch (Transparency)}, \textit{Sự thanh tra (Inspection)} và \textit{Sự thích nghi (Adaptation)}.
+
+\textbf{Các vai trò chính trong Scrum (Scrum Roles):}
+\begin{itemize}
+    \item \textbf{Product Owner (Người sở hữu sản phẩm):} Là người chịu trách nhiệm tối đa hóa giá trị của sản phẩm thông qua việc quản lý Danh mục sản phẩm (Product Backlog). PO là người đưa ra các quyết định về thứ tự ưu tiên của các tính năng dựa trên nhu cầu của khách hàng và lợi ích kinh doanh.
+    \item \textbf{Scrum Master (Người điều phối):} Là người chịu trách nhiệm đảm bảo nhóm hiểu và vận hành đúng theo quy trình Scrum. Scrum Master đóng vai trò là một "người phục vụ" (servant-leader), giúp loại bỏ các rào cản cản trở tiến độ của nhóm và huấn luyện nhóm cải tiến năng suất.
+    \item \textbf{Development Team (Nhóm phát triển):} Là một nhóm liên chức năng (Cross-functional) và tự quản lý (Self-organizing), bao gồm các chuyên gia trực tiếp thực hiện công việc để tạo ra các phần tăng trưởng sản phẩm (Increments) có khả năng phát hành ở cuối mỗi Sprint.
+\end{itemize}
+
+\textbf{Các sự kiện trong Scrum (Scrum Events):}
+\begin{itemize}
+    \item \textbf{Sprint (Chu kỳ phát triển):} Là một đơn vị thời gian cố định (thường từ 1-4 tuần) trong đó một phiên bản sản phẩm có thể chuyển giao được tạo ra. Toàn bộ dự án là một chuỗi các Sprint liên tiếp.
+    \item \textbf{Sprint Planning (Lập kế hoạch Sprint):} Buổi họp diễn ra ở đầu mỗi Sprint để xác định mục tiêu của Sprint đó và lựa chọn các hạng mục từ Product Backlog để thực hiện.
+    \item \textbf{Daily Scrum (Họp hằng ngày):} Cuộc họp ngắn 15 phút hằng ngày để nhóm đồng bộ hóa công việc, chia sẻ những gì đã làm, những gì sẽ làm và các khó khăn đang gặp phải.
+    \item \textbf{Sprint Review (Sơ kết Sprint):} Diễn ra ở cuối Sprint để kiểm tra kết quả công việc (Increment) và xác định các công việc tiếp theo.
+    \item \textbf{Sprint Retrospective (Cải tiến Sprint):} Là dịp để nhóm nhìn lại quá trình làm việc, tìm ra các điểm tốt và các điểm cần cải thiện về mặt quy trình, nhân sự và công cụ để áp dụng cho Sprint sau.
+\end{itemize}
+
+\textbf{Các tạo tác trong Scrum (Scrum Artifacts):}
+\begin{itemize}
+    \item \textbf{Product Backlog:} Danh sách ưu tiên các tính năng, yêu cầu cần có cho sản phẩm. Đây là nguồn duy nhất cho mọi thay đổi của sản phẩm.
+    \item \textbf{Sprint Backlog:} Tập hợp các hạng mục từ Product Backlog được chọn cho Sprint hiện tại cùng với kế hoạch chi tiết để hoàn thành mục tiêu Sprint.
+    \item \textbf{Increment (Phần tăng trưởng sản phẩm):} Là kết quả của tất cả các hạng mục Product Backlog đã hoàn thành trong Sprint và giá trị của các increment từ những Sprint trước đó.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{assets/figures/scrum_process.png}
+    \caption{Cấu trúc quy trình thực thi theo mô hình Agile Scrum}
+    \label{fig:scrum_process}
+\end{figure}
+
+\section{Kiến trúc hệ thống và Bảo mật}
+
+\subsection{Kiến trúc Modular Monolith}
+Kiến trúc Modular Monolith là sự kết hợp giữa tính đơn giản trong triển khai của kiến trúc Monolith truyền thống và tính tách biệt logic của kiến trúc Microservices \cite{ModularMonolith}. Trong mô hình này, toàn bộ ứng dụng được đóng gói và triển khai dưới dạng một đơn vị duy nhất (Single Deployment Unit), nhưng bên trong mã nguồn được chia thành các module chức năng độc lập và có ranh giới rõ ràng.
+
+\textbf{Lợi ích và Lý do lựa chọn:}
+\begin{itemize}
+    \item \textbf{Độ phức tạp thấp:} Khác với Microservices, Modular Monolith không yêu cầu quản lý mạng phức tạp, độ trễ truyền tin hay các bài toán về tính nhất quán dữ liệu phân tán.
+    \item \textbf{Tách biệt logic (Logical Isolation):} Mỗi module (như User, Billing, Property) sở hữu logic và dữ liệu riêng biệt, chỉ giao tiếp với nhau qua các giao thức công khai (Public APIs). Điều này giúp giảm thiểu sự phụ thuộc lẫn nhau (coupling) và tăng khả năng bảo trì.
+    \item \textbf{Khả năng mở rộng bền vững:} Nhờ cấu trúc module hóa, hệ thống có thể dễ dàng được tách thành các Microservices riêng lẻ trong tương lai nếu nhu cầu về hiệu năng và mở rộng tăng cao mà không cần phải viết lại toàn bộ mã nguồn.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{assets/figures/modular_monolith.png}
+    \caption{Mô hình minh họa kiến trúc Modular Monolith}
+    \label{fig:modular_monolith_pattern}
+\end{figure}
+
+Trong đồ án này, kiến trúc Modular Monolith được triển khai thông qua các module logic trong Rust, giúp đội ngũ phát triển quản lý mã nguồn một cách khoa học, dễ dàng thực hiện kiểm thử đơn vị và bảo đảm tính an toàn cho từng thành phần của Nhatroso Platform.
+
+JWT là một tiêu chuẩn mở (RFC 7519) \cite{RFC7519} bao gồm ba phần: Header (thuật toán mã hóa), Payload (chứa các claims như user\_id, role) và Signature (chữ ký số để đảm bảo tính toàn vẹn).
+Trong hệ thống, JWT đóng vai trò là phương thức xác thực chính, cho phép Mobile App và Web Dashboard gửi các yêu cầu an toàn tới Backend mà không cần lưu trữ session trên server.
+
+\subsection{Kiến trúc Phân quyền RBAC (Role-Based Access Control)}
+Kiểm soát truy cập dựa trên vai trò (Role-Based Access Control - RBAC) là một phương pháp quản lý quyền truy cập hệ thống dựa trên chức năng và nhiệm vụ của từng người dùng trong tổ chức \cite{RBAC}. Thay vì gán trực tiếp quyền hạn cho từng cá nhân, RBAC sử dụng thực thể trung gian là \textit{Vai trò (Role)}. Mô hình này tuân thủ nghiêm ngặt nguyên tắc Quyền hạn tối thiểu (Principle of Least Privilege), đảm bảo người dùng chỉ có đủ các quyền cần thiết để thực hiện công việc của mình.
+
+Cấu trúc RBAC được xây dựng trên ba thành phần nền tảng:
+\begin{enumerate}
+    \item \textbf{Người dùng (User):} Các cá nhân hoặc hệ thống tương tác với nền tảng.
+    \item \textbf{Vai trò (Role):} Một tập hợp các quyền hạn được định nghĩa sẵn dựa trên chức năng nghiệp vụ.
+    \item \textbf{Quyền hạn (Permission):} Khả năng thực hiện các thao tác cụ thể (Xem, Tạo, Sửa, Xóa) trên một tài nguyên nhất định.
+\end{enumerate}
+
+Trong hệ thống Nhatroso Platform, cơ chế RBAC phân tách rõ rệt hai nhóm vai trò chủ chốt:
+
+\begin{itemize}
+    \item \textbf{Owner (Chủ nhà):} Đóng vai trò là quản trị viên của không gian khách thuê (Tenant space). Vai trò này có toàn quyền (Full Access) đối với các tài nguyên thuộc sở hữu của mình, bao gồm: quản lý cấu trúc tòa nhà, thiết lập đơn giá dịch vụ, phê duyệt hợp đồng, khởi tạo hóa đơn và xem báo cáo tài chính tổng thể.
+    \item \textbf{Tenant (Người thuê):} Đóng vai trò là người sử dụng dịch vụ cuối cùng. Vai trò này bị giới hạn quyền truy cập theo cơ chế cách ly dữ liệu cá nhân. Người thuê chỉ có quyền xem thông tin hợp đồng và hóa đơn của chính mình, gửi yêu cầu báo số điện nước và nhận các thông báo từ hệ thống.
+\end{itemize}
+
+Về mặt kỹ thuật, cơ chế RBAC được thực thi thông qua mã định danh vai trò (Role Claim) được nhúng bên trong mã thông báo JWT. Khi người dùng gửi yêu cầu tới API, một tầng phần mềm trung gian (\textit{RBAC Middleware}) sẽ thực hiện giải mã JWT, kiểm tra vai trò của người dùng và đối chiếu với danh mục quyền hạn của tệp tin API (Endpoint) để quyết định cho phép hoặc từ chối truy cập. Cơ chế này không chỉ giúp bảo mật dữ liệu mà còn giúp việc quản trị và mở rộng các nhóm quyền hạn mới trở nên linh hoạt và tập trung.
+
+\section{Triển khai và Tích hợp liên tục (CI/CD)}
+
+Triển khai và Tích hợp liên tục (CI/CD) là một tập hợp các phương pháp và tri thức kỹ thuật nhằm tự động hóa các giai đoạn trong quá trình phát triển phần mềm, từ khi lập trình viên hoàn thành mã nguồn đến khi sản phẩm được vận hành thực tế. Mục tiêu cốt lõi của CI/CD là tăng tốc độ chuyển giao (velocity), nâng cao chất lượng phần mềm thông qua kiểm thử tự động và giảm thiểu rủi ro lỗi do con người trong quá trình triển khai.
+
+\subsection{Tích hợp liên tục (Continuous Integration - CI)}
+Continuous Integration là giai đoạn tập trung vào việc tự động hóa quá trình xây dựng (build) và kiểm tra mã nguồn ngay khi có các thay đổi mới được đẩy lên hệ thống quản lý phiên bản (Git). Các thành phần kiến thức chính trong CI bao gồm:
+\begin{itemize}
+    \item \textbf{Tự động hóa xây dựng (Automated Build):} Hệ thống tự động biên dịch mã nguồn để đảm bảo không có lỗi cú pháp hoặc lỗi phụ thuộc. Đối với ngôn ngữ Rust, giai đoạn này được thực thi thông qua công cụ Cargo.
+    \item \textbf{Kiểm soát chất lượng mã nguồn (Linting):} Sử dụng các công cụ phân tích mã tĩnh (Static Analysis) như Clippy (Rust) hoặc ESLint (TypeScript) để phát hiện các đoạn mã không tối ưu, vi phạm quy tắc lập trình hoặc tiềm ẩn lỗi bảo mật.
+    \item \textbf{Kiểm thử tự động (Automated Testing):} Thực thi đồng thời các bộ kiểm thử đơn vị (Unit Tests) và kiểm thử tích hợp (Integration Tests) để xác nhận rằng các thay đổi mới không làm phá vỡ các chức năng hiện có của hệ thống.
+\end{itemize}
+
+\subsection{Triển khai liên tục (Continuous Delivery/Deployment - CD)}
+Giai đoạn CD tiếp nối sau khi giai đoạn CI hoàn thành thành công, tập trung vào việc đưa sản phẩm đến môi trường vận hành một cách an toàn và tự động:
+\begin{itemize}
+    \item \textbf{Đóng gói Container (Containerization):} Sử dụng Docker để đóng gói ứng dụng cùng với toàn bộ môi trường runtime, thư viện phụ thuộc vào một hình ảnh (Image) duy nhất. Điều này đảm bảo tính nhất quán tuyệt đối giữa môi trường phát triển và môi trường sản xuất.
+    \item \textbf{Quản lý kho hình ảnh (Registry Management):} Các Docker Image được đẩy lên và lưu trữ tại các kho chứa bảo mật như Amazon ECR (Elastic Container Registry) hoặc Docker Hub, phục vụ cho việc quản lý phiên bản và triển khai.
+    \item \textbf{Triển khai không gián đoạn (Zero-downtime Deployment):} Áp dụng các kỹ thuật như Rolling Update để cập nhật phiên bản mới của hệ thống Backend mà không gây ngưng trệ dịch vụ đối với người dùng cuối.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{assets/figures/cicd_workflow.png}
+    \caption{Mô hình vòng lặp minh họa luồng CI/CD}
+    \label{fig:ci_cd_workflow}
+\end{figure}
+
+Trong đồ án Nhatroso Platform, toàn bộ luồng CI/CD được tự động hóa thông qua công cụ GitHub Actions, kết hợp với hạ tầng điện toán đám mây Amazon Web Services (AWS), tạo ra một quy trình phát triển chuyên nghiệp, tin cậy và linh hoạt.

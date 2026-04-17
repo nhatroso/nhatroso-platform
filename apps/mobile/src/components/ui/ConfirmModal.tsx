@@ -6,7 +6,7 @@ import {
   Modal,
   TouchableWithoutFeedback,
 } from 'react-native';
-import { AlertCircle, X } from '@/src/lib/icons';
+import { AlertCircle, X } from '@/assets/icons';
 
 export interface ConfirmModalProps {
   visible: boolean;

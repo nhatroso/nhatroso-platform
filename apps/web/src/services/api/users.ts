@@ -1,4 +1,4 @@
-import { apiFetch, API_BASE_URL } from './base';
+import { apiFetch } from './base';
 
 export interface UserProfile {
   id: string;
@@ -27,7 +27,7 @@ export interface LookupUserResponse {
 export const usersService = {
   lookupByPhone: async (phone: string): Promise<LookupUserResponse> => {
     const res = await apiFetch(
-      `${API_BASE_URL}/users/lookup?phone=${encodeURIComponent(phone)}`,
+      `/users/lookup?phone=${encodeURIComponent(phone)}`,
       {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
@@ -44,7 +44,7 @@ export const usersService = {
   },
 
   getCurrentUser: async (): Promise<UserProfile> => {
-    const res = await apiFetch(`${API_BASE_URL}/auth/me`, {
+    const res = await apiFetch(`/auth/me`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
     });

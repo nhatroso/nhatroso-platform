@@ -16,7 +16,8 @@ import viMeterRequests from './locales/vi/meter_requests.json';
 import enMeterRequests from './locales/en/meter_requests.json';
 import viRoomServices from './locales/vi/room_services.json';
 import enRoomServices from './locales/en/room_services.json';
-
+import viInvoices from './locales/vi/invoices.json';
+import enInvoices from './locales/en/invoices.json';
 export const i18nConfig = {
   locales: ['vi', 'en'] as const,
   defaultLocale: 'vi' as const,
@@ -35,6 +36,7 @@ export const translations = {
     Meters: viMeters,
     MeterRequests: viMeterRequests,
     RoomServices: viRoomServices,
+    Invoices: viInvoices,
   },
   en: {
     Errors: enErrors,
@@ -46,6 +48,7 @@ export const translations = {
     Meters: enMeters,
     MeterRequests: enMeterRequests,
     RoomServices: enRoomServices,
+    Invoices: enInvoices,
   },
 };
 

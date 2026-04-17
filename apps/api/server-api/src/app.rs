@@ -47,6 +47,7 @@ impl Hooks for App {
 
     fn routes(_ctx: &AppContext) -> AppRoutes {
         AppRoutes::empty()
+            .add_route(controllers::auto_invoice_configs::routes())
             .add_route(controllers::meter_request_configs::routes())
             .add_route(controllers::meter_requests::routes())
             .add_route(controllers::meters::routes())
@@ -60,9 +61,22 @@ impl Hooks for App {
             .add_route(controllers::contracts::routes())
             .add_route(controllers::users::routes())
             .add_route(controllers::uploads::routes())
+            .add_route(controllers::invoices::routes())
+            .add_route(controllers::payments::routes())
     }
 
-    async fn after_routes(router: axum::Router, _ctx: &AppContext) -> Result<axum::Router> {
+    async fn after_routes(router: axum::Router, ctx: &AppContext) -> Result<axum::Router> {
+        let ctx = ctx.clone();
+        tokio::spawn(async move {
+            let mut interval = tokio::time::interval(tokio::time::Duration::from_secs(60));
+            loop {
+                interval.tick().await;
+                if let Err(e) = crate::models::payments::Model::update_expired(&ctx.db).await {
+                    tracing::error!(error = ?e, "[Worker] Payment expiration job failed");
+                }
+            }
+        });
+
         Ok(router.nest_service("/static", tower_http::services::ServeDir::new("static")))
     }
 
@@ -72,6 +86,7 @@ impl Hooks for App {
 
     fn register_tasks(tasks: &mut Tasks) {
         tasks.register(tasks::seed_data::SeedData);
+        tasks.register(tasks::auto_generate_invoices::AutoGenerateInvoices);
     }
 
     async fn truncate(_ctx: &AppContext) -> Result<()> {

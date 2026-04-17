@@ -4,7 +4,7 @@ use sea_orm::{ActiveModelTrait, ActiveValue, EntityTrait, ColumnTrait, QueryFilt
 use crate::models::_entities::{
     users, buildings, floors, rooms, services, price_rules,
     room_services, contracts, contract_tenants, meters, meter_readings,
-    meter_requests, meter_request_configs,
+    meter_requests, meter_request_configs, invoices, invoice_details, invoice_status_histories,
 };
 
 pub struct SeedData;
@@ -363,6 +363,48 @@ impl Task for SeedData {
         println!("[OK] Current month pending & simulated submissions created");
 
         // ════════════════════════════════════════════════════════════════════════════
+        // 11. INVOICES
+        // ════════════════════════════════════════════════════════════════════════════
+        let invoice_samples = vec![
+            ("A101", vec![("Tiền điện tháng 12", 350000), ("Tiền nước", 50000), ("Cáp quang", 120000)], "PAID"),
+            ("A102", vec![("Tiền điện tháng 12", 210000), ("Tiền nước", 55000)], "PAID"),
+            ("A201", vec![("Tiền thuê nhà tháng 01", 3500000), ("Tiền điện tháng 01", 300000)], "UNPAID"),
+            ("B101", vec![("Tiền thuê phòng tháng 01", 2000000), ("Điện nước", 150000)], "PENDING_CONFIRMATION"),
+            ("B102", vec![("Sửa chữa phòng", 500000)], "VOIDED"),
+        ];
+
+        for (code, items, status) in invoice_samples {
+            // Find tenant name
+            let tenant_idx = match code {
+                "A101" => 0,
+                "A102" => 1,
+                "A201" => 2,
+                "B101" => 3,
+                "B102" => 4,
+                _ => 0,
+            };
+            let tenant_name = tenants_info[tenant_idx].name;
+
+            // Calculate total
+            let total: i64 = items.iter().map(|(_, amt)| *amt).sum();
+
+            // Generate Invoice
+            let inv_id = find_or_create_invoice(
+                db, code, tenant_name,
+                rust_decimal::Decimal::from(total), status
+            ).await?;
+
+            // Generate Details
+            for (desc, amt) in items {
+                find_or_create_invoice_detail(db, inv_id, desc, rust_decimal::Decimal::from(amt)).await?;
+            }
+
+            // Generate History
+            find_or_create_invoice_history(db, inv_id, status, owner_id).await?;
+        }
+        println!("[OK] Sample invoices created");
+
+        // ════════════════════════════════════════════════════════════════════════════
         // SUMMARY
         // ════════════════════════════════════════════════════════════════════════════
         println!("\n════════════════════════════════════════════════════════════════");
@@ -689,4 +731,63 @@ async fn find_or_create_meter_request_config(
     Ok(result.id)
 }
 
+async fn find_or_create_invoice(
+    db: &DatabaseConnection, room_code: &str, tenant_name: &str,
+    total: rust_decimal::Decimal, status: &str,
+) -> Result<i32> {
+    if let Some(existing) = invoices::Entity::find()
+        .filter(invoices::Column::RoomCode.eq(room_code))
+        .filter(invoices::Column::Status.eq(status))
+        .one(db).await? {
+        if existing.tenant_name.as_deref() != Some(tenant_name) {
+            let mut model: invoices::ActiveModel = existing.into();
+            model.tenant_name = ActiveValue::Set(Some(tenant_name.to_string()));
+            let updated = model.update(db).await?;
+            return Ok(updated.id);
+        }
+        return Ok(existing.id);
+    }
+    let mut model = invoices::ActiveModel::new();
+    model.room_code = ActiveValue::Set(Some(room_code.to_string()));
+    model.tenant_name = ActiveValue::Set(Some(tenant_name.to_string()));
+    model.total_amount = ActiveValue::Set(Some(total));
+    model.status = ActiveValue::Set(Some(status.to_string()));
+    let result = model.insert(db).await?;
+    Ok(result.id)
+}
 
+async fn find_or_create_invoice_detail(
+    db: &DatabaseConnection, inv_id: i32, desc: &str, amount: rust_decimal::Decimal,
+) -> Result<()> {
+    if let Some(_existing) = invoice_details::Entity::find()
+        .filter(invoice_details::Column::InvoiceId.eq(inv_id))
+        .filter(invoice_details::Column::Description.eq(desc))
+        .one(db).await? {
+        return Ok(());
+    }
+    let mut model = invoice_details::ActiveModel::new();
+    model.invoice_id = ActiveValue::Set(inv_id);
+    model.description = ActiveValue::Set(desc.to_string());
+    model.amount = ActiveValue::Set(amount);
+    model.insert(db).await?;
+    Ok(())
+}
+
+async fn find_or_create_invoice_history(
+    db: &DatabaseConnection, inv_id: i32, to_status: &str, actor: uuid::Uuid,
+) -> Result<()> {
+    if let Some(_existing) = invoice_status_histories::Entity::find()
+        .filter(invoice_status_histories::Column::InvoiceId.eq(inv_id))
+        .filter(invoice_status_histories::Column::ToStatus.eq(to_status))
+        .one(db).await? {
+        return Ok(());
+    }
+    let mut model = invoice_status_histories::ActiveModel::new();
+    model.invoice_id = ActiveValue::Set(inv_id);
+    model.from_status = ActiveValue::Set(None); // Simplified
+    model.to_status = ActiveValue::Set(Some(to_status.to_string()));
+    model.actor_id = ActiveValue::Set(Some(actor));
+    model.timestamp = ActiveValue::Set(Some(now()));
+    model.insert(db).await?;
+    Ok(())
+}

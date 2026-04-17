@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { useFloors } from '@/hooks/use-floors';
 import { RoomList } from '@/components/buildings/RoomList';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { PageHeader } from '@/components/ui/PageHeader';
 
 function FloorListSkeleton() {
   return (
@@ -13,7 +14,7 @@ function FloorListSkeleton() {
       {Array.from({ length: 5 }).map((_, i) => (
         <div
           key={i}
-          className="overflow-hidden rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+          className="overflow-hidden rounded-xl border border-gray-border bg-gray-card p-6 shadow-sm"
         >
           <div className="flex items-center justify-between">
             <div className="flex flex-col gap-2">
@@ -55,20 +56,15 @@ function FloorsPageContent() {
   } = useFloors({ initialBuildingId });
 
   return (
-    <div className="flex h-[calc(100vh-112px)] w-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-      <div className="flex shrink-0 flex-col gap-4 border-b border-gray-200 px-6 py-5 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">
-              {t('Floors')}
-            </h1>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              {filteredFloors.length} {t('Floors').toLowerCase()}
-            </p>
-          </div>
+    <div className="flex h-[calc(100vh-112px)] w-full flex-col overflow-hidden rounded-xl border border-gray-border bg-gray-card shadow-sm">
+      <PageHeader
+        variant="split"
+        title={t('Floors')}
+        description={`${filteredFloors.length} ${t('Floors').toLowerCase()}`}
+        actions={
           <button
             onClick={() => setIsCreateModalOpen(true)}
-            className="inline-flex items-center rounded-lg bg-blue-700 px-4 py-2 text-center text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+            className="inline-flex items-center rounded-lg bg-primary px-4 py-2 text-center text-body font-medium text-white hover:bg-primary-hover focus:outline-none focus:ring-4 focus:ring-primary-light dark:bg-primary dark:hover:bg-primary-hover dark:focus:ring-primary-hover"
           >
             <svg
               className="mr-2 h-4 w-4"
@@ -85,16 +81,16 @@ function FloorsPageContent() {
             </svg>
             {t('AddFloor') || 'Add Floor'}
           </button>
-        </div>
-
+        }
+      >
         <div className="flex items-center gap-3">
-          <label className="text-sm font-medium text-gray-900 dark:text-white">
-            {t('Building') || 'Building'}:
+          <label className="text-body font-medium text-gray-text">
+            {t('SelectBuilding')}:
           </label>
           <select
             value={selectedBuildingId}
             onChange={(e) => setSelectedBuildingId(e.target.value)}
-            className="block w-64 rounded-lg border border-gray-300 bg-white p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+            className="block w-64 rounded-lg border border-gray-border bg-gray-input p-2.5 text-body text-gray-text focus:border-primary focus:ring-primary"
           >
             <option value="all">
               -- {t('AllBuildings') || 'All Buildings'} --
@@ -106,13 +102,13 @@ function FloorsPageContent() {
             ))}
           </select>
         </div>
-      </div>
+      </PageHeader>
 
-      <div className="flex-1 overflow-y-auto p-6 bg-gray-50/50 dark:bg-gray-900/50">
+      <div className="flex-1 overflow-y-auto p-6 bg-gray-surface">
         {loading ? (
           <FloorListSkeleton />
         ) : filteredFloors.length === 0 ? (
-          <div className="rounded-lg border-2 border-dashed border-gray-300 p-12 text-center text-gray-500 dark:border-gray-700 dark:text-gray-400">
+          <div className="rounded-lg border-2 border-dashed border-gray-border p-12 text-center text-gray-muted">
             {t('EmptyFloors')}
           </div>
         ) : (
@@ -128,8 +124,8 @@ function FloorsPageContent() {
                   key={fl.id}
                   className={`overflow-hidden rounded-xl border transition-all duration-200 ${
                     isExpanded
-                      ? 'border-blue-300 bg-white shadow-md dark:border-blue-500/50 dark:bg-gray-800'
-                      : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:hover:border-gray-600'
+                      ? 'border-primary-light bg-gray-card shadow-md'
+                      : 'border-gray-border bg-gray-card hover:shadow-sm'
                   }`}
                 >
                   <button
@@ -140,32 +136,30 @@ function FloorsPageContent() {
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-3">
                         <span
-                          className={`text-lg font-bold transition-colors ${isExpanded ? 'text-blue-700 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}
+                          className={`text-h3 font-bold transition-colors ${isExpanded ? 'text-primary' : 'text-gray-text'}`}
                         >
                           {fl.identifier}
                         </span>
                         <span
-                          className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-semibold ${
+                          className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-tiny font-semibold ${
                             fl.status === 'ACTIVE'
-                              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                              : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                              ? 'bg-success-light text-success'
+                              : 'bg-gray-subtle text-gray-muted'
                           }`}
                         >
                           {t(`Status_${fl.status}`)}
                         </span>
                       </div>
-                      <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                      <span className="text-body font-medium text-gray-muted">
                         {t('Building') || 'Building'}:{' '}
-                        <span className="text-gray-900 dark:text-gray-300">
-                          {buildingName}
-                        </span>
+                        <span className="text-gray-text">{buildingName}</span>
                       </span>
                     </div>
                     <div
-                      className={`rounded-full p-2 transition-colors ${isExpanded ? 'bg-blue-50 dark:bg-gray-700' : 'bg-gray-50 dark:bg-gray-700'}`}
+                      className={`rounded-full p-2 transition-colors ${isExpanded ? 'bg-primary-light' : 'bg-gray-surface'}`}
                     >
                       <svg
-                        className={`h-5 w-5 text-gray-500 transition-transform duration-200 ${isExpanded ? 'rotate-180 text-blue-600 dark:text-blue-400' : ''}`}
+                        className={`h-5 w-5 text-gray-muted transition-transform duration-200 ${isExpanded ? 'rotate-180 text-primary' : ''}`}
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -181,7 +175,7 @@ function FloorsPageContent() {
                   </button>
 
                   {isExpanded && (
-                    <div className="border-t border-gray-100 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+                    <div className="border-t border-gray-border bg-gray-card p-6">
                       <RoomList floorId={fl.id} />
                     </div>
                   )}
@@ -193,17 +187,17 @@ function FloorsPageContent() {
       </div>
 
       {isCreateModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden bg-gray-900/50 p-4">
-          <div className="relative w-full max-w-md h-full md:h-auto">
-            <div className="relative rounded-lg bg-white shadow dark:bg-gray-800">
-              <div className="flex items-start justify-between rounded-t border-b p-4 dark:border-gray-600">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden bg-gray-strong/50 p-4">
+          <div className="relative h-full w-full max-w-xl md:h-auto">
+            <div className="relative rounded-lg bg-gray-card shadow">
+              <div className="flex items-start justify-between rounded-t border-b p-4 border-gray-border">
+                <h3 className="text-h2 font-semibold text-gray-text">
                   {t('AddFloor')}
                 </h3>
                 <button
                   type="button"
                   onClick={() => setIsCreateModalOpen(false)}
-                  className="ml-auto inline-flex items-center rounded-lg bg-transparent p-1.5 text-sm text-gray-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-600 dark:hover:text-white"
+                  className="ml-auto inline-flex items-center rounded-lg bg-transparent p-1.5 text-body text-gray-muted hover:bg-gray-subtle hover:text-gray-text"
                 >
                   <svg
                     className="h-5 w-5"
@@ -221,14 +215,14 @@ function FloorsPageContent() {
               </div>
               <form onSubmit={handleCreate} className="p-6 space-y-6">
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
-                    {t('Building')} <span className="text-red-500">*</span>
+                  <label className="mb-2 block text-body font-medium text-gray-text">
+                    {t('Building')} <span className="text-danger">*</span>
                   </label>
                   <select
                     required
                     value={newBuildingId}
                     onChange={(e) => setNewBuildingId(e.target.value)}
-                    className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                    className="block w-full rounded-lg border border-gray-border bg-gray-input p-2.5 text-body text-gray-text focus:border-primary focus:ring-primary"
                   >
                     <option value="" disabled>
                       -- {t('SelectPropertyFirst')} --
@@ -241,8 +235,8 @@ function FloorsPageContent() {
                   </select>
                 </div>
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
-                    {t('Name')} <span className="text-red-500">*</span>
+                  <label className="mb-2 block text-body font-medium text-gray-text">
+                    {t('Name')} <span className="text-danger">*</span>
                   </label>
                   <input
                     required
@@ -250,23 +244,23 @@ function FloorsPageContent() {
                     value={newFloorName}
                     onChange={(e) => setNewFloorName(e.target.value)}
                     placeholder={t('PlaceholderFloorName')}
-                    className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                    className="block w-full rounded-lg border border-gray-border bg-gray-input p-2.5 text-body text-gray-text focus:border-primary focus:ring-primary"
                   />
                 </div>
-                <div className="flex items-center gap-3 pt-4 border-t border-gray-200 dark:border-gray-600">
+                <div className="flex items-center gap-3 pt-4 border-t border-gray-border">
                   <button
                     type="submit"
                     disabled={
                       isSubmitting || !newBuildingId || !newFloorName.trim()
                     }
-                    className="rounded-lg bg-blue-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 disabled:opacity-50 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                    className="rounded-lg bg-primary px-5 py-2.5 text-center text-body font-medium text-white hover:bg-primary-hover focus:outline-none focus:ring-4 focus:ring-primary-light disabled:opacity-50"
                   >
                     {isSubmitting ? t('Saving') : t('Creating')}
                   </button>
                   <button
                     type="button"
                     onClick={() => setIsCreateModalOpen(false)}
-                    className="rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:border-gray-500 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white dark:focus:ring-gray-600"
+                    className="rounded-lg border border-gray-border bg-gray-card px-5 py-2.5 text-body font-medium text-gray-muted hover:bg-gray-subtle hover:text-gray-text focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-subtle"
                   >
                     Cancel
                   </button>
@@ -285,7 +279,7 @@ export default function FloorsPage() {
     <React.Suspense
       fallback={
         <div className="flex h-screen items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         </div>
       }
     >

@@ -1,9 +1,9 @@
 # Database Design (MVP)
 
-Last updated: February 27, 2026
-Status: Review
+Last updated: April 9, 2026
+Status: In Progress
 Type: SDD
-Version: v1.0
+Version: v2.0
 
 <aside>
 🗄️
@@ -69,34 +69,28 @@ It focuses on **PostgreSQL** as the system of record, plus the minimal constrain
 ### 4) Physical schema (PostgreSQL) — MVP
 
 > Data types are suggestions; adapt to your ORM conventions.
-> 
 
 #### 4.1 Users & auth
 
 **users**
 
-- `id uuid pk`
-- `email text unique null`
-- `phone text unique null`
-- `password_hash text not null`
-- `role text not null` (`OWNER` | `TENANT`)
-- `status text not null` (`ACTIVE` | `DISABLED`)
-- `created_at timestamptz not null default now()`
-- `updated_at timestamptz not null default now()`
+- `id` integer serial pk (auto-increment, not UUID)
+- `name` text null
+- `email` text unique null
+- `phone` text unique null
+- `password_hash` text not null
+- `role` text not null (`OWNER` | `TENANT`)
+- `created_at` timestamptz not null default now()
+- `updated_at` timestamptz not null default now()
 
 **refresh_tokens**
 
-- `id uuid pk`
-- `user_id uuid not null fk users(id)`
-- `jti text not null unique`
-- `expires_at timestamptz not null`
-- `revoked_at timestamptz null`
-- `created_at timestamptz not null default now()`
-
-**Constraints**
-
-- `CHECK (email IS NOT NULL OR phone IS NOT NULL)`
-- Normalize `email` to lowercase and `phone` to E.164 at application layer.
+- `id` integer serial pk
+- `user_id` integer not null fk users(id)
+- `jti` text not null unique
+- `expires_at` timestamptz not null
+- `revoked_at` timestamptz null
+- `created_at` timestamptz not null default now()
 
 ---
 
@@ -104,32 +98,34 @@ It focuses on **PostgreSQL** as the system of record, plus the minimal constrain
 
 **buildings**
 
-- `id uuid pk`
-- `owner_id uuid not null fk users(id)`
-- `name text not null`
-- `address text null`
-- `status text not null` (`ACTIVE` | `ARCHIVED`)
+- `id` integer serial pk
+- `owner_id` integer not null fk users(id)
+- `name` text not null
+- `address` text null
+- `status` text not null (`ACTIVE` | `ARCHIVED`)
 - timestamps
 
 **floors**
 
-- `id uuid pk`
-- `building_id uuid not null fk buildings(id)`
-- `identifier text not null`
-- `status text not null` (`ACTIVE` | `ARCHIVED`)
+- `id` integer serial pk
+- `building_id` integer not null fk buildings(id)
+- `identifier` text not null
+- `status` text not null (`ACTIVE` | `ARCHIVED`)
 
 **rooms**
 
-- `id uuid pk`
-- `building_id uuid not null fk buildings(id)`
-- `floor_id uuid null fk floors(id)`
-- `code text not null`
-- `status text not null` (`VACANT` | `DEPOSITED` | `OCCUPIED` | `MAINTENANCE` | `ARCHIVED`)
+- `id` integer serial pk
+- `building_id` integer not null fk buildings(id)
+- `floor_id` integer null fk floors(id)
+- `code` text not null
+- `status` text not null (`VACANT` | `DEPOSITED` | `OCCUPIED` | `MAINTENANCE` | `ARCHIVED`)
 - timestamps
 
 **Constraints**
 
 - `UNIQUE(building_id, code)`
+
+> **Note:** A `blocks` table between buildings and floors was created but subsequently dropped (`m20260317_141521_remove_blocks.rs`).
 
 ---
 
@@ -137,28 +133,37 @@ It focuses on **PostgreSQL** as the system of record, plus the minimal constrain
 
 **services**
 
-- `id uuid pk`
-- `owner_id uuid not null fk users(id)`
-- `name text not null`
-- `unit text not null` (examples: `kWh`, `m3`, `month`)
-- `status text not null` (`ACTIVE` | `ARCHIVED`)
-- `created_at timestamptz not null default now()`
+- `id` integer serial pk
+- `owner_id` integer not null fk users(id)
+- `name` text not null
+- `unit` text not null (examples: `kWh`, `m3`, `month`, `VND/month`)
+- `status` text not null (`ACTIVE` | `ARCHIVED`)
+- `created_at` timestamptz not null default now()
+
+**room_services** _(new table, not in original design)_
+
+- `id` integer serial pk
+- `room_id` integer not null fk rooms(id)
+- `service_id` integer not null fk services(id)
+- `price_rule_id` integer null fk price_rules(id)
+- `status` text not null (`ACTIVE` | `ARCHIVED`)
+- `created_at` timestamptz
 
 **price_rules**
 
-- `id uuid pk`
-- `owner_id uuid not null fk users(id)`
-- `room_id uuid not null fk rooms(id)`
-- `service_id uuid not null fk services(id)`
-- `unit_price numeric not null`
-- `effective_start date not null`
-- `effective_end date null`
-- `created_at timestamptz not null default now()`
+- `id` integer serial pk
+- `owner_id` integer not null fk users(id)
+- `room_id` integer not null fk rooms(id)
+- `service_id` integer not null fk services(id)
+- `unit_price` numeric not null
+- `effective_start` date not null
+- `effective_end` date null
+- `is_active` boolean not null default true
+- `created_at` timestamptz not null default now()
 
 **Constraints (critical)**
 
-- For the same `(room_id, service_id)`, effective ranges must not overlap.
-    - Best practice in Postgres: use a `daterange(effective_start, effective_end, '[]')` and a **GiST exclusion constraint**.
+- For the same `(room_id, service_id)`, effective date ranges must not overlap.
 
 ---
 
@@ -166,25 +171,27 @@ It focuses on **PostgreSQL** as the system of record, plus the minimal constrain
 
 **contracts**
 
-- `id uuid pk`
-- `owner_id uuid not null fk users(id)`
-- `room_id uuid not null fk rooms(id)`
-- `start_date date not null`
-- `end_date date null`
-- `billing_cycle text not null` (`MONTHLY`)
-- `status text not null` (`ACTIVE` | `ENDED`)
-- `created_at timestamptz not null default now()`
+- `id` integer serial pk
+- `owner_id` integer not null fk users(id)
+- `room_id` integer not null fk rooms(id)
+- `start_date` date not null
+- `end_date` date null
+- `billing_cycle` text not null (`MONTHLY`)
+- `rental_period` integer null (months)
+- `room_code` text null (snapshot)
+- `room_address` text null (snapshot)
+- `status` text not null (`ACTIVE` | `ENDED`)
+- `created_at` timestamptz not null default now()
 
 **contract_tenants**
 
-- `contract_id uuid not null fk contracts(id)`
-- `tenant_id uuid not null fk users(id)`
+- `contract_id` integer not null fk contracts(id)
+- `tenant_id` integer not null fk users(id)
 - `PRIMARY KEY (contract_id, tenant_id)`
 
 **Constraints (critical)**
 
-- Exactly 1 active contract per room:
-    - Postgres: `UNIQUE(room_id) WHERE status = 'ACTIVE'` (partial unique index)
+- Exactly 1 active contract per room: partial unique index on `room_id WHERE status = 'ACTIVE'`.
 
 ---
 
@@ -192,37 +199,43 @@ It focuses on **PostgreSQL** as the system of record, plus the minimal constrain
 
 **meters**
 
-- `id uuid pk`
-- `room_id uuid not null fk rooms(id)`
-- `type text not null` (`ELECTRIC` | `WATER`)
-- `serial_no text null`
+- `id` integer serial pk
+- `room_id` integer not null fk rooms(id)
+- `type` text not null (`ELECTRIC` | `WATER`)
+- `serial_no` text null
 
 **meter_readings**
 
-- `id uuid pk`
-- `meter_id uuid not null fk meters(id)`
-- `period char(7) not null` (YYYY-MM)
-- `photo_url text not null` (object storage key/reference)
-- `ocr_raw_value text null`
-- `ocr_value int null`
-- `ocr_confidence numeric null`
-- `final_value int null`
-- `status text not null` (`DRAFT` | `RECOGNIZED` | `NEEDS_REVIEW` | `FINALIZED` | `FAILED`)
-- `created_by uuid not null fk users(id)`
-- `created_at timestamptz not null default now()`
+- `id` integer serial pk
+- `meter_id` integer not null fk meters(id)
+- `period` char(7) not null (YYYY-MM)
+- `photo_url` text null (uploaded image path)
+- `reading_value` numeric null (manual entry)
+- `usage` numeric null (computed from previous)
+- `status` text not null (`PENDING` | `ACCEPTED` | `REJECTED`)
+- `created_at` timestamptz not null default now()
 
-**reading_overrides**
+**meter_request_configs** _(new table)_
 
-- `id uuid pk`
-- `reading_id uuid not null fk meter_readings(id)`
-- `reason text not null`
-- `overridden_by uuid not null fk users(id)`
-- `overridden_at timestamptz not null default now()`
+- `id` integer serial pk
+- `building_id` integer not null fk buildings(id)
+- `deadline_day` integer not null (day of month for submission deadline)
+- `period_offset` integer not null (months offset for period calculation)
+- `created_at`, `updated_at` timestamptz
+
+**meter_requests** _(new table)_
+
+- `id` integer serial pk
+- `building_id` integer not null fk buildings(id)
+- `period` char(7) not null (YYYY-MM)
+- `status` text not null (`PENDING` | `COMPLETED` | `CANCELLED`)
+- `created_at`, `updated_at` timestamptz
+
+> **Note:** No OCR pipeline implemented. No `reading_overrides` table. Meter readings use manual `reading_value` input, not OCR output (`ocr_value`, `ocr_confidence`).
 
 **Recommended constraints**
 
-- `UNIQUE(meter_id, period)` to prevent duplicate readings for the same period.
-- Application rule: block finalize if current < previous finalized, unless override recorded.
+- `UNIQUE(meter_id, period)` — prevent duplicate readings for the same period.
 
 ---
 
@@ -230,58 +243,43 @@ It focuses on **PostgreSQL** as the system of record, plus the minimal constrain
 
 **invoices**
 
-- `id uuid pk`
-- `owner_id uuid not null fk users(id)`
-- `room_id uuid not null fk rooms(id)`
-- `contract_id uuid not null fk contracts(id)`
-- `period char(7) not null`
-- `status text not null` (`UNPAID` | `PENDING_CONFIRMATION` | `PAID` | `VOIDED`)
-- `total_amount numeric not null`
-- `created_at timestamptz not null default now()`
-- `updated_at timestamptz not null default now()`
+- `id` integer serial pk
+- `owner_id` integer not null fk users(id)
+- `room_id` integer not null fk rooms(id)
+- `contract_id` integer not null fk contracts(id)
+- `period` char(7) not null
+- `status` text not null (`UNPAID` | `PAID` | `VOIDED`)
+- `total_amount` numeric not null
+- `created_at` timestamptz not null default now()
+- `updated_at` timestamptz not null default now()
 
-**invoice_lines**
+**invoice_details** _(replaces invoice_lines)_
 
-- `id uuid pk`
-- `invoice_id uuid not null fk invoices(id)`
-- `item_type text not null` (`RENT` | `ELECTRIC` | `WATER` | `SERVICE`)
-- `service_id uuid null fk services(id)`
-- `quantity numeric not null`
-- `unit_price numeric not null`
-- `amount numeric not null`
-- `metadata jsonb null` (optional: reading ids, price_rule id, etc.)
+- `id` integer serial pk
+- `invoice_id` integer not null fk invoices(id)
+- `label` text not null (line item description)
+- `amount` numeric not null
 
-**invoice_status_history**
+**invoice_status_histories**
 
-- `id uuid pk`
-- `invoice_id uuid not null fk invoices(id)`
-- `from_status text null`
-- `to_status text not null`
-- `reason text null`
-- `actor_user_id uuid null fk users(id)`
-- `created_at timestamptz not null default now()`
+- `id` integer serial pk
+- `invoice_id` integer not null fk invoices(id)
+- `from_status` text null
+- `to_status` text not null
+- `reason` text null
+- `created_at` timestamptz not null default now()
 
 **Constraints (critical)**
 
-- Idempotent invoice generation:
-    - `UNIQUE(contract_id, period)`
+- `UNIQUE(contract_id, period)` — idempotent invoice generation.
+
+> **Note:** Original design used `invoice_lines` with `item_type` enum, `quantity`, `unit_price` breakdown. Actual implementation uses simpler `invoice_details` with just `label` + `amount`. Status `PENDING_CONFIRMATION` dropped; active statuses are `UNPAID | PAID | VOIDED`.
 
 ---
 
-#### 4.7 Audit (append-only)
+#### 4.7 Audit
 
-**audit_events**
-
-- `id uuid pk`
-- `owner_id uuid null fk users(id)`
-- `actor_user_id uuid null fk users(id)`
-- `action_type text not null`
-- `target_type text not null`
-- `target_id uuid null`
-- `ip text null`
-- `user_agent text null`
-- `reason text null`
-- `created_at timestamptz not null default now()`
+> **Note:** The original design included an `audit_events` (append-only) table. This table is **not present** in the current migration files. Audit logging may be added in a future iteration.
 
 ---
 
@@ -311,9 +309,12 @@ Tenant cannot access Owner endpoints (enforced by RBAC guards).
 
 ---
 
-### 7) Open items / decisions to confirm
+### 7) Open items / decisions
 
-- Whether to support **Blocks** (wings/areas) in MVP, or postpone.
-- Whether to store `period` as `date` (first day of month) instead of `char(7)`.
-- Whether to create a dedicated `files` table instead of storing `photo_url` directly.
-- Whether invoice totals are stored as integer cents (recommended) or numeric.
+- ✅ Resolved: `period` stored as `char(7)` (YYYY-MM format).
+- ✅ Resolved: Blocks feature dropped (migration `m20260317_141521_remove_blocks.rs`).
+- ✅ Resolved: `invoice_lines` replaced by simpler `invoice_details` (label + amount).
+- ⬜ OCR pipeline: not implemented. Meter readings are manually entered. Future decision: integrate OCR service or keep manual-only.
+- ⬜ Audit events table: planned but not yet migrated.
+- ⬜ Payment webhook: endpoint exists (`POST /invoices/:id/webhook`) but payment provider integration (VietQR, Casso, Sepay) not yet implemented.
+- ⬜ Tenant invoice view: currently owner-only; tenant mobile access via meter request workflow.

@@ -1,4 +1,4 @@
-import { apiFetch, API_BASE_URL } from './base';
+import { apiFetch } from './base';
 
 export interface MeterRequestConfig {
   id: string;
@@ -28,7 +28,7 @@ export interface MeterRequest {
 }
 
 export async function getMeterConfig(): Promise<MeterRequestConfig | null> {
-  const res = await apiFetch(`${API_BASE_URL}/meter-request-configs`, {
+  const res = await apiFetch(`/meter-request-configs`, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
   });
@@ -45,7 +45,7 @@ export async function getMeterConfig(): Promise<MeterRequestConfig | null> {
 export async function updateMeterConfig(
   data: ConfigParams,
 ): Promise<MeterRequestConfig> {
-  const res = await apiFetch(`${API_BASE_URL}/meter-request-configs`, {
+  const res = await apiFetch(`/meter-request-configs`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -61,7 +61,7 @@ export async function updateMeterConfig(
 export async function getMeterRequests(
   periodMonth?: string,
 ): Promise<MeterRequest[]> {
-  let url = `${API_BASE_URL}/meter-requests`;
+  let url = `/meter-requests`;
   if (periodMonth) {
     url += `?period_month=${encodeURIComponent(periodMonth)}`;
   }
@@ -87,7 +87,7 @@ export interface GenerateManualParams {
 export async function generateManualRequests(
   data: GenerateManualParams,
 ): Promise<{ generated_count: number }> {
-  const res = await apiFetch(`${API_BASE_URL}/meter-requests/generate-manual`, {
+  const res = await apiFetch(`/meter-requests/generate-manual`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),

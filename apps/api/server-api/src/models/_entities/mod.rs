@@ -2,15 +2,20 @@
 
 pub mod prelude;
 
+pub mod auto_invoice_configs;
 pub mod buildings;
 pub mod contract_tenants;
 pub mod contracts;
 pub mod floors;
+pub mod invoice_details;
+pub mod invoice_status_histories;
+pub mod invoices;
 pub mod meter_readings;
 pub mod meter_request_configs;
 pub mod meter_requests;
 pub mod meters;
 pub mod price_rules;
+pub mod payments;
 pub mod refresh_tokens;
 pub mod room_services;
 pub mod rooms;

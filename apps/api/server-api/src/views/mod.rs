@@ -9,4 +9,5 @@ pub mod auth;
 pub mod room_services;
 pub mod meter_requests;
 pub mod meter_request_configs;
-
+pub mod invoices;
+pub mod auto_invoice_configs;

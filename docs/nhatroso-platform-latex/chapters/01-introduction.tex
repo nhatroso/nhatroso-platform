@@ -1,0 +1,105 @@
+% chapters/01-introduction.tex
+\chapter{Giới thiệu}\label{chapter_intro}
+
+\section{Đặt vấn đề}
+
+Tại Việt Nam, thị trường nhà trọ phục vụ hàng triệu sinh viên, công nhân và người lao động. Phần lớn chủ cho thuê nhà trọ quy mô nhỏ và vừa vẫn đang quản lý bằng phương pháp truyền thống: ghi chỉ số điện nước thủ công vào sổ sách, tính tiền bằng Excel hoặc máy tính cầm tay, và thông báo hóa đơn qua nhắn tin. Quy trình này tiềm ẩn nhiều rủi ro: sai sót trong ghi nhận chỉ số, thiếu minh bạch trong tính toán dẫn đến tranh chấp với người thuê, và dữ liệu phân tán khó tổng hợp báo cáo.
+
+Bên cạnh đó, việc theo dõi hợp đồng thuê, quản lý trạng thái phòng, và đối soát thanh toán hàng tháng đòi hỏi nhiều thời gian và công sức của chủ nhà. Người thuê phòng cũng thiếu công cụ để theo dõi hóa đơn và lịch sử thanh toán của mình một cách minh bạch và chủ động.
+
+Sự phát triển của công nghệ nhận dạng ký tự quang học (OCR), ứng dụng web đám mây và hệ thống thanh toán số như QR code mở ra cơ hội số hóa toàn bộ quy trình quản lý nhà trọ, giúp giảm tải thao tác thủ công và gia tăng tính minh bạch. Trong giai đoạn đầu, việc số hóa quy trình thông qua bằng chứng ảnh chụp và hệ thống phê duyệt trực tuyến là bước đệm quan trọng trước khi tiến tới tự động hóa hoàn toàn bằng AI.
+
+\section{Mục tiêu đề tài}
+
+Mục tiêu tổng quát của đề tài là xây dựng một nền tảng quản lý nhà trọ toàn diện (Nhatroso Platform), giúp chuyển đổi số quy trình vận hành truyền thống sang mô hình hiện đại, tự động hóa và minh bạch. Cụ thể, đồ án tập trung hoàn thành các mục tiêu chi tiết sau:
+
+\begin{itemize}
+    \item \textbf{Số hóa và minh bạch hóa quy trình ghi nhận dịch vụ:}
+    Xây dựng cơ chế ghi nhận chỉ số điện, nước thông qua hình ảnh thực tế từ ứng dụng di động. Điều này không chỉ giúp giảm thiểu sai sót do nhập liệu thủ công mà còn tạo ra bằng chứng khách quan, giúp giải quyết triệt để các tranh chấp tiềm ẩn giữa chủ nhà và người thuê về chi phí sử dụng.
+
+    \item \textbf{Xây dựng kiến trúc quản lý vận hành tập trung:}
+    Thiết kế và triển khai hệ thống theo mô hình kiến trúc Modular Monolith, cho phép quản lý tập trung toàn bộ dữ liệu về bất động sản (tòa nhà, tầng, phòng), hồ sơ cư dân và hợp đồng thuê trên một nền tảng duy nhất. Kiến trúc này đảm bảo tính nhất quán, an toàn dữ liệu và khả năng mở rộng linh hoạt trong tương lai.
+
+    \item \textbf{Tự động hóa luồng tài chính và thanh toán:}
+    Phát triển công cụ tự động tính toán hóa đơn hàng tháng dựa trên biểu phí dịch vụ động và chỉ số sử dụng thực tế. Tích hợp giải pháp thanh toán qua mã VietQR động, hỗ trợ đối soát giao dịch tự động thông qua Webhook, giúp tối ưu hóa dòng tiền và giảm tải công việc kế toán cho chủ nhà.
+
+    \item \textbf{Tối ưu hóa trải nghiệm người dùng đa nền tảng:}
+    Cung cấp hệ sinh thái ứng dụng đa nền tảng gồm Web Dashboard dành cho chủ nhà để quản lý vận hành chuyên sâu và Ứng dụng Mobile dành cho người thuê để chủ động theo dõi hóa đơn, nộp chỉ số và gửi yêu cầu hỗ trợ. Hệ thống đảm bảo tính thân thiện, dễ sử dụng và phản ứng nhanh trên mọi thiết bị.
+
+    \item \textbf{Ứng dụng công nghệ hiện đại và độ tin cậy cao:}
+    Nghiên cứu và áp dụng ngôn ngữ lập trình Rust cùng framework Loco.rs để xây dựng một hệ thống Backend có hiệu suất cao, an toàn bộ nhớ và tin cậy. Đồng thời, thiết lập quy trình triển khai hiện đại sử dụng Docker và hạ tầng điện toán đám mây AWS để đảm bảo tính sẵn sàng của dịch vụ.
+\end{itemize}
+
+\section{Đối tượng và phạm vi nghiên cứu}
+
+\textbf{Đối tượng nghiên cứu:}
+Đề tài tập trung nghiên cứu giải pháp xây dựng hệ thống quản lý vận hành nhà trọ thông minh, dựa trên việc số hóa toàn diện các luồng nghiệp vụ giữa chủ nhà và người thuê. Trọng tâm nghiên cứu bao gồm:
+\begin{itemize}
+    \item Mô hình kiến trúc Modular Monolith và khả năng cách ly dữ liệu trong môi trường đa khách thuê (Multi-tenancy).
+    \item Quy trình tự động hóa luồng tài chính từ khâu ghi nhận chỉ số đến khâu đối soát thanh toán.
+    \item Ứng dụng công nghệ xử lý hình ảnh và OCR để giảm thiểu sai sót trong quản lý dịch vụ.
+\end{itemize}
+
+\textbf{Phạm vi nghiên cứu:}
+\begin{itemize}
+    \item \textbf{Phạm vi nghiệp vụ:} Toàn bộ vòng đời quản lý lưu trú, từ quản lý cấu trúc hạ tầng (tòa nhà, tầng, phòng), quản lý hồ sơ cư dân và hợp đồng, đến các quy trình phức tạp hơn như cấu hình biểu phí dịch vụ theo thời gian, tự động hóa tính toán công nợ và tích hợp thanh toán không tiền mặt dựa trên phản hồi Webhook từ ngân hàng.
+    \item \textbf{Phạm vi công nghệ:} Phát triển hệ thống đa nền tảng sử dụng Web Dashboard (Next.js) cho chủ nhà và Mobile App (React Native/Expo) cho người thuê. Hệ thống Backend được xây dựng bằng Rust (Loco.rs) phục vụ các giao thức RESTful API, triển khai trên nền tảng Docker và hạ tầng AWS.
+    \item \textbf{Giới hạn đề tài:} Do giới hạn về thời gian và nguồn lực, đề tài không bao gồm việc nghiên cứu và tích hợp các thiết bị phần cứng IoT để đọc chỉ số tự động. Hệ thống hiện tại dừng lại ở việc số hóa quy trình thông qua bằng chứng ảnh chụp và sự can thiệp của con người trong các bước phê duyệt cuối cùng để đảm bảo độ chính xác tuyệt đối.
+\end{itemize}
+
+\section{Quy trình phát triển và công cụ sử dụng}
+
+\textbf{Quy trình phát triển phần mềm:}
+Đề tài được thực hiện theo mô hình phát triển phần mềm \textbf{Agile/Scrum} \cite{ScrumGuide}, cho phép tính linh hoạt cao và đảm bảo khả năng bàn giao sản phẩm liên tục thông qua các chu kỳ ngắn. Lộ trình tổng thể kéo dài 16 tuần được chia làm ba giai đoạn chính:
+\begin{itemize}
+    \item \textbf{Giai đoạn Chuẩn bị (Tuần 1--4):} Tập trung vào việc nghiên cứu thị trường, xác định chiến lược kinh doanh (BRD), chi tiết hóa các yêu cầu chức năng và phi chức năng (SRS) và thiết kế kiến trúc hệ thống tổng quát (SDD).
+    \item \textbf{Giai đoạn Phát triển (Tuần 5--12):} Thực hiện phát triển thông qua 3 chu kỳ Sprints chính:
+    \begin{itemize}
+        \item \textit{Sprint 1:} Hoàn thiện hệ thống xác thực (Auth), quản lý cấu trúc tòa nhà, tầng, phòng và thiết lập biểu phí dịch vụ.
+        \item \textit{Sprint 2:} Triển khai module hợp đồng, cư dân và xây dựng quy trình ghi nhận chỉ số điện nước thông qua ảnh chụp.
+        \item \textit{Sprint 3:} Phát triển bộ máy tính toán hóa đơn, tích hợp thanh toán QR và hoàn thiện giao diện Dashboard.
+    \end{itemize}
+    \item \textbf{Giai đoạn Kiểm thử và Hoàn thiện (Tuần 13--16):} Song song với quá trình phát triển, các hoạt động QA/QC được thực hiện để đảm bảo chất lượng, thực hiện kiểm thử chấp nhận người dùng (UAT) trước khi đóng gói và bàn giao.
+\end{itemize}
+
+\textbf{Công cụ và công nghệ sử dụng:}
+Để đáp ứng yêu cầu về hiệu suất cao và khả năng bảo trì, hệ sinh thái công nghệ của đề tài được lựa chọn dựa trên các tiêu chí hiện đại và tối ưu:
+\begin{itemize}
+    \item \textbf{Quản lý dự án và mã nguồn:} Sử dụng mô hình Monorepo với Turborepo và pnpm để quản lý toàn bộ mã nguồn trên GitHub. Lộ trình và tài liệu chuyên môn được quản lý tập trung trên Notion.
+    \item \textbf{Công nghệ Backend:} Ngôn ngữ lập trình Rust cùng framework Loco.rs (dựa trên Axum \cite{Axum}) giúp đảm bảo hiệu suất cao và an toàn bộ nhớ \cite{RustBook}. SeaORM \cite{SeaORM} được sử dụng để tương tác với cơ sở dữ liệu PostgreSQL \cite{PostgreSQL}.
+    \item \textbf{Công nghệ Frontend:} Framework Next.js 16 kết hợp với TailwindCSS v4 cho phiên bản Web Dashboard của chủ nhà, đảm bảo giao diện hiện đại và tốc độ phản hồi nhanh.
+    \item \textbf{Ứng dụng di động:} Sử dụng Expo 55 và React Native cho phiên bản Mobile dành cho người thuê, giúp tối ưu hóa thời gian phát triển đa nền tảng (iOS/Android) với giao diện linh hoạt từ NativeWind.
+    \item \textbf{Hạ tầng và Vận hành:} Hệ thống được triển khai trên nền tảng Docker \cite{Docker}, vận hành trên hạ tầng đám mây AWS \cite{AWS} (EC2 cho máy chủ và S3 cho lưu trữ tệp tin), tự động hóa CI/CD qua GitHub Actions \cite{GitHubActions}.
+\end{itemize}
+
+\section{Ý nghĩa đồ án}
+
+\textbf{Ý nghĩa khoa học:}
+Đồ án không chỉ dừng lại ở việc xây dựng một ứng dụng quản lý đơn thuần mà còn là quá trình nghiên cứu và ứng dụng các giải pháp công nghệ tiên tiến vào thực tiễn:
+\begin{itemize}
+    \item \textbf{Ứng dụng ngôn ngữ Rust:} Minh chứng cho việc áp dụng một ngôn ngữ lập trình hiện đại, chú trọng vào an toàn bộ nhớ và hiệu suất vào lĩnh vực phần mềm dân dụng, giúp giảm thiểu các lỗi logic và bảo mật thường gặp.
+    \item \textbf{Tối ưu hóa kiến trúc hệ thống:} Nghiên cứu và thực thi mô hình Modular Monolith, giúp cân bằng giữa tốc độ phát triển và khả năng bảo trì. Đồng thời, việc áp dụng Multi-tenancy giúp giải quyết bài toán cách ly dữ liệu và tối ưu tài nguyên hạ tầng cho nhiều khách thuê.
+    \item \textbf{Số hóa và xử lý hình ảnh:} Đóng góp vào việc nghiên cứu quy trình tự động hóa dựa trên bằng chứng kỹ thuật số (ảnh chụp), tạo nền tảng cho việc tích hợp các mô hình AI/OCR chuyên sâu hơn trong tương lai.
+\end{itemize}
+
+\textbf{Ý nghĩa thực tiễn:}
+Sự ra đời của Nhatroso Platform mang lại những giá trị thiết thực cho các đối tượng trong hệ sinh thái:
+\begin{itemize}
+    \item \textbf{Đối với chủ cho thuê:} Xây dựng phong cách quản lý chuyên nghiệp, giảm bớt gánh nặng tính toán thủ công và sai sót. Hệ thống báo cáo thời gian thực giúp chủ nhà nắm bắt chính xác dòng tiền, tình trạng lấp đầy và hiệu quả kinh doanh của từng tòa nhà.
+    \item \textbf{Đối với người thuê phòng:} Cung cấp trải nghiệm minh bạch nhất về chi phí. Người thuê có thể dễ dàng quản lý hóa đơn, lịch sử thanh toán và thực hiện các giao dịch không tiền mặt chỉ với vài thao tác trên di động, từ đó gia tăng sự tin tưởng và gắn kết với chủ nhà.
+    \item \textbf{Đối với cộng đồng và xã hội:} Góp phần vào mục tiêu chuyển đổi số quốc gia, đặc biệt là trong phân khúc kinh tế hộ gia đình và kinh doanh nhà trọ nhỏ lẻ. Đồ án mở ra hướng đi cho việc hiện đại hóa các dịch vụ dân sinh bằng công nghệ số.
+\end{itemize}
+
+\section{Bố cục đồ án}
+
+Đồ án được tổ chức thành bảy chương:
+
+ \begin{itemize}
+   \item Chương \ref{chapter_intro}: Giới thiệu --- Bối cảnh, mục tiêu và phạm vi đề tài.
+   \item Chương \ref{chapter_theory}: Cơ sở lý thuyết --- Kiến thức nền tảng, công nghệ sử dụng và kiến trúc hệ thống.
+   \item Chương \ref{chapter_requirements}: Phân tích yêu cầu hệ thống --- Stakeholder, yêu cầu chức năng và quản lý nghiệp vụ.
+   \item Chương \ref{chapter_design}: Thiết kế hệ thống --- Mô hình dữ liệu, thiết kế API và quy trình nghiệp vụ.
+   \item Chương \ref{chapter_impl}: Cài đặt và triển khai --- Công nghệ, cấu trúc module và triển khai Docker.
+   \item Chương \ref{chapter_testing}: Thử nghiệm và Đánh giá --- Chiến lược, kịch bản và kết quả kiểm thử thực tế.
+   \item Chương \ref{chapter_conclusion}: Kết luận --- Tổng kết kết quả đạt được, hạn chế và hướng phát triển tương lai.
+ \end{itemize}

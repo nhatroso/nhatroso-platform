@@ -7,7 +7,7 @@
   "SubmissionRate": "Submission Rate",
   "BuildingsOverview": "Buildings Overview",
   "MasterList": "Detailed Meter List",
-  "SearchRoom": "Search room...",
+  "SearchRoom": "Search room",
   "AllBuildings": "All Buildings",
   "AllServices": "All Services",
   "FilterStatus": "Status",
@@ -34,5 +34,12 @@
   "NewValue": "New Value",
   "ConfirmRecord": "Confirm Reading",
   "SuccessRecord": "Reading recorded successfully!",
-  "ErrorRecord": "Error recording reading."
+  "ErrorRecord": "Error recording reading.",
+  "ReadingHistory": "Submission History",
+  "ReadingHistoryDesc": "Review the full history of tenant utility meter readings.",
+  "ExportExcel": "Export Report",
+  "NoReadingsFound": "No records found in this period.",
+  "UsageValue": "Usage",
+  "Evidence": "Evidence Photo",
+  "ReadingValue": "Latest Reading"
 }

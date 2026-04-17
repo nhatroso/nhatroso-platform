@@ -1,7 +1,8 @@
 import { Room, CreateRoomInput, UpdateRoomInput } from '@nhatroso/shared';
-import { apiFetch, API_BASE_URL } from './base';
+import { apiFetch } from './base';
+
 export async function getAllRooms(): Promise<Room[]> {
-  const res = await apiFetch(`${API_BASE_URL}/rooms`, {
+  const res = await apiFetch(`/rooms`, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
   });
@@ -10,7 +11,7 @@ export async function getAllRooms(): Promise<Room[]> {
 }
 
 export async function getRooms(floorId: string): Promise<Room[]> {
-  const res = await apiFetch(`${API_BASE_URL}/floors/${floorId}/rooms`, {
+  const res = await apiFetch(`/floors/${floorId}/rooms`, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
   });
@@ -22,7 +23,7 @@ export async function createRoom(
   floorId: string,
   data: CreateRoomInput,
 ): Promise<Room> {
-  const res = await apiFetch(`${API_BASE_URL}/floors/${floorId}/rooms`, {
+  const res = await apiFetch(`/floors/${floorId}/rooms`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -38,7 +39,7 @@ export async function updateRoom(
   id: string,
   data: UpdateRoomInput,
 ): Promise<Room> {
-  const res = await apiFetch(`${API_BASE_URL}/rooms/${id}`, {
+  const res = await apiFetch(`/rooms/${id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -51,7 +52,7 @@ export async function updateRoom(
 }
 
 export async function getAvailableRooms(): Promise<Room[]> {
-  const res = await apiFetch(`${API_BASE_URL}/rooms/available`, {
+  const res = await apiFetch(`/rooms/available`, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
   });

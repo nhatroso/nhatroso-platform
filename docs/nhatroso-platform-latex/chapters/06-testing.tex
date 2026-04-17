@@ -1,0 +1,53 @@
+% chapters/05-testing.tex
+\chapter{Kiểm thử hệ thống}\label{chapter_testing}
+
+\section{Chiến lược kiểm thử}
+
+Chiến lược kiểm thử của dự án tuân theo mô hình kim tự tháp kiểm thử với ba tầng: unit test (tầng đáy, nhiều nhất), integration test (tầng giữa), và end-to-end smoke test (tầng đỉnh, ít nhất nhưng kiểm tra luồng đầu cuối).
+
+Mỗi tầng giải quyết một phạm vi kiểm thử khác nhau. Unit test tập trung vào logic nghiệp vụ thuần túy, có thể chạy nhanh và độc lập. Integration test kiểm tra sự tương tác giữa module và database thực. E2E test xác minh toàn bộ luồng người dùng từ đầu đến cuối.
+
+\section{Chiến lược kiểm thử}
+
+Chiến lược kiểm thử tập trung vào việc đảm bảo tính chính xác của dữ liệu tài chính (billing) và tính đồng bộ giữa hai nền tảng Dashboard (Web) và ứng dụng di động (Mobile). Hệ thống sử dụng mô hình kim tự tháp kiểm thử với trọng tâm là các Unit Test cho logic tính toán và Integration Test cho các luồng nghiệp vụ liên nền tảng.
+
+\section{Unit Test và Integration Test trong Rust}
+
+Tận dụng bộ công cụ kiểm thử tích hợp sẵn của Rust (\texttt{cargo test}) và các tiện ích từ Loco.rs:
+
+\textbf{Kiểm thử logic Billing:} Xác minh tính đúng đắn của quy trình tính toán hóa đơn bên trong dịch vụ \texttt{InvoicesService}. Các kịch bản bao gồm: tính toán chênh lệch chỉ số giữa hai kỳ đọc, áp dụng đơn giá từ bảng giá hiệu lực, và xử lý các trường hợp dịch vụ không có đơn giá cố định.
+
+\textbf{Kiểm thử ràng buộc cơ sở dữ liệu:} Sử dụng Loco testing infrastructure để chạy các integration tests trên cơ sở dữ liệu PostgreSQL thực. Xác minh các ràng buộc \texttt{unique} trên mã phòng, sự chồng chéo của \texttt{price\_rules} và tính duy nhất của hóa đơn theo kỳ.
+
+\textbf{Kiểm thử API và Phân quyền:} Kiểm tra các endpoint RESTful để đảm bảo chúng trả về đúng mã trạng thái (200 OK, 403 Forbidden) tùy theo Token người dùng.
+
+\begin{table}[htbp]
+\centering
+\caption{Kịch bản integration test (Implemented)}
+\label{tab:integration-tests}
+\begin{tabularx}{\textwidth}{l>{\raggedright\arraybackslash}X}
+\toprule
+\textbf{Kịch bản} & \textbf{Kết quả kỳ vọng} \\
+\midrule
+Tạo hóa đơn lặp lại cho cùng một kỳ & Hệ thống báo lỗi vi phạm ràng buộc duy nhất. \\
+Nộp chỉ số điện khi kỳ yêu cầu đã đóng & Trả về lỗi \texttt{METER\_REQUEST\_CLOSED}. \\
+Tenant truy cập thông tin của phòng khác & Trả về lỗi \texttt{403 Forbidden} thông qua Ownership check. \\
+Lấy đơn giá dịch vụ tại thời điểm cụ thể & Trả về đúng giá trị dựa trên hiệu lực \texttt{effective\_start/end}. \\
+Owner duyệt chỉ số vượt quá giới hạn & Cảnh báo và yêu cầu xác nhận ghi đè. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Kiểm thử luồng nghiệp vụ đầu cuối (E2E)}
+
+Kịch bản kiểm thử E2E xác minh sự phối hợp giữa ứng dụng Mobile của người thuê và Dashboard Web của chủ nhà:
+
+\begin{enumerate}
+  \item \textbf{Khởi tạo:} Owner tạo kỳ yêu cầu \texttt{meter\_requests} trên Web Dashboard.
+  \item \textbf{Nộp chỉ số:} Tenant đăng nhập Mobile App, nhận thông báo và upload ảnh đồng hồ kèm chỉ số thủ công.
+  \item \textbf{Đối soát:} Owner xem danh sách chỉ số chờ duyệt trên Web, đối chiếu ảnh bằng chứng và chọn \texttt{ACCEPT}.
+  \item \textbf{Tính toán:} Owner chạy lệnh \texttt{calculate\_invoice} để kiểm tra bản nháp hóa đơn.
+  \item \textbf{Phát hành:} Owner chính thức tạo hóa đơn; Tenant nhận được thông tin hóa đơn mới trên Mobile App.
+\end{enumerate}
+
+Kết quả kiểm thử cho thấy luồng dữ liệu giữa hai nền tảng diễn ra thông suốt, các ràng buộc toàn vẹn được thực thi nghiêm ngặt tại tầng API Rust.
