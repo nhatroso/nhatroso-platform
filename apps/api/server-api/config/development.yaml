@@ -17,7 +17,7 @@ logger:
 # Web server configuration
 server:
   # Port on which the server will listen. the server binding is 0.0.0.0:{PORT}
-  port: 5150
+  port: {{ get_env(name="PORT", default="5150") }}
   # Binding for the server (which interface to bind to)
   binding: 0.0.0.0
   # The UI hostname or IP address that mailers will point to.
@@ -33,7 +33,6 @@ workers:
   #   - BackgroundAsync - Workers operate asynchronously in the background, processing tasks with async capabilities.
   mode: BackgroundQueue
 
-
 # Queue Configuration
 queue:
   kind: Redis
@@ -42,23 +41,15 @@ queue:
   # Dangerously flush all data in Redis on startup. dangerous operation, make sure that you using this flag only on dev environments or test mode
   dangerously_flush: false
 
-# Mailer Configuration.
-mailer:
-  # SMTP mailer configuration.
-  smtp:
-    # Enable/Disable smtp mailer.
-    enable: true
-    # SMTP server host. e.x localhost, smtp.gmail.com
-    host: localhost
-    # SMTP server port
-    port: 1025
-    # Use secure connection (SSL/TLS).
-    secure: false
-    # auth:
-    #   user:
-    #   password:
-    # Override the SMTP hello name (default is the machine's hostname)
-    # hello_name:
+settings:
+  email:
+    provider: ses
+    from: {{ get_env(name="EMAIL_FROM", default="noreply@nhatroso.com") }}
+    timeout_seconds: 10
+    rate_limit_ms: 50
+    retry:
+      max_attempts: 3
+      backoff_base: 2
 
 # Initializers Configuration
 # initializers:
@@ -93,6 +84,6 @@ auth:
   # JWT authentication
   jwt:
     # Secret key for token generation and verification
-    secret: C7Jv4x7FYe4orZlCOu2M
+    secret: {{ get_env(name="JWT_SECRET", default="C7Jv4x7FYe4orZlCOu2M") }}
     # Token expiration time in seconds
     expiration: 604800 # 7 days

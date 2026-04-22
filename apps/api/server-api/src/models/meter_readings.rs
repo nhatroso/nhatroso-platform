@@ -94,6 +94,7 @@ impl Model {
                 period_month: ActiveValue::Set(params.period_month),
                 status: ActiveValue::Set("SUBMITTED".to_string()),
                 created_at: ActiveValue::Set(chrono::Utc::now().into()),
+                ..Default::default()
             };
             active.insert(db).await?
         };
@@ -229,5 +230,36 @@ impl Model {
                 status: r.status,
             })
             .collect())
+    }
+
+    pub async fn submit_ocr_reading(
+        ctx: &AppContext,
+        meter_id: Uuid,
+        user_id: Uuid,
+        params: crate::views::meters::OcrReadingParams,
+    ) -> Result<MeterReadingResponse> {
+        let db = &ctx.db;
+
+        // 1. Create a PENDING record
+        let active = ActiveModel {
+            id: ActiveValue::Set(Uuid::new_v4()),
+            meter_id: ActiveValue::Set(meter_id),
+            image_url: ActiveValue::Set(Some(params.image_url)),
+            tenant_id: ActiveValue::Set(Some(user_id)),
+            period_month: ActiveValue::Set(params.period_month),
+            status: ActiveValue::Set("PENDING".to_string()),
+            created_at: ActiveValue::Set(chrono::Utc::now().into()),
+            ..Default::default()
+        };
+        let model = active.insert(db).await?;
+        let reading_id = model.id;
+
+        // 2. Enqueue the worker
+        let args = crate::workers::meter_reading_worker::MeterReadingWorkerArgs {
+            reading_id,
+        };
+        crate::workers::meter_reading_worker::MeterReadingWorker::perform_later(ctx, args).await?;
+
+        Ok(MeterReadingResponse::from(model))
     }
 }

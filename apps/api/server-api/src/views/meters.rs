@@ -21,6 +21,12 @@ pub struct RecordReadingParams {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct OcrReadingParams {
+    pub image_url: String,
+    pub period_month: Option<String>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MeterResponse {
     pub id: Uuid,
     pub room_id: Uuid,

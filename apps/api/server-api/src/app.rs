@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use loco_rs::{
     app::{AppContext, Hooks, Initializer},
-    bgworker::{Queue},
+    bgworker::{BackgroundWorker, Queue},
     boot::{create_app, BootResult, StartMode},
     config::Config,
     controller::AppRoutes,
@@ -13,7 +13,7 @@ use migration::Migrator;
 use std::path::Path;
 
 #[allow(unused_imports)]
-use crate::{controllers, tasks};
+use crate::{controllers, tasks, workers};
 
 pub struct App;
 
@@ -38,7 +38,19 @@ impl Hooks for App {
         environment: &Environment,
         config: Config,
     ) -> Result<BootResult> {
-        create_app::<Self, Migrator>(mode, environment, config).await
+        tracing::info!("Starting server...");
+
+        match create_app::<Self, Migrator>(mode, environment, config).await {
+            Ok(boot_result) => {
+                tracing::info!("Core services started successfully.");
+                Ok(boot_result)
+            }
+            Err(e) => {
+                tracing::error!("Failed to start server. Please check DB or Redis status.");
+                tracing::error!("Error details: {:?}", e);
+                Err(e)
+            }
+        }
     }
 
     async fn initializers(_ctx: &AppContext) -> Result<Vec<Box<dyn Initializer>>> {
@@ -67,26 +79,44 @@ impl Hooks for App {
 
     async fn after_routes(router: axum::Router, ctx: &AppContext) -> Result<axum::Router> {
         let ctx = ctx.clone();
+
+        // Spawn Payment Expiration background task
+        let ctx_clone = ctx.clone();
         tokio::spawn(async move {
             let mut interval = tokio::time::interval(tokio::time::Duration::from_secs(60));
             loop {
                 interval.tick().await;
-                if let Err(e) = crate::models::payments::Model::update_expired(&ctx.db).await {
+                if let Err(e) = crate::models::payments::Model::update_expired(&ctx_clone.db).await {
                     tracing::error!(error = ?e, "[Worker] Payment expiration job failed");
                 }
+            }
+        });
+
+        // Spawn Email Queue background task (Amazon SES)
+        let ctx_email = ctx.clone();
+        tokio::spawn(async move {
+            tracing::info!("Starting Email Worker (SES)...");
+            if let Err(e) = workers::email_worker::start_worker(&ctx_email).await {
+                tracing::error!("Email worker stopped. (Redis not running?) Error: {:?}", e);
+            } else {
+                tracing::info!("Email Worker is ready.");
             }
         });
 
         Ok(router.nest_service("/static", tower_http::services::ServeDir::new("static")))
     }
 
-    async fn connect_workers(_ctx: &AppContext, _queue: &Queue) -> Result<()> {
+    async fn connect_workers(ctx: &AppContext, queue: &Queue) -> Result<()> {
+        queue.register(
+            workers::meter_reading_worker::MeterReadingWorker::build(ctx),
+        ).await?;
         Ok(())
     }
 
     fn register_tasks(tasks: &mut Tasks) {
         tasks.register(tasks::seed_data::SeedData);
         tasks.register(tasks::auto_generate_invoices::AutoGenerateInvoices);
+        tasks.register(tasks::auto_generate_meter_requests::AutoGenerateMeterRequests);
     }
 
     async fn truncate(_ctx: &AppContext) -> Result<()> {

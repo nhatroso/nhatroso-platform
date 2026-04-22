@@ -27,21 +27,22 @@ workers:
 queue:
   kind: Redis
   # Redis connection URI
-  uri: '{{ get_env(name="REDIS_URL", default="redis://127.0.0.1") }}'
+  uri: {{ get_env(name="REDIS_URL", default="redis://127.0.0.1") }}
   dangerously_flush: false
 
-# Mailer Configuration.
-mailer:
-  stub: true
-  smtp:
-    enable: true
-    host: localhost
-    port: 1025
-    secure: false
+settings:
+  email:
+    provider: ses
+    from: { { get_env(name="EMAIL_FROM", default="noreply@nhatroso.com") } }
+    timeout_seconds: 10
+    rate_limit_ms: 50
+    retry:
+      max_attempts: 3
+      backoff_base: 2
 
 # Database Configuration
 database:
-  uri: '{{ get_env(name="DATABASE_URL", default="postgres://nhatroso:nhatroso@localhost:5432/nhatroso_db_test") }}'
+  uri: {{ get_env(name="DATABASE_URL", default="postgres://nhatroso:nhatroso@localhost:5432/nhatroso_db_test") }}
   enable_logging: false
   connect_timeout: 500
   idle_timeout: 500
@@ -54,5 +55,5 @@ database:
 # Authentication Configuration
 auth:
   jwt:
-    secret: FKAvOMDFPCthP6yZAl6e
+    secret: {{ get_env(name="JWT_SECRET", default="FKAvOMDFPCthP6yZAl6e") }}
     expiration: 604800

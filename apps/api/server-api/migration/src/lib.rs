@@ -45,6 +45,7 @@ mod m20260413_100000_add_invoice_generation_date_to_buildings;
 mod m20260414_022436_add_relational_fields_to_invoices;
 mod m20260414_030000_add_due_date_to_invoices;
 mod m20260416_104500_create_payments;
+mod m20260420_100600_add_ocr_raw_result_to_meter_readings;
 
 pub struct Migrator;
 
@@ -92,7 +93,8 @@ impl MigratorTrait for Migrator {
             Box::new(m20260413_100000_add_invoice_generation_date_to_buildings::Migration),
             Box::new(m20260414_022436_add_relational_fields_to_invoices::Migration),
             Box::new(m20260414_030000_add_due_date_to_invoices::Migration),
-            Box::new(m20260416_104500_create_payments::Migration)
+            Box::new(m20260416_104500_create_payments::Migration),
+            Box::new(m20260420_100600_add_ocr_raw_result_to_meter_readings::Migration)
         ]
     }
 }

@@ -17,6 +17,7 @@ pub struct Model {
     pub usage: Option<Decimal>,
     pub period_month: Option<String>,
     pub status: String,
+    pub ocr_raw_result: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

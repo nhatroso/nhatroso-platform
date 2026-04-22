@@ -676,6 +676,7 @@ async fn create_meter_reading_if_needed(
         usage: ActiveValue::Set(Some(rust_decimal::Decimal::from(0))),
         period_month: ActiveValue::Set(Some(reading_date.format("%Y-%m").to_string())),
         status: ActiveValue::Set("SUBMITTED".to_string()),
+        ocr_raw_result: ActiveValue::Set(None),
         created_at: ActiveValue::Set(now()),
     }.insert(db).await?;
     Ok(())

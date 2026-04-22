@@ -7,8 +7,10 @@ use crate::{
     views::meters::{CreateMeterParams, RecordReadingParams, LandlordListParams, UpdateMeterStatusParams, LandlordReadingsParams},
     models::meters::Model as Meter,
     models::meter_readings::Model as MeterReading,
-    utils::{auth, error::error_response},
+    utils::{auth, error::error_response, storage::Storage},
+    views::meters::OcrReadingParams,
 };
+use std::time::Duration;
 
 pub async fn list_by_room(
     Path(room_id): Path<Uuid>,
@@ -55,6 +57,40 @@ pub async fn record_reading(
         Ok(res) => format::json(res),
         Err((status, code)) => error_response(code, status),
     }
+}
+
+pub async fn get_upload_url(
+    _auth: JWT,
+    State(_ctx): State<AppContext>,
+) -> Result<Response> {
+    let bucket = std::env::var("S3_BUCKET").unwrap_or_else(|_| "nhatroso-dev".to_string());
+    let storage = Storage::new(bucket).await;
+
+    let key = format!("uploads/{}.jpg", Uuid::new_v4());
+    let url = storage.get_presigned_upload_url(&key, Duration::from_secs(900)).await
+        .map_err(|e| Error::BadRequest(e.to_string()))?;
+
+    format::json(serde_json::json!({
+        "url": url,
+        "key": key
+    }))
+}
+
+pub async fn submit_ocr(
+    auth: JWT,
+    Path(id): Path<Uuid>,
+    State(ctx): State<AppContext>,
+    Json(params): Json<OcrReadingParams>,
+) -> Result<Response> {
+    let user_id = auth::get_user_id(&auth)?;
+
+    // Ownership check
+    if !Meter::validate_meter_access(&ctx.db, id, user_id).await? {
+        return error_response("METER_ACCESS_DENIED", StatusCode::FORBIDDEN);
+    }
+
+    let res = MeterReading::submit_ocr_reading(&ctx, id, user_id, params).await?;
+    format::json(res)
 }
 
 pub async fn list_readings(
@@ -117,6 +153,8 @@ pub fn routes() -> Routes {
         .add("/landlord/readings", get(list_landlord_readings))
         .add("/room/{room_id}", get(list_by_room))
         .add("/{id}/status", patch(update_status))
+        .add("/upload-url", get(get_upload_url))
+        .add("/{id}/ocr", post(submit_ocr))
         .add("/{id}/readings", post(record_reading))
         .add("/{id}/readings", get(list_readings))
 }
