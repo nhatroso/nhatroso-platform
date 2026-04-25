@@ -39,7 +39,24 @@ pub struct SESEmailService {
 impl SESEmailService {
     pub async fn new(email_config: &EmailConfig, template_dir: &str) -> Result<Self, anyhow::Error> {
         let region_provider = RegionProviderChain::default_provider().or_else(aws_config::Region::new(env::var("AWS_REGION").unwrap_or_else(|_| "ap-southeast-1".to_string())));
-        let config = aws_config::defaults(aws_config::BehaviorVersion::latest()).region(region_provider).load().await;
+
+        let access_key = std::env::var("AWS_SES_ACCESS_KEY_ID").unwrap_or_default();
+        let secret_key = std::env::var("AWS_SES_SECRET_ACCESS_KEY").unwrap_or_default();
+
+        let credentials = aws_sdk_sesv2::config::Credentials::new(
+            access_key,
+            secret_key,
+            None,
+            None,
+            "Environment",
+        );
+
+        let config = aws_config::defaults(aws_config::BehaviorVersion::latest())
+            .region(region_provider)
+            .credentials_provider(credentials)
+            .load()
+            .await;
+
         let client = Client::new(&config);
 
         let from_email = email_config.from.clone();

@@ -38,7 +38,41 @@ impl Hooks for App {
         environment: &Environment,
         config: Config,
     ) -> Result<BootResult> {
+        if dotenvy::dotenv().is_ok() {
+            tracing::info!("Environment configured successfully");
+        } else {
+            tracing::warn!("No .env file found or failed to load");
+        }
+
         tracing::info!("Starting server...");
+
+        let db_url = std::env::var("DATABASE_URL").unwrap_or_default();
+        if !db_url.is_empty() {
+            tracing::info!("Database connection mapped");
+        } else {
+            tracing::error!("Missing DATABASE_URL");
+        }
+
+        let redis_url = std::env::var("REDIS_URL").unwrap_or_default();
+        if !redis_url.is_empty() {
+            tracing::info!("Redis connection mapped");
+        } else {
+            tracing::warn!("Missing REDIS_URL configuration");
+        }
+
+        let ses_key = std::env::var("AWS_SES_ACCESS_KEY_ID").unwrap_or_default();
+        if !ses_key.is_empty() {
+            tracing::info!("AWS SES Credential found");
+        } else {
+            tracing::warn!("Missing AWS SES Credential");
+        }
+
+        let s3_key = std::env::var("AWS_S3_ACCESS_KEY_ID").unwrap_or_default();
+        if !s3_key.is_empty() {
+            tracing::info!("AWS S3 Credential found");
+        } else {
+            tracing::warn!("Missing AWS S3 Credential");
+        }
 
         match create_app::<Self, Migrator>(mode, environment, config).await {
             Ok(boot_result) => {
@@ -80,30 +114,52 @@ impl Hooks for App {
     async fn after_routes(router: axum::Router, ctx: &AppContext) -> Result<axum::Router> {
         let ctx = ctx.clone();
 
-        // Spawn Payment Expiration background task
+        let _ = dotenvy::dotenv().ok();
+
+        // 1. Spawn Payment Expiration background task with Recoverability
         let ctx_clone = ctx.clone();
         tokio::spawn(async move {
             let mut interval = tokio::time::interval(tokio::time::Duration::from_secs(60));
             loop {
                 interval.tick().await;
-                if let Err(e) = crate::models::payments::Model::update_expired(&ctx_clone.db).await {
-                    tracing::error!(error = ?e, "[Worker] Payment expiration job failed");
+                let ctx_inner = ctx_clone.clone();
+                // Isolate into sub-task to protect main ticker from internal panics
+                tokio::spawn(async move {
+                    if let Err(e) = crate::models::payments::Model::update_expired(&ctx_inner.db).await {
+                        tracing::error!(error = ?e, "[Worker] Payment expiration job failed");
+                    }
+                });
+            }
+        });
+
+        // 2. Spawn Email Worker with Redis conditioning and backoff retries
+        let has_redis = ctx.config.queue.is_some() || std::env::var("REDIS_URL").is_ok();
+        if has_redis {
+            let ctx_email = ctx.clone();
+            tokio::spawn(async move {
+                tracing::info!("Starting Email Worker (SES)...");
+                let mut retries = 0;
+                loop {
+                    match workers::email_worker::start_worker(&ctx_email).await {
+                        Ok(_) => break, // Graceful exit
+                        Err(e) => {
+                            retries += 1;
+                            tracing::error!("Email worker crashed: {:?}. Retrying {}/∞ in 5s...", e, retries);
+                            tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
+                        }
+                    }
                 }
-            }
-        });
+            });
+        } else {
+            tracing::warn!("Skipping Email Worker Deployment: REDIS Queue is not configured.");
+        }
 
-        // Spawn Email Queue background task (Amazon SES)
-        let ctx_email = ctx.clone();
-        tokio::spawn(async move {
-            tracing::info!("Starting Email Worker (SES)...");
-            if let Err(e) = workers::email_worker::start_worker(&ctx_email).await {
-                tracing::error!("Email worker stopped. (Redis not running?) Error: {:?}", e);
-            } else {
-                tracing::info!("Email Worker is ready.");
-            }
-        });
+        // 3. Inject explicit application Health Check endpoint
+        let router = router
+            .route("/api/health", axum::routing::get(|| async { axum::Json(serde_json::json!({ "status": "ok", "service": "nhatroso-platform-api" })) }))
+            .nest_service("/static", tower_http::services::ServeDir::new("static"));
 
-        Ok(router.nest_service("/static", tower_http::services::ServeDir::new("static")))
+        Ok(router)
     }
 
     async fn connect_workers(ctx: &AppContext, queue: &Queue) -> Result<()> {

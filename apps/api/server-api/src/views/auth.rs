@@ -20,6 +20,23 @@ pub struct RefreshParams {
     pub refresh_token: String,
 }
 
+#[derive(Clone, Debug, Deserialize)]
+pub struct ForgotPasswordParams {
+    pub email: String,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+pub struct VerifyOtpParams {
+    pub email: String,
+    pub otp: String,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+pub struct ResetPasswordParams {
+    pub reset_token: String,
+    pub password: String,
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct AuthResponse {
     pub token: String,

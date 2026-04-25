@@ -1,0 +1,170 @@
+@startuml erd
+
+hide circle
+skinparam linetype ortho
+
+skinparam class {
+    BackgroundColor White
+    ArrowColor #2c3e50
+    BorderColor #2c3e50
+}
+
+entity "users" as users {
+  * id : uuid <<PK>>
+  --
+  email : string
+  phone : string
+  password_hash : string
+  role : string
+  status : string
+  name : string
+  id_card : string
+}
+
+entity "buildings" as buildings {
+  * id : uuid <<PK>>
+  --
+  * owner_id : uuid <<FK>>
+  name : string
+  address : string
+  status : string
+}
+
+entity "floors" as floors {
+  * id : uuid <<PK>>
+  --
+  * building_id : uuid <<FK>>
+  identifier : string
+  status : string
+}
+
+entity "rooms" as rooms {
+  * id : uuid <<PK>>
+  --
+  * building_id : uuid <<FK>>
+  floor_id : uuid <<FK>>
+  code : string
+  status : string
+}
+
+entity "contracts" as contracts {
+  * id : uuid <<PK>>
+  --
+  * user_id : uuid <<FK>>
+  * room_id : uuid <<FK>>
+  start_date : date
+  end_date : date
+  monthly_rent : int
+  deposit_amount : int
+  status : string
+}
+
+entity "contract_tenants" as ct {
+  * contract_id : uuid <<FK>>
+  * tenant_id : uuid <<FK>>
+}
+
+entity "services" as services {
+  * id : uuid <<PK>>
+  --
+  * owner_id : uuid <<FK>>
+  name : string
+  unit : string
+  status : string
+}
+
+entity "price_rules" as price_rules {
+  * id : uuid <<PK>>
+  --
+  * owner_id : uuid <<FK>>
+  * service_id : uuid <<FK>>
+  name : string
+  unit_price : decimal
+}
+
+entity "room_services" as rs {
+  * id : uuid <<PK>>
+  --
+  * room_id : uuid <<FK>>
+  * service_id : uuid <<FK>>
+  price_rule_id : uuid <<FK>>
+  is_active : boolean
+}
+
+entity "meters" as meters {
+  * id : uuid <<PK>>
+  --
+  * room_id : uuid <<FK>>
+  * service_id : uuid <<FK>>
+  serial_number : string
+  initial_reading : decimal
+  status : string
+}
+
+entity "meter_requests" as meter_requests {
+  * id : uuid <<PK>>
+  --
+  * room_id : uuid <<FK>>
+  period_month : string
+  due_date : datetime
+  status : string
+}
+
+entity "meter_readings" as meter_readings {
+  * id : uuid <<PK>>
+  --
+  * meter_id : uuid <<FK>>
+  tenant_id : uuid <<FK>>
+  reading_value : decimal
+  usage : decimal
+  period_month : string
+  status : string
+  ocr_raw_result : string
+  image_url : string
+}
+
+entity "invoices" as invoices {
+  * id : int <<PK>>
+  --
+  room_id : uuid <<FK>>
+  landlord_id : uuid <<FK>>
+  total_amount : decimal
+  status : string
+  due_date : datetime
+}
+
+entity "invoice_details" as invoice_details {
+  * id : int <<PK>>
+  --
+  * invoice_id : int <<FK>>
+  description : string
+  amount : decimal
+}
+
+users ||--o{ buildings
+buildings ||--o{ floors
+buildings ||--o{ rooms
+floors ||--o{ rooms
+users ||--o{ contracts
+rooms ||--o{ contracts
+contracts ||--o{ ct
+users ||--o{ ct
+users ||--o{ services
+services ||--o{ price_rules
+
+rooms ||--o{ rs
+services ||--o{ rs
+price_rules ||--o{ rs
+
+rooms ||--o{ meters
+services ||--o{ meters
+meters ||--o{ meter_readings
+
+rooms ||--o{ meter_requests
+users ||--o{ meter_readings
+
+rooms ||--o{ invoices
+users ||--o{ invoices
+invoices ||--o{ invoice_details
+
+@enduml

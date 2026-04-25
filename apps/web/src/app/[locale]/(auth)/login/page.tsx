@@ -2,9 +2,10 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { LoginSchema } from '@nhatroso/shared';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
+import { login } from '@/services/api/auth';
+import { LoginSchema } from '@nhatroso/shared';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -33,17 +34,7 @@ export default function LoginPage() {
     }
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(result.data),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData?.error?.code || 'UNKNOWN_ERROR');
-      }
-
+      await login(result.data);
       router.push('/dashboard');
     } catch (err) {
       const key = err instanceof Error ? err.message : 'UNKNOWN_ERROR';
@@ -93,12 +84,20 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label
-                htmlFor="password"
-                className="mb-2 block text-body font-medium text-gray-text"
-              >
-                {tAuth('passwordLabel')}
-              </label>
+              <div className="mb-2 flex items-center justify-between">
+                <label
+                  htmlFor="password"
+                  className="block text-body font-medium text-gray-text"
+                >
+                  {tAuth('passwordLabel')}
+                </label>
+                <Link
+                  href="/forgot-password"
+                  className="text-body font-medium text-primary hover:underline dark:text-primary-dark"
+                >
+                  {tAuth('forgotPassword')}
+                </Link>
+              </div>
               <input
                 id="password"
                 name="password"

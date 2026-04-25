@@ -1,0 +1,66 @@
+@startuml seq_billing
+
+
+actor "Hệ Thống / Quản trị viên" as cron
+participant "API Server (Rust)" as api
+database "Database (PostgreSQL)" as db
+actor "Chủ trọ (Owner)" as owner
+actor "Người thuê (Tenant)" as tenant
+
+cron -> api : Kích hoạt tính hóa đơn\nPOST /api/v1/invoices/calculate
+activate api
+
+api -> db : Query Active Contracts (Hợp đồng đang hiệu lực)
+activate db
+db --> api : Danh sách Hợp đồng & Rooms
+deactivate db
+
+loop Mỗi hợp đồng / Phòng
+    api -> db : Lấy giá dịch vụ từ price_rules (Điện, Nước, Rác, Wifi...)
+    activate db
+    db --> api : Danh sách đơn giá
+    deactivate db
+
+    api -> db : Truy vấn chỉ số tiêu thụ đã ACCEPTED (meter_readings)\n(Kỳ hiện tại & kỳ trước)
+    activate db
+    db --> api : Chỉ số Mới & Cũ
+    deactivate db
+
+    api -> api : Tính mức tiêu thụ (Usage = Mới - Cũ)
+    api -> api : Tính tiền từng dịch vụ (Usage x Unit_price)
+    api -> api : Tổng hợp hóa đơn (Tiền thuê + Dịch vụ)
+
+    api -> db : Lưu Draft Invoice & Invoice Details\n(Status = DRAFT)
+    activate db
+    db --> api : OK
+    deactivate db
+end
+
+api --> cron : Kết thúc tính toán
+deactivate api
+
+==== QUY TRÌNH PHÁT HÀNH ====
+
+owner -> api : GET /invoices?status=DRAFT\n(Xem trước hóa đơn)
+activate api
+api --> owner : Danh sách hóa đơn nháp
+deactivate api
+
+owner -> api : POST /invoices/publish\n(Chốt hóa đơn)
+activate api
+api -> db : Update status = ISSUED
+activate db
+db --> api : OK
+deactivate db
+
+api -> api : Đẩy thông báo (Push Notification/Email)
+
+api --> owner : Success
+deactivate api
+
+tenant -> api : Mở App & Nhận thông báo hóa đơn mới
+activate api
+api --> tenant : Hiển thị chi tiết hóa đơn (Status=ISSUED, Số tiền)
+deactivate api
+
+@enduml

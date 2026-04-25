@@ -2,9 +2,10 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { RegisterSchema } from '@nhatroso/shared';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
+import { register } from '@/services/api/auth';
+import { RegisterSchema } from '@nhatroso/shared';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -33,17 +34,7 @@ export default function RegisterPage() {
     }
 
     try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(result.data),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData?.error?.code || 'UNKNOWN_ERROR');
-      }
-
+      await register(result.data);
       router.push('/dashboard');
     } catch (err) {
       const key = err instanceof Error ? err.message : 'UNKNOWN_ERROR';

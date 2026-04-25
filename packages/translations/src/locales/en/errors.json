@@ -6,9 +6,11 @@
   "AUTH_INVALID_CREDENTIALS": "Invalid phone number or password",
   "AUTH_INVALID_REFRESH_TOKEN": "Your session has expired or is invalid",
   "AUTH_INVALID_EMAIL": "Invalid email address",
-  "UNKNOWN_ERROR": "An unknown error occurred",
+  "UNKNOWN_ERROR": "An unknown error occurred. Please try again later.",
   "BUILDING_HAS_ACTIVE_ROOMS": "Cannot archive building: There are still rented or deposited rooms",
   "BUILDING_UPDATE_ARCHIVED": "Cannot update archived building.",
   "ROOM_CODE_EXISTS": "Room code already exists in this building.",
-  "READING_REQUEST_ALREADY_EXISTS": "A reading request for this month and year already exists."
+  "READING_REQUEST_ALREADY_EXISTS": "A reading request for this month and year already exists.",
+  "AUTH_INVALID_OTP": "OTP is incorrect or expired",
+  "AUTH_REQUIRED_FIELDS": "Please enter all required fields"
 }

@@ -7,8 +7,8 @@
 \usepackage{tipa}
 
 % --- Typography and Fonts ---
+\usepackage{lmodern}            % Full T1 and T5 support for monospaced and sans fonts
 \usepackage{mathptmx}           % Professional Times font
-\usepackage[scaled=0.95]{inconsolata} % Monospaced font for code
 \usepackage[protrusion=false, nopatch=footnote]{microtype} % Disable protrusion for T5 compatibility
 \usepackage{setspace}
 
@@ -65,3 +65,8 @@
 }
 \usepackage{bookmark}
 \usepackage{cleveref}           % Must load after hyperref
+
+\pdfstringdefDisableCommands{%
+  \def\abreve{a}%
+  \def\ocircumflex{o}%
+}

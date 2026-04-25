@@ -201,7 +201,7 @@ Trong đồ án này, kiến trúc Modular Monolith được triển khai thông
 JWT là một tiêu chuẩn mở (RFC 7519) \cite{RFC7519} bao gồm ba phần: Header (thuật toán mã hóa), Payload (chứa các claims như user\_id, role) và Signature (chữ ký số để đảm bảo tính toàn vẹn).
 Trong hệ thống, JWT đóng vai trò là phương thức xác thực chính, cho phép Mobile App và Web Dashboard gửi các yêu cầu an toàn tới Backend mà không cần lưu trữ session trên server.
 
-\subsection{Kiến trúc Phân quyền RBAC (Role-Based Access Control)}
+\subsection{Kiến trúc Phân quyền RBAC}
 Kiểm soát truy cập dựa trên vai trò (Role-Based Access Control - RBAC) là một phương pháp quản lý quyền truy cập hệ thống dựa trên chức năng và nhiệm vụ của từng người dùng trong tổ chức \cite{RBAC}. Thay vì gán trực tiếp quyền hạn cho từng cá nhân, RBAC sử dụng thực thể trung gian là \textit{Vai trò (Role)}. Mô hình này tuân thủ nghiêm ngặt nguyên tắc Quyền hạn tối thiểu (Principle of Least Privilege), đảm bảo người dùng chỉ có đủ các quyền cần thiết để thực hiện công việc của mình.
 
 Cấu trúc RBAC được xây dựng trên ba thành phần nền tảng:

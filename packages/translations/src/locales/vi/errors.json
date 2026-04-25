@@ -6,9 +6,11 @@
   "AUTH_INVALID_CREDENTIALS": "Tài khoản hoặc mật khẩu không đúng",
   "AUTH_INVALID_REFRESH_TOKEN": "Phiên đăng nhập đã hết hạn",
   "AUTH_INVALID_EMAIL": "Email không hợp lệ",
-  "UNKNOWN_ERROR": "Đã có lỗi không xác định xảy ra",
+  "UNKNOWN_ERROR": "Đã có lỗi không xác định xảy ra. Vui lòng thử lại sau.",
   "BUILDING_HAS_ACTIVE_ROOMS": "Không thể lưu trữ tòa nhà: Vẫn còn phòng đang được thuê hoặc đặt cọc",
   "BUILDING_UPDATE_ARCHIVED": "Không thể cập nhật tòa nhà đã lưu trữ.",
   "ROOM_CODE_EXISTS": "Mã phòng đã tồn tại trong tòa nhà này.",
-  "READING_REQUEST_ALREADY_EXISTS": "Yêu cầu chốt số cho tháng và năm này đã tồn tại."
+  "READING_REQUEST_ALREADY_EXISTS": "Yêu cầu chốt số cho tháng và năm này đã tồn tại.",
+  "AUTH_INVALID_OTP": "Mã xác nhận không đúng hoặc đã hết hạn",
+  "AUTH_REQUIRED_FIELDS": "Vui lòng nhập đầy đủ thông tin"
 }

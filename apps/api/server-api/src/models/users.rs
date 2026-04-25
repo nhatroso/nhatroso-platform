@@ -195,6 +195,30 @@ impl Model {
         };
         Ok(Ok(user))
     }
+    pub async fn reset_password(
+        db: &DatabaseConnection,
+        user_id: Uuid,
+        new_password: &str,
+    ) -> Result<std::result::Result<(), (StatusCode, &'static str)>> {
+        if new_password.len() < 8 {
+            return Ok(Err((StatusCode::BAD_REQUEST, "AUTH_PASSWORD_TOO_SHORT")));
+        }
+
+        let user = Entity::find_by_id(user_id).one(db).await?;
+        let Some(user) = user else {
+            return Ok(Err((StatusCode::NOT_FOUND, "AUTH_USER_NOT_FOUND")));
+        };
+
+        let password_hash = loco_rs::hash::hash_password(new_password)
+            .map_err(|e| Error::Message(e.to_string()))?;
+
+        let mut item: ActiveModel = user.into();
+        item.password_hash = ActiveValue::Set(password_hash);
+        item.updated_at = ActiveValue::Set(chrono::Utc::now().into());
+        item.update(db).await?;
+
+        Ok(Ok(()))
+    }
 }
 
 // implement your write-oriented logic here

@@ -1,0 +1,70 @@
+@startuml seq_ocr
+
+skinparam maxMessageSize 150
+skinparam ParticipantPadding 20
+skinparam BoxPadding 10
+
+actor "Người thuê (Tenant)" as tenant
+box "Ứng dụng" #LightCyan
+participant "Mobile App" as app
+end box
+box "Backend Core" #MintCream
+participant "API Server (Rust)" as api
+database "Database (PostgreSQL)" as db
+end box
+box "External Services" #Linen
+participant "Amazon S3" as s3
+participant "Google Cloud Vision API" as gcp
+end box
+actor "Chủ trọ (Owner)" as owner
+
+tenant -> app : Chụp ảnh đồng hồ (Điện/Nước) & Nhập số tay
+activate app
+app -> api : POST /api/v1/meter-readings/upload\n(Gửi ảnh & dữ liệu)
+activate api
+
+api -> s3 : Upload ảnh
+activate s3
+s3 --> api : Trả về image_url
+deactivate s3
+
+api -> gcp : Gọi hàm nhận dạng ký tự (OCR)
+activate gcp
+gcp --> api : Trả về chuỗi văn bản nhận diện được
+deactivate gcp
+
+api -> api : Parse chuỗi số (Extract reading_value)
+
+api -> db : Lưu bản ghi meted_reading\n(Status = PENDING, image_url, ocr_result)
+activate db
+db --> api : OK
+deactivate db
+
+api --> app : Success (Trạng thái chờ duyệt)
+deactivate api
+app --> tenant : Hiển thị "Đã nộp thành công"
+deactivate app
+
+==== QUY TRÌNH PHÊ DUYỆT ====
+
+owner -> api : GET /api/v1/meter-readings?status=PENDING
+activate owner
+activate api
+api -> db : Truy vấn dữ liệu
+activate db
+db --> api : Kết quả
+deactivate db
+api --> owner : Danh sách chờ duyệt (kèm ảnh)
+deactivate api
+
+owner -> api : PATCH /api/v1/meter-readings/:id/accept
+activate api
+api -> db : Update status = ACCEPTED
+activate db
+db --> api : OK
+deactivate db
+api --> owner : Success
+deactivate api
+deactivate owner
+
+@enduml

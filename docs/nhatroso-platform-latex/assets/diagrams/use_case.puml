@@ -1,0 +1,37 @@
+@startuml use_case
+
+left to right direction
+skinparam packageStyle rectangle
+skinparam UseCaseBackgroundColor LightCyan
+
+actor "Chủ trọ (Owner)" as owner
+actor "Người thuê (Tenant)" as tenant
+actor "Hệ thống (System)" as sys
+
+rectangle "Nhatroso Platform" {
+  usecase "Quản lý tòa nhà & phòng" as UC1
+  usecase "Quản lý dịch vụ & đơn giá" as UC2
+  usecase "Quản lý hợp đồng thuê" as UC3
+  usecase "Khởi tạo yêu cầu thu thập chỉ số" as UC4
+  usecase "Nộp chỉ số điện/nước (App)" as UC5
+  usecase "Tự động trích xuất chỉ số (OCR)" as UC6
+  usecase "Phê duyệt chỉ số thực tế" as UC7
+  usecase "Tính toán hóa đơn tự động" as UC8
+  usecase "Duyệt và phát hành hóa đơn" as UC9
+  usecase "Xem hóa đơn (App)" as UC10
+}
+
+owner --> UC1
+owner --> UC2
+owner --> UC3
+owner --> UC4
+owner --> UC7
+owner --> UC9
+
+UC5 <-- tenant
+UC10 <-- tenant
+
+sys --> UC6
+sys --> UC8
+
+@enduml

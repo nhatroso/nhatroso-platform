@@ -5,13 +5,23 @@
 
 Nhatroso Platform được thiết kế theo mô hình Modular Monolith sử dụng ngôn ngữ lập trình Rust. Toàn bộ logic nghiệp vụ được đóng gói trong một API server duy nhất, đảm bảo tính hiệu năng cao, an toàn bộ nhớ \cite{RustBook} và dễ dàng bảo trì. Hệ thống tận dụng nền tảng Loco.rs \cite{LocoRS} (với lõi là Axum \cite{Axum}) để cung cấp các tính năng quản lý cơ sở dữ liệu, xác thực và quản lý background job một cách đồng bộ.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{assets/figures/arch.png}
     \caption{Sơ đồ kiến trúc tổng thể của hệ thống Nhatroso Platform}
     \label{fig:system_architecture}
 \end{figure}
 
+\subsection{Sơ đồ Use Case (Các ca sử dụng cốt lõi)}
+
+Để hiểu rõ hơn chức năng của các tác nhân khi tương tác với nền tảng, sơ đồ Use Case trong Hình \ref{fig:use_case_diagram} định nghĩa rõ luồng thao tác giữa Chủ trọ (Owner), Người thuê (Tenant), và tiến trình tự động của Hệ thống (System). Chủ trọ có toàn quyền thao tác để quản lý dữ liệu gốc, trong khi người thuê sử dụng ứng dụng di động để tương tác ở các bước cần thiết như báo cáo thông số và xem biên lai.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{assets/figures/use_case.png}
+    \caption{Sơ đồ Use Case tổng quát}
+    \label{fig:use_case_diagram}
+\end{figure}
 
 Kiến trúc bao gồm các khối chính được quản lý thông qua Docker:
 
@@ -41,7 +51,16 @@ Cơ sở dữ liệu được quản lý thông qua SeaORM \cite{SeaORM}, sử d
 
 \subsection{Sơ đồ quan hệ thực thể}
 
-Các thực thể chính được thiết kế để hỗ trợ quy trình billing linh hoạt và có bằng chứng đối soát. Bảng \ref{tab:entities} liệt kê các thực thể cốt lõi trong phiên bản MVP.
+Các thực thể chính được thiết kế để hỗ trợ quy trình billing linh hoạt và có bằng chứng đối soát. Hình \ref{fig:er_diagram} mô tả mối quan hệ giữa các thực thể cốt lõi trong cơ sở dữ liệu, đảm bảo việc tổ chức dữ liệu quản lý nhà trọ một cách khoa học.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{assets/figures/erd.png}
+    \caption{Sơ đồ quan hệ thực thể (ERD)}
+    \label{fig:er_diagram}
+\end{figure}
+
+Bảng \ref{tab:entities} liệt kê các thực thể cốt lõi trong phiên bản MVP.
 
 \begin{table}[htbp]
 \centering
@@ -101,7 +120,7 @@ Billing & POST /invoices/calculate & Xem trước giá trị hóa đơn dựa tr
 
 \subsection{Luồng nhận diện tự động và phê duyệt chỉ số}
 
-Hệ thống đã triển khai thành công tính năng trích xuất chỉ số tự động để giảm tải cho cả người thuê lẫn người quản lý:
+Hệ thống đã triển khai thành công tính năng trích xuất chỉ số tự động để giảm tải cho cả người thuê lẫn người quản lý, như được mô tả trong Hình \ref{fig:ocr_sequence}. Quy trình cụ thể như sau:
 \begin{enumerate}
   \item Hệ thống tạo \texttt{meter\_requests} hằng tháng hoặc kích hoạt nộp khi có yêu cầu.
   \item Người thuê (Tenant) nhận thông báo và chụp ảnh đồng hồ qua ứng dụng Mobile App.
@@ -111,16 +130,30 @@ Hệ thống đã triển khai thành công tính năng trích xuất chỉ số
   \item Chỉ số \texttt{ACCEPTED} trở thành cơ sở tính hóa đơn.
 \end{enumerate}
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{assets/figures/seq_ocr.png}
+    \caption{Sơ đồ tuần tự luồng thông báo chỉ số bằng OCR}
+    \label{fig:ocr_sequence}
+\end{figure}
+
 \subsection{Quy trình tính hóa đơn (Billing Logic)}
 
-Logic tính toán được thực hiện tại server Rust để đảm bảo an toàn. Hệ thống truy vấn \texttt{price\_rules} có hiệu lực tại thời điểm tạo hóa đơn, kết hợp với chênh lệch chỉ số giữa hai kỳ liên tiếp.
+Logic tính toán hóa đơn tự động được thực hiện tại server Rust để đảm bảo an toàn và tối ưu tốc độ xử lý như trình bày tại Hình \ref{fig:billing_sequence}. Hệ thống truy vấn \texttt{price\_rules} có hiệu lực tại thời điểm tạo hóa đơn, kết hợp với chênh lệch chỉ số giữa hai kỳ liên tiếp để tự động tính toán tổng số tiền tiêu thụ cuối cùng của mỗi hợp đồng/phòng.
 
-Hóa đơn được tạo dưới dạng bản nháp (\texttt{calculate}) để owner kiểm tra trước khi phát hành chính thức, đảm bảo tính chính xác tuyệt đối của dữ liệu.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{assets/figures/seq_billing.png}
+    \caption{Sơ đồ tuần tự phát hành hóa đơn tự động}
+    \label{fig:billing_sequence}
+\end{figure}
+
+Hóa đơn được tạo dưới dạng bản nháp (\texttt{calculate} state) để owner kiểm tra trước khi xác nhận phát hành chính thức (\texttt{publish} state), đảm bảo tính chính xác tuyệt đối của dữ liệu trước khi gửi đi thông báo thanh toán cho người thuê.
 
 \section{Thiết kế luồng Tích hợp và Triển khai tự động (CI/CD)}
 
 Quy trình phát triển và vận hành (DevOps) được thiết kế hiện đại trên nền tảng GitHub Actions kết hợp chặt chẽ với AWS và Docker:
 \begin{enumerate}
-    \item \textbf{Continuous Integration (CI):} Bất kỳ thay đổi mã nguồn mới nào khi được đẩy (Push/Merge) lên nhánh chính sẽ kích hoạt quy trình Build mã nguồn Rust tự động, thực hiện kiểm thử (Unit/Integration Testing \cite{RustTesting}) và quét bảo mật mã nguồn. Nếu thành công, mã nguồn được đóng gói ra một Docker Image \cite{Docker} rút gọn.
+    \item \textbf{Continuous Integration (CI):} Bất kỳ thay đổi mã nguồn mới nào khi đẩy lên nhánh chính sẽ kích hoạt quy trình Build mã nguồn Rust tự động, tiến hành kiểm thử \cite{RustTesting} và quét bảo mật mã nguồn. Nếu thành công, mã nguồn được đóng gói ra một Docker Image \cite{Docker} rút gọn.
     \item \textbf{Continuous Deployment (CD):} Docker Image được hệ thống CI tự động đẩy lên Container Registry (như Amazon ECR hoặc Docker Hub). Ngay sau đó tiến trình CD sẽ kích hoạt một lệnh (Webhook/SSH) đến Server Amazon EC2 để tiến hành kéo bản nâng cấp mới về và khởi động lại dịch vụ backend API mà không làm hệ thống ngừng hoạt động (zero-downtime).
 \end{enumerate}
