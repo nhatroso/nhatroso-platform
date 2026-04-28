@@ -1,6 +1,10 @@
+'use client';
+
 import * as React from 'react';
 import { useTranslations } from 'next-intl';
 import { Room } from '@nhatroso/shared';
+import { Card, Badge } from 'flowbite-react';
+import { Icons } from '@/components/icons';
 
 interface RoomCardProps {
   room: Room;
@@ -17,69 +21,75 @@ export function RoomCard({
 }: RoomCardProps) {
   const t = useTranslations('Buildings');
 
-  const statusColor = (status: string) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
       case 'VACANT':
-        return 'bg-success-light text-success ring-success/20 dark:bg-success-dark/20 dark:text-success-dark';
+        return 'success';
       case 'OCCUPIED':
-        return 'bg-primary-light text-primary ring-primary/20 dark:bg-primary-dark/20 dark:text-primary-dark';
+        return 'info';
       case 'DEPOSITED':
-        return 'bg-warning-light text-warning ring-warning/20 dark:bg-warning-dark/20 dark:text-warning-dark';
+        return 'warning';
       case 'MAINTENANCE':
-        return 'bg-danger-light text-danger ring-danger/20 dark:bg-danger-dark/20 dark:text-danger-dark';
+        return 'failure';
       default:
-        return 'bg-gray-subtle text-gray-text ring-gray-border';
+        return 'gray';
     }
   };
 
   if (compact) {
     return (
-      <div className="group relative flex h-20 flex-col justify-between overflow-hidden rounded-xl bg-gray-card p-3 shadow-sm border border-gray-border transition-all hover:shadow-md">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="text-body font-bold text-gray-text">{room.code}</h3>
+      <Card className="h-full">
+        <div className="flex flex-col justify-between h-full">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-bold text-gray-900 dark:text-white">
+              {room.code}
+            </h3>
+          </div>
+          <div className="flex items-center justify-between">
+            <Badge color={getStatusColor(room.status)} size="xs">
+              {t(`Status_${room.status}`)}
+            </Badge>
+          </div>
         </div>
-        <div className="flex items-center justify-between">
-          <span
-            className={`inline-flex items-center rounded-md px-2 py-0.5 text-tiny font-semibold ring-1 ring-inset ${statusColor(room.status)}`}
-          >
-            {t(`Status_${room.status}`)}
-          </span>
-        </div>
-      </div>
+      </Card>
     );
   }
 
   return (
-    <div className="group relative flex flex-col overflow-hidden rounded-2xl bg-gray-card p-5 shadow-sm border border-gray-border transition-all hover:shadow-lg">
+    <Card className="h-full">
       <div className="flex items-start justify-between mb-4">
         <div>
-          <h3 className="text-h3 font-bold text-gray-text">{room.code}</h3>
-          <span
-            className={`mt-1 inline-flex items-center rounded-md px-2 py-0.5 text-tiny font-semibold ring-1 ring-inset ${statusColor(room.status)}`}
-          >
-            {t(`Status_${room.status}`)}
-          </span>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+            {room.code}
+          </h3>
+          <div className="mt-2">
+            <Badge color={getStatusColor(room.status)} size="sm">
+              {t(`Status_${room.status}`)}
+            </Badge>
+          </div>
         </div>
       </div>
 
       {(buildingName || floorName) && (
-        <div className="mt-auto space-y-1 pt-2 border-t border-gray-border">
+        <div className="mt-auto space-y-2 pt-4 border-t border-gray-200 dark:border-gray-700">
           {buildingName && (
-            <p
-              className="text-tiny text-gray-muted line-clamp-1"
-              title={buildingName}
-            >
-              <span className="font-medium">{t('Building')}:</span>{' '}
-              {buildingName}
-            </p>
+            <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
+              <Icons.Building className="mr-1 h-3 w-3" />
+              <span className="font-medium mr-1">{t('Building')}:</span>
+              <span className="truncate" title={buildingName}>
+                {buildingName}
+              </span>
+            </div>
           )}
           {floorName && (
-            <p className="text-tiny text-gray-muted line-clamp-1">
-              <span className="font-medium">{t('Floor')}:</span> {floorName}
-            </p>
+            <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
+              <Icons.Floor className="mr-1 h-3 w-3" />
+              <span className="font-medium mr-1">{t('Floor')}:</span>
+              <span className="truncate">{floorName}</span>
+            </div>
           )}
         </div>
       )}
-    </div>
+    </Card>
   );
 }

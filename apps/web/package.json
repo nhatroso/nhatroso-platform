@@ -17,6 +17,7 @@
     "@nhatroso/translations": "workspace:*",
     "clsx": "^2.1.1",
     "flowbite": "^4.0.1",
+    "flowbite-react": "^0.12.17",
     "lucide-react": "^1.0.1",
     "next": "16.1.6",
     "next-intl": "^4.8.3",

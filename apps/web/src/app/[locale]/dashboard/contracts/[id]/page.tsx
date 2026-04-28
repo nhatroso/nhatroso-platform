@@ -2,12 +2,15 @@
 
 import * as React from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { contractsService } from '@/services/api/contracts';
 import { ContractResponse } from '@nhatroso/shared';
 import { PageHeader } from '@/components/ui/PageHeader';
+import { Icons } from '@/components/icons';
 
 // Use same tailwind classes that mimic the provided CSS or convert inline
 export default function ContractDetailPage() {
+  const t = useTranslations('Contracts');
   const router = useRouter();
   const params = useParams();
   const contractId = params.id as string;
@@ -28,7 +31,7 @@ export default function ContractDetailPage() {
   if (isLoading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-border border-t-primary" />
+        <Icons.Loading className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -64,15 +67,17 @@ export default function ContractDetailPage() {
             <div className="flex gap-4">
               <button
                 onClick={() => router.back()}
-                className="rounded-lg border border-gray-border bg-gray-card px-4 py-2 font-medium text-gray-text hover:bg-gray-surface active:scale-95 transition-all shadow-sm"
+                className="inline-flex items-center rounded-lg border border-gray-border bg-gray-card px-4 py-2 font-medium text-gray-text hover:bg-gray-surface active:scale-95 transition-all shadow-sm"
               >
-                &larr; Quay lại
+                <Icons.Back className="mr-2 h-4 w-4" />
+                {t('Back') || 'Quay lại'}
               </button>
               <button
                 onClick={handlePrint}
-                className="rounded-lg bg-primary px-4 py-2 font-medium text-white hover:bg-primary-hover active:scale-95 transition-all shadow-sm"
+                className="inline-flex items-center rounded-lg bg-primary px-4 py-2 font-medium text-white hover:bg-primary-hover active:scale-95 transition-all shadow-sm"
               >
-                In Hợp Đồng
+                <Icons.Export className="mr-2 h-4 w-4" />
+                {t('PrintContract') || 'In Hợp Đồng'}
               </button>
             </div>
           }

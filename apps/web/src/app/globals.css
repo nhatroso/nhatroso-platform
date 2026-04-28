@@ -4,6 +4,7 @@
 
 @plugin 'flowbite/plugin';
 @source '../node_modules/flowbite';
+@source '../node_modules/flowbite-react/dist/esm/**/*.mjs';
 
 @theme inline {
   --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;

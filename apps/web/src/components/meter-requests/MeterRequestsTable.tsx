@@ -45,9 +45,19 @@ function TableSkeleton() {
   );
 }
 
-export default function MeterRequestsTable({ period }: { period?: string }) {
+export default function MeterRequestsTable({
+  period,
+  searchTerm = '',
+}: {
+  period?: string;
+  searchTerm?: string;
+}) {
   const t = useTranslations('MeterRequests.Table');
   const { requests, loading, error } = useMeterRequests(period);
+
+  const filteredRequests = (requests || []).filter((req) =>
+    req.room_code.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
 
   if (loading) {
     return <TableSkeleton />;
@@ -137,7 +147,7 @@ export default function MeterRequestsTable({ period }: { period?: string }) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-border">
-                {requests.length === 0 ? (
+                {filteredRequests.length === 0 ? (
                   <tr>
                     <td
                       colSpan={5}
@@ -147,7 +157,7 @@ export default function MeterRequestsTable({ period }: { period?: string }) {
                     </td>
                   </tr>
                 ) : (
-                  requests.map((req) => (
+                  filteredRequests.map((req) => (
                     <tr key={req.id}>
                       <td className="h-px w-px whitespace-nowrap px-6 py-3">
                         <span className="text-body font-bold text-gray-text">

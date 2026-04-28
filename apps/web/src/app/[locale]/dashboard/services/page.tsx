@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useServices } from '@/hooks/use-services';
 import { getServiceDisplayName, getUnitDisplayName } from '@/lib/utils';
 import { PageHeader } from '@/components/ui/PageHeader';
+import { Icons } from '@/components/icons';
 
 export default function ServicesPage() {
   const t = useTranslations('Services');
@@ -59,7 +60,7 @@ export default function ServicesPage() {
         <div className="flex-1 overflow-y-auto bg-gray-surface/50 p-4">
           {isLoading && services.length === 0 ? (
             <div className="flex h-32 items-center justify-center">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-border border-t-primary" />
+              <Icons.Loading className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : (
             <ul className="flex flex-col gap-2">
@@ -117,21 +118,7 @@ export default function ServicesPage() {
                       </div>
                       <div className="relative">
                         <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                          <svg
-                            className="w-4 h-4 text-gray-muted"
-                            aria-hidden="true"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              stroke="currentColor"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-                            />
-                          </svg>
+                          <Icons.Search className="w-4 h-4 text-gray-muted" />
                         </div>
                         <input
                           type="search"
@@ -178,19 +165,7 @@ export default function ServicesPage() {
           <div className="hidden h-full w-full items-center justify-center md:flex">
             <div className="flex flex-col items-center text-center p-8 bg-gray-card rounded-xl shadow-sm border border-gray-border">
               <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-primary-light text-primary">
-                <svg
-                  className="h-10 w-10"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1.5}
-                    d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.628.282a2 2 0 01-1.806 0l-.628-.282a6 6 0 00-3.86-.517l-2.387.477a2 2 0 00-1.022.547l-.348.348a2 2 0 000 2.828l.793.793a2 2 0 002.828 0l.793-.793a2 2 0 012.828 0l.793.793a2 2 0 002.828 0l.348-.348a2 2 0 000-2.828l-.793-.793z"
-                  />
-                </svg>
+                <Icons.Service className="h-10 w-10" />
               </div>
               <h3 className="text-h2 font-bold text-gray-text">
                 {t('SelectFirst')}
@@ -270,19 +245,7 @@ export default function ServicesPage() {
               onClick={() => setSelectedServiceId(null)}
               className="inline-flex items-center text-body font-medium text-gray-muted hover:text-gray-text mb-6 md:hidden"
             >
-              <svg
-                className="mr-2 h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
+              <Icons.Back className="mr-2 h-4 w-4" />
               {t('Back')}
             </button>
 
@@ -401,7 +364,7 @@ export default function ServicesPage() {
                       <button
                         type="submit"
                         disabled={isSavingTemplate}
-                        className="text-white bg-success hover:bg-success-hover focus:ring-4 focus:ring-success-light font-medium rounded-lg text-body px-5 py-2.5 disabled:opacity-50"
+                        className="text-white bg-primary hover:bg-primary-hover focus:ring-4 focus:ring-primary-light font-medium rounded-lg text-body px-5 py-2.5 disabled:opacity-50"
                       >
                         {isSavingTemplate
                           ? '...'
@@ -443,7 +406,7 @@ export default function ServicesPage() {
                                   {rule.name}
                                 </td>
                                 <td className="px-6 py-5 text-gray-text">
-                                  {rule.unit_price} /
+                                  {rule.unit_price}/
                                   {getUnitDisplayName(selectedService.unit, t)}
                                 </td>
                                 <td className="px-6 py-5 text-right">

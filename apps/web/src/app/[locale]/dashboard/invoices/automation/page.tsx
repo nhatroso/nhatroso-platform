@@ -1,7 +1,7 @@
 'use client';
 
 import { useAutoInvoiceConfig } from '@/hooks/use-auto-invoice-config';
-import { AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
+import { Icons } from '@/components/icons';
 import { useTranslations } from 'next-intl';
 import { PageHeader } from '@/components/ui/PageHeader';
 
@@ -25,7 +25,7 @@ export default function AutoInvoicesPage() {
   if (loading) {
     return (
       <div className="flex justify-center p-10">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <Icons.Loading className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -41,14 +41,14 @@ export default function AutoInvoicesPage() {
       <div className="bg-gray-card shadow-sm border border-gray-border rounded-2xl p-6">
         {error && (
           <div className="mb-4 bg-danger-light border border-danger-light text-danger rounded-lg p-4 flex items-center">
-            <AlertCircle className="shrink-0 h-4 w-4 mr-2" />
+            <Icons.Warning className="shrink-0 h-4 w-4 mr-2" />
             {t('error')}
           </div>
         )}
 
         {success && (
           <div className="mb-4 bg-success-light border border-success-light text-success rounded-lg p-4 flex items-center">
-            <CheckCircle2 className="shrink-0 h-4 w-4 mr-2" />
+            <Icons.Success className="shrink-0 h-4 w-4 mr-2" />
             {t('success')}
           </div>
         )}
@@ -121,7 +121,7 @@ export default function AutoInvoicesPage() {
             >
               {saving ? (
                 <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <Icons.Loading className="w-4 h-4 mr-2 animate-spin" />
                   {t('saving')}
                 </>
               ) : (

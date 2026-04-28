@@ -150,8 +150,41 @@ impl Hooks for App {
                     }
                 }
             });
+
+            // Spawn SMS Worker
+            let ctx_sms = ctx.clone();
+            tokio::spawn(async move {
+                tracing::info!("Starting SMS Worker (SpeedSMS)...");
+                let mut retries = 0;
+                loop {
+                    match workers::sms_worker::start_worker(&ctx_sms).await {
+                        Ok(_) => break,
+                        Err(e) => {
+                            retries += 1;
+                            tracing::error!("SMS worker crashed: {:?}. Retrying {}/∞ in 5s...", e, retries);
+                            tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
+                        }
+                    }
+                }
+            });
+
+            // 3. Daily Notification Task (Scans for Reminders, Deadline, Overdue)
+            let ctx_notify = ctx.clone();
+            tokio::spawn(async move {
+                tracing::info!("Starting Daily Notification Scheduler...");
+                let mut interval = tokio::time::interval(tokio::time::Duration::from_secs(3600 * 24)); // Every 24h
+                loop {
+                    interval.tick().await;
+                    let ctx_inner = ctx_notify.clone();
+                    tokio::spawn(async move {
+                        if let Err(e) = crate::models::invoices::Model::process_automated_notifications(&ctx_inner).await {
+                             tracing::error!(error = ?e, "[Worker] Automated notifications job failed");
+                        }
+                    });
+                }
+            });
         } else {
-            tracing::warn!("Skipping Email Worker Deployment: REDIS Queue is not configured.");
+            tracing::warn!("Skipping Notification Workers: REDIS Queue is not configured.");
         }
 
         // 3. Inject explicit application Health Check endpoint

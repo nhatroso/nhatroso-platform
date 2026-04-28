@@ -21,6 +21,7 @@ use crate::{
         },
     },
 };
+use loco_rs::app::AppContext;
 use loco_rs::model::{ModelResult, ModelError};
 use rust_decimal::Decimal;
 use sea_orm::{
@@ -126,11 +127,21 @@ impl Model {
 
         txn.commit().await?;
 
-        Ok(InvoiceResponse {
-            invoice,
+        let res = InvoiceResponse {
+            invoice: invoice.clone(),
             details: saved_details,
             histories: vec![history_model],
-        })
+        };
+
+        // Fire & Forget Notification
+        let db_clone = db.clone();
+        tokio::spawn(async move {
+            if let Err(e) = Self::notify_invoice_generated(&db_clone, &invoice).await {
+                tracing::error!(error=?e, "Failed to send invoice generation notification");
+            }
+        });
+
+        Ok(res)
     }
 
     pub async fn list(db: &DatabaseConnection, user_id: Uuid) -> ModelResult<Vec<InvoiceResponse>> {
@@ -283,7 +294,17 @@ impl Model {
 
         txn.commit().await.map_err(|e| e.to_string())?;
 
-        Self::get_one(db, updated_invoice.id, owner_id).await.map_err(|e| e.to_string())
+        let res = Self::get_one(db, updated_invoice.id, owner_id).await.map_err(|e| e.to_string())?;
+
+        let db_clone = db.clone();
+        let inv_clone = updated_invoice.clone();
+        tokio::spawn(async move {
+            if let Err(e) = Self::notify_payment_success(&db_clone, &inv_clone).await {
+                tracing::error!(error=?e, "Failed to send payment success notification");
+            }
+        });
+
+        Ok(res)
     }
 
     pub async fn sepay_webhook(
@@ -349,7 +370,17 @@ impl Model {
 
         txn.commit().await.map_err(|e| e.to_string())?;
 
-        Self::get_one(db, updated_invoice.id, Uuid::nil()).await.map_err(|e| e.to_string())
+        let res = Self::get_one(db, updated_invoice.id, Uuid::nil()).await.map_err(|e| e.to_string())?;
+
+        let db_clone = db.clone();
+        let inv_clone = updated_invoice.clone();
+        tokio::spawn(async move {
+            if let Err(e) = Self::notify_payment_success(&db_clone, &inv_clone).await {
+                tracing::error!(error=?e, "Failed to send payment success notification (SePay)");
+            }
+        });
+
+        Ok(res)
     }
 
     pub async fn automation_webhook(
@@ -398,7 +429,17 @@ impl Model {
 
         txn.commit().await.map_err(|e| e.to_string())?;
 
-        Self::get_one(db, updated_invoice.id, Uuid::nil()).await.map_err(|e| e.to_string())
+        let res = Self::get_one(db, updated_invoice.id, Uuid::nil()).await.map_err(|e| e.to_string())?;
+
+        let db_clone = db.clone();
+        let inv_clone = updated_invoice.clone();
+        tokio::spawn(async move {
+            if let Err(e) = Self::notify_payment_success(&db_clone, &inv_clone).await {
+                tracing::error!(error=?e, "Failed to send payment success notification (Automation)");
+            }
+        });
+
+        Ok(res)
     }
 
     pub async fn calculate_amounts(
@@ -518,4 +559,158 @@ impl Model {
             total_amount,
         })
     }
+
+    pub async fn notify_invoice_generated(db: &DatabaseConnection, invoice: &Model) -> ModelResult<()> {
+        let tenant = self::get_tenant_for_invoice(db, invoice.id).await?;
+        if let Some(email) = tenant.email {
+            let redis_url = std::env::var("REDIS_URL").unwrap_or_else(|_| "redis://localhost:6379".to_string());
+            let job = crate::jobs::email_job::EmailJob::new(
+                email,
+                format!("Thông báo hóa đơn mới - {}", invoice.room_code.as_deref().unwrap_or("")),
+                "invoice_generated.html".to_string(),
+                serde_json::json!({
+                    "tenant_name": invoice.tenant_name,
+                    "room_code": invoice.room_code,
+                    "total_amount": invoice.total_amount,
+                    "due_date": invoice.due_date,
+                    "invoice_url": format!("{}/invoices/{}", std::env::var("SERVER_HOST").unwrap_or_default(), invoice.id),
+                }),
+            );
+            crate::jobs::email_job::EmailJob::enqueue_email(&redis_url, job).await.map_err(|e| ModelError::Any(e.into()))?;
+        }
+        Ok(())
+    }
+
+    pub async fn notify_payment_success(db: &DatabaseConnection, invoice: &Model) -> ModelResult<()> {
+        let tenant = self::get_tenant_for_invoice(db, invoice.id).await?;
+        if let Some(email) = tenant.email {
+            let redis_url = std::env::var("REDIS_URL").unwrap_or_else(|_| "redis://localhost:6379".to_string());
+            let job = crate::jobs::email_job::EmailJob::new(
+                email,
+                format!("Thanh toán thành công - {}", invoice.room_code.as_deref().unwrap_or("")),
+                "payment_success.html".to_string(),
+                serde_json::json!({
+                    "tenant_name": invoice.tenant_name,
+                    "room_code": invoice.room_code,
+                    "total_amount": invoice.total_amount,
+                    "payment_date": chrono::Utc::now(),
+                }),
+            );
+            crate::jobs::email_job::EmailJob::enqueue_email(&redis_url, job).await.map_err(|e| ModelError::Any(e.into()))?;
+        }
+        Ok(())
+    }
+
+    pub async fn remind_tenant(db: &DatabaseConnection, id: i32, owner_id: Uuid) -> ModelResult<()> {
+        let invoice = Entity::find_by_id(id)
+            .one(db)
+            .await?
+            .ok_or_else(|| ModelError::EntityNotFound)?;
+
+        // Verify ownership and status
+        if invoice.landlord_id != Some(owner_id) {
+            return Err(ModelError::Any("UNAUTHORIZED".into()));
+        }
+        if invoice.status.as_deref() != Some("UNPAID") {
+            return Err(ModelError::Any("INVALID_STATUS".into()));
+        }
+
+        let tenant = self::get_tenant_for_invoice(db, invoice.id).await?;
+        let redis_url = std::env::var("REDIS_URL").unwrap_or_else(|_| "redis://localhost:6379".to_string());
+
+        let job = crate::jobs::sms_job::SmsJob::new(
+            tenant.phone,
+            format!("Nhatroso: Hoa don {} chua duoc thanh toan. Vui long kiem tra va hoan tat thanh toan som nhe. Cam on ban!",
+                invoice.room_code.as_deref().unwrap_or("")
+            ),
+        );
+
+        crate::jobs::sms_job::SmsJob::enqueue_sms(&redis_url, job).await.map_err(|e| ModelError::Any(e.into()))?;
+
+        Ok(())
+    }
+    pub async fn process_automated_notifications(ctx: &AppContext) -> ModelResult<()> {
+        let db = &ctx.db;
+        let redis_url = std::env::var("REDIS_URL").unwrap_or_else(|_| "redis://localhost:6379".to_string());
+        let now = chrono::Utc::now();
+
+        let unpaid_invoices = Entity::find()
+            .filter(InvoiceColumn::Status.eq("UNPAID"))
+            .all(db)
+            .await?;
+
+        for inv in unpaid_invoices {
+            let due_date = match inv.due_date {
+                Some(d) => d,
+                None => continue,
+            };
+
+            let days_diff = (due_date.timestamp() - now.timestamp()) / 86400;
+
+            let tenant = match self::get_tenant_for_invoice(db, inv.id).await {
+                Ok(t) => t,
+                Err(_) => continue, // Skip if no tenant found
+            };
+
+            if days_diff == 3 {
+                // Nhắc trước hạn (3 ngày) - Email
+                if let Some(email) = tenant.email {
+                    let job = crate::jobs::email_job::EmailJob::new(
+                        email,
+                        format!("Nhắc thanh toán hóa đơn - {}", inv.room_code.as_deref().unwrap_or("")),
+                        "invoice_reminder.html".to_string(),
+                        serde_json::json!({
+                            "tenant_name": inv.tenant_name,
+                            "room_code": inv.room_code,
+                            "total_amount": inv.total_amount,
+                            "due_date": inv.due_date,
+                        }),
+                    );
+                    let _ = crate::jobs::email_job::EmailJob::enqueue_email(&redis_url, job).await;
+                }
+            } else if days_diff == 1 {
+                // Gần deadline (1 ngày) - SMS
+                let job = crate::jobs::sms_job::SmsJob::new(
+                    tenant.phone,
+                    format!("Nhatroso: Hoa don {} sap den han thanh toan. Vui long thanh toan truoc ngay {}.",
+                        inv.room_code.as_deref().unwrap_or(""),
+                        due_date.format("%d/%m/%Y")
+                    ),
+                );
+                let _ = crate::jobs::sms_job::SmsJob::enqueue_sms(&redis_url, job).await;
+            } else if days_diff == -1 {
+                // Quá hạn (1 ngày) - SMS
+                let job = crate::jobs::sms_job::SmsJob::new(
+                    tenant.phone,
+                    format!("Nhatroso: Hoa don {} da qua han thanh toan. Vui long lien he chu nha de duoc ho tro.",
+                        inv.room_code.as_deref().unwrap_or("")
+                    ),
+                );
+                let _ = crate::jobs::sms_job::SmsJob::enqueue_sms(&redis_url, job).await;
+            }
+        }
+
+        Ok(())
+    }
+}
+
+async fn get_tenant_for_invoice(db: &DatabaseConnection, invoice_id: i32) -> ModelResult<crate::models::_entities::users::Model> {
+    use crate::models::_entities::{invoices, contracts, contract_tenants, users};
+
+    users::Entity::find()
+        .join(sea_orm::JoinType::InnerJoin, users::Relation::ContractTenants.def())
+        .join(sea_orm::JoinType::InnerJoin, contract_tenants::Relation::Contracts.def())
+        .filter(
+            contracts::Column::RoomId.in_subquery(
+                invoices::Entity::find()
+                    .filter(invoices::Column::Id.eq(invoice_id))
+                    .select_only()
+                    .column(invoices::Column::RoomId)
+                    .into_query()
+            )
+        )
+        .filter(contracts::Column::Status.eq("ACTIVE"))
+        .one(db)
+        .await?
+        .ok_or_else(|| ModelError::EntityNotFound)
 }

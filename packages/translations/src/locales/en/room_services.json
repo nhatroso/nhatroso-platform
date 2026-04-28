@@ -7,5 +7,7 @@
   "ServicesButton": "Services",
   "MetersButton": "Meters",
   "ManagePricingTitle": "Manage Services & Pricing",
+  "SearchPlaceholder": "Search room...",
+  "actions": "Actions",
   "MetersTitle": "Utility Meters"
 }

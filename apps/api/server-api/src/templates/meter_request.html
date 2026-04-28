@@ -41,6 +41,32 @@
         line-height: 1.5rem;
         color: #4b5563;
       }
+      .info-grid {
+        background-color: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin: 1.5rem 0;
+      }
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #f3f4f6;
+      }
+      .info-row:last-child {
+        border-bottom: none;
+      }
+      .info-label {
+        font-size: 0.875rem;
+        color: #6b7280;
+      }
+      .info-value {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #111827;
+        text-align: right;
+      }
       .button-container {
         text-align: center;
         margin: 2rem 0;
@@ -53,10 +79,6 @@
         text-decoration: none;
         font-weight: 600;
         display: inline-block;
-        transition: background-color 0.2s;
-      }
-      .button:hover {
-        background-color: #1e42af;
       }
       .footer {
         padding: 1.5rem;
@@ -74,22 +96,39 @@
   <body>
     <div class="container">
       <div class="header">
-        <h1 class="heading">Đặt lại mật khẩu</h1>
+        <h1 class="heading">Yêu cầu nộp chỉ số điện nước</h1>
       </div>
       <div class="content">
-        <p>Chào <strong>{{ name }}</strong>,</p>
+        <p>Xin chào <strong>{{ tenant_name }}</strong>,</p>
         <p>
-          Bạn đã yêu cầu đặt lại mật khẩu cho tài khoản Nhatroso. Nhấp vào nút
-          dưới đây để hoàn tất quy trình:
+          Đã đến kỳ nộp chỉ số điện và nước cho tháng này. Bạn vui lòng truy cập
+          hệ thống để cập nhật chỉ số chính xác cho phòng của mình.
         </p>
 
+        <div class="info-grid">
+          <div class="info-row">
+            <span class="info-label">Phòng:</span>
+            <span class="info-value">{{ room_code }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Kỳ hóa đơn:</span>
+            <span class="info-value">{{ period_month }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Hạn chót nộp:</span>
+            <span class="info-value"
+              >{{ due_date | date(format="%d/%m/%Y") }}</span
+            >
+          </div>
+        </div>
+
         <div class="button-container">
-          <a href="{{ reset_link }}" class="button">Đặt lại mật khẩu ngay</a>
+          <a href="{{ request_url }}" class="button">Nộp chỉ số ngay</a>
         </div>
 
         <p>
-          Nếu bạn không yêu cầu đặt lại mật khẩu, bạn có thể xóa email này một
-          cách an toàn.
+          Việc nộp chỉ số đúng hạn giúp hệ thống tính toán hóa đơn nhanh chóng
+          và chính xác nhất.
         </p>
 
         <p>Trân trọng,<br />Đội ngũ Nhatroso</p>

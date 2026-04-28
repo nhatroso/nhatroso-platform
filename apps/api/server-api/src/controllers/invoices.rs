@@ -124,6 +124,30 @@ pub async fn calculate(
     }
 }
 
+pub async fn remind_tenant(
+    auth: JWT,
+    Path(id): Path<i32>,
+    State(ctx): State<AppContext>,
+) -> Result<Response> {
+    let owner_id = auth::get_user_id(&auth)?;
+
+    match InvoiceModel::remind_tenant(&ctx.db, id, owner_id).await {
+        Ok(_) => format::json(serde_json::json!({ "success": true })),
+        Err(e) => {
+            if let loco_rs::model::ModelError::EntityNotFound = e {
+                 error_response("INVOICE_NOT_FOUND", axum::http::StatusCode::NOT_FOUND)
+            } else if e.to_string().contains("UNAUTHORIZED") {
+                 error_response("UNAUTHORIZED", axum::http::StatusCode::UNAUTHORIZED)
+            } else if e.to_string().contains("INVALID_STATUS") {
+                 error_response("INVALID_STATUS", axum::http::StatusCode::CONFLICT)
+            } else {
+                tracing::error!(error = %e, "Failed to send reminder");
+                error_response("INTERNAL_SERVER_ERROR", axum::http::StatusCode::INTERNAL_SERVER_ERROR)
+            }
+        }
+    }
+}
+
 pub fn routes() -> Routes {
     Routes::new()
         .prefix("api/v1/invoices")
@@ -133,4 +157,5 @@ pub fn routes() -> Routes {
         .add("/{id}", get(get_one))
         .add("/{id}/void", post(void_invoice))
         .add("/{id}/pay", post(pay_invoice))
+        .add("/{id}/remind", post(remind_tenant))
 }

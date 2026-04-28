@@ -10,6 +10,8 @@
   "Description": "Manage your properties and rentals.",
   "SelectBuilding": "Select Building",
   "CreateBuilding": "Create Building",
+  "SearchRoomPlaceholder": "Search room ...",
+  "SearchFloorPlaceholder": "Search floor...",
   "ClearFilters": "Clear Filters",
   "Archive": "Archive",
   "Update": "Update",

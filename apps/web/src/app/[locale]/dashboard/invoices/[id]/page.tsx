@@ -4,16 +4,7 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import {
-  Loader2,
-  ArrowLeft,
-  Home,
-  ChevronRight,
-  FileText,
-  User,
-  CreditCard,
-  History,
-} from 'lucide-react';
+import { Icons } from '@/components/icons';
 import Link from 'next/link';
 import { PageHeader } from '@/components/ui/PageHeader';
 import {
@@ -81,7 +72,7 @@ export default function InvoiceDetailPage() {
   if (isLoading) {
     return (
       <div className="flex h-64 items-center justify-center animate-in fade-in duration-500">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <Icons.Loading className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -108,13 +99,13 @@ export default function InvoiceDetailPage() {
               href="/dashboard"
               className="inline-flex items-center text-tiny font-medium text-gray-muted hover:text-primary transition-colors"
             >
-              <Home className="mr-2.5 h-3 w-3" />
+              <Icons.Home className="mr-2.5 h-3 w-3" />
               {t('dashboard')}
             </Link>
           </li>
           <li>
             <div className="flex items-center">
-              <ChevronRight className="h-4 w-4 text-gray-border" />
+              <Icons.Next className="h-4 w-4 text-gray-border" />
               <Link
                 href="/dashboard/invoices"
                 className="ml-1 text-tiny font-medium text-gray-muted hover:text-primary md:ml-2 transition-colors"
@@ -125,7 +116,7 @@ export default function InvoiceDetailPage() {
           </li>
           <li aria-current="page">
             <div className="flex items-center">
-              <ChevronRight className="h-4 w-4 text-gray-border" />
+              <Icons.Next className="h-4 w-4 text-gray-border" />
               <span className="ml-1 text-tiny font-bold text-gray-text md:ml-2">
                 #{invoice.id}
               </span>
@@ -141,7 +132,7 @@ export default function InvoiceDetailPage() {
             onClick={() => router.push('/dashboard/invoices')}
             className="p-2 text-gray-muted hover:text-gray-text hover:bg-gray-surface rounded-lg transition-colors border border-gray-border bg-gray-card shadow-sm"
           >
-            <ArrowLeft className="h-5 w-5" />
+            <Icons.Back className="h-5 w-5" />
           </button>
           <PageHeader
             variant="full"
@@ -157,7 +148,7 @@ export default function InvoiceDetailPage() {
           {/* Invoice Breakdown Card */}
           <div className="rounded-2xl border border-gray-border bg-gray-card shadow-sm overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-border bg-gray-surface/30 flex items-center gap-2">
-              <FileText className="h-5 w-5 text-primary" />
+              <Icons.Contract className="h-5 w-5 text-primary" />
               <h3 className="text-body font-bold text-gray-text uppercase tracking-wider">
                 {t('breakdown')}
               </h3>
@@ -210,7 +201,7 @@ export default function InvoiceDetailPage() {
           {/* Payment History Timeline Card */}
           <div className="rounded-2xl border border-gray-border bg-gray-card shadow-sm overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-border bg-gray-surface/30 flex items-center gap-2">
-              <History className="h-5 w-5 text-primary" />
+              <Icons.History className="h-5 w-5 text-primary" />
               <h3 className="text-body font-bold text-gray-text uppercase tracking-wider">
                 {t('paymentHistory')}
               </h3>
@@ -266,7 +257,7 @@ export default function InvoiceDetailPage() {
             <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white/10 rounded-full blur-3xl group-hover:bg-white/20 transition-all duration-700" />
             <div className="relative z-10">
               <div className="flex items-center gap-2 mb-4 opacity-80">
-                <CreditCard className="h-4 w-4" />
+                <Icons.Revenue className="h-4 w-4" />
                 <span className="text-[11px] font-bold uppercase tracking-widest">
                   {t('totalAmount')}
                 </span>
@@ -283,7 +274,7 @@ export default function InvoiceDetailPage() {
           {/* Tenant Info Card */}
           <div className="rounded-2xl border border-gray-border bg-gray-card p-6 shadow-sm">
             <div className="flex items-center gap-2 mb-4 text-gray-muted">
-              <User className="h-4 w-4" />
+              <Icons.Tenant className="h-4 w-4" />
               <h3 className="text-tiny font-bold uppercase tracking-wider">
                 {t('tenantInfo')}
               </h3>
@@ -332,7 +323,7 @@ export default function InvoiceDetailPage() {
                     className="w-full bg-danger text-white font-bold py-3.5 px-4 rounded-xl hover:bg-danger-hover disabled:opacity-50 transition-all shadow-lg shadow-danger/20 hover:shadow-danger/40 active:scale-[0.98]"
                   >
                     {isActionLoading ? (
-                      <Loader2 className="h-5 w-5 animate-spin mx-auto" />
+                      <Icons.Loading className="h-5 w-5 animate-spin mx-auto" />
                     ) : (
                       t('confirmVoid')
                     )}
@@ -354,10 +345,10 @@ export default function InvoiceDetailPage() {
                     className="w-full bg-success hover:bg-success-hover text-white font-bold py-4 px-4 rounded-xl shadow-lg shadow-success/20 hover:shadow-success-hover/40 transition-all flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50"
                   >
                     {isActionLoading ? (
-                      <Loader2 className="h-5 w-5 animate-spin" />
+                      <Icons.Loading className="h-5 w-5 animate-spin" />
                     ) : (
                       <>
-                        <CreditCard className="h-5 w-5" />
+                        <Icons.Revenue className="h-5 w-5" />
                         {t('markAsPaid')}
                       </>
                     )}
@@ -374,7 +365,7 @@ export default function InvoiceDetailPage() {
                 )}
                 {!isUnpaid && !isVoidable && (
                   <div className="bg-gray-surface border border-gray-border rounded-xl p-6 text-center">
-                    <History className="h-8 w-8 text-gray-muted/30 mx-auto mb-2" />
+                    <Icons.History className="h-8 w-8 text-gray-muted/30 mx-auto mb-2" />
                     <p className="text-tiny font-bold text-gray-muted uppercase tracking-wider">
                       {t('noActionsAvailable')}
                     </p>

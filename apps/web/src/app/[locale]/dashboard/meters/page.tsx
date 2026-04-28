@@ -3,17 +3,7 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import {
-  Zap,
-  Droplets,
-  Search,
-  Activity,
-  AlertCircle,
-  ArrowRight,
-  Building2,
-  TrendingUp,
-  Loader2,
-} from 'lucide-react';
+import { Icons } from '@/components/icons';
 import {
   LandlordMeterSummary,
   LandlordMeterDetail,
@@ -85,7 +75,7 @@ export default function MeterManagementPage() {
   if (loading && !summary) {
     return (
       <div className="flex h-[60vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <Icons.Loading className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -103,25 +93,25 @@ export default function MeterManagementPage() {
         <StatsCard
           title={t('TotalMeters')}
           value={summary?.total_meters || 0}
-          icon={<Activity className="h-5 w-5" />}
+          icon={<Icons.Meter className="h-5 w-5" />}
           color="primary"
         />
         <StatsCard
           title={t('PendingReadings')}
           value={summary?.pending_readings || 0}
-          icon={<AlertCircle className="h-5 w-5" />}
+          icon={<Icons.Warning className="h-5 w-5" />}
           color="warning"
         />
         <StatsCard
           title={t('OverdueReadings')}
           value={summary?.overdue_readings || 0}
-          icon={<AlertCircle className="h-5 w-5" />}
+          icon={<Icons.Warning className="h-5 w-5" />}
           color="danger"
         />
         <StatsCard
           title={t('SubmissionRate')}
           value={`${summary?.submission_rate.toFixed(1)}%`}
-          icon={<TrendingUp className="h-5 w-5" />}
+          icon={<Icons.Trends className="h-5 w-5" />}
           color="success"
         />
       </div>
@@ -230,7 +220,7 @@ export default function MeterManagementPage() {
                 <td colSpan={6} className="py-20 text-center">
                   <div className="flex flex-col items-center gap-3">
                     <div className="rounded-full bg-gray-surface p-4">
-                      <Search className="h-8 w-8 text-gray-muted/50" />
+                      <Icons.Search className="h-8 w-8 text-gray-muted/50" />
                     </div>
                     <p className="text-gray-muted">{t('NoMetersFound')}</p>
                   </div>
@@ -247,16 +237,16 @@ export default function MeterManagementPage() {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
-                      <Building2 className="h-4 w-4 text-gray-muted" />
+                      <Icons.Property className="h-4 w-4 text-gray-muted" />
                       <span>{m.building_name}</span>
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
                       {m.service_name.toLowerCase().includes('electricity') ? (
-                        <Zap className="h-4 w-4 text-warning" />
+                        <Icons.Energy className="h-4 w-4 text-warning" />
                       ) : (
-                        <Droplets className="h-4 w-4 text-primary" />
+                        <Icons.Water className="h-4 w-4 text-primary" />
                       )}
                       <span>
                         {getServiceDisplayName(m.service_name, tServices)}
@@ -293,7 +283,7 @@ export default function MeterManagementPage() {
                         {t('RecordManually')}
                       </button>
                       <button className="rounded-lg bg-gray-surface p-1.5 text-gray-muted hover:bg-gray-subtle transition-colors">
-                        <ArrowRight className="h-4 w-4" />
+                        <Icons.Forward className="h-4 w-4" />
                       </button>
                     </div>
                   </td>

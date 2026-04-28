@@ -1,59 +1,54 @@
-# Loco configuration file documentation
-
-# Application logging configuration
 logger:
-  # Enable or disable logging.
-  enable: true
-  # Enable pretty backtrace (sets RUST_BACKTRACE=1)
-  pretty_backtrace: true
-  # Log level, options: trace, debug, info, warn or error.
-  level: debug
-  # Define the logging format. options: compact, pretty or json
-  format: compact
+  enable: {{ get_env(name="LOGGER_ENABLE") }}
+  pretty_backtrace: {{ get_env(name="LOGGER_PRETTY_BACKTRACE") }}
+  level: {{ get_env(name="LOGGER_LEVEL") }}
+  format: {{ get_env(name="LOGGER_FORMAT") }}
 
-# Web server configuration
 server:
-  # Port on which the server will listen. the server binding is 0.0.0.0:{PORT}
-  port: 5150
-  # The UI hostname or IP address that mailers will point to.
-  host: http://localhost
+  port: {{ get_env(name="PORT") }}
+  binding: {{ get_env(name="SERVER_BINDING") }}
+  host: {{ get_env(name="SERVER_HOST") }}
   middlewares:
 
-# Worker Configuration
 workers:
-  mode: ForegroundBlocking
+  mode: {{ get_env(name="WORKER_MODE") }}
 
-# Queue Configuration
 queue:
   kind: Redis
-  # Redis connection URI
-  uri: {{ get_env(name="REDIS_URL", default="redis://127.0.0.1") }}
-  dangerously_flush: false
+  uri: {{ get_env(name="REDIS_URL") }}
+  dangerously_flush: {{ get_env(name="REDIS_DANGEROUSLY_FLUSH") }}
 
 settings:
   email:
     provider: ses
-    from: { { get_env(name="EMAIL_FROM", default="noreply@nhatroso.com") } }
-    timeout_seconds: 10
-    rate_limit_ms: 50
+    from: {{ get_env(name="EMAIL_FROM") }}
+    timeout_seconds: {{ get_env(name="EMAIL_TIMEOUT") }}
+    rate_limit_ms: {{ get_env(name="EMAIL_RATE_LIMIT") }}
     retry:
       max_attempts: 3
       backoff_base: 2
 
-# Database Configuration
-database:
-  uri: {{ get_env(name="DATABASE_URL", default="postgres://nhatroso:nhatroso@localhost:5432/nhatroso_db_test") }}
-  enable_logging: false
-  connect_timeout: 500
-  idle_timeout: 500
-  min_connections: 1
-  max_connections: 1
-  auto_migrate: true
-  dangerously_truncate: true
-  dangerously_recreate: true
+  sms:
+    provider: speedsms
+    access_token: {{ get_env(name="SPEEDSMS_ACCESS_TOKEN") }}
+    timeout_seconds: {{ get_env(name="SMS_TIMEOUT") }}
+    rate_limit_ms: {{ get_env(name="SMS_RATE_LIMIT") }}
+    retry:
+      max_attempts: 3
+      backoff_base: 2
 
-# Authentication Configuration
+database:
+  uri: 'postgres://nhatroso:nhatroso@localhost:5432/nhatroso_db_test'
+  enable_logging: {{ get_env(name="DATABASE_ENABLE_LOGGING") }}
+  connect_timeout: {{ get_env(name="DB_CONNECT_TIMEOUT") }}
+  idle_timeout: {{ get_env(name="DB_IDLE_TIMEOUT") }}
+  min_connections: {{ get_env(name="DB_MIN_CONNECTIONS") }}
+  max_connections: {{ get_env(name="DB_MAX_CONNECTIONS") }}
+  auto_migrate: {{ get_env(name="DATABASE_AUTO_MIGRATE") }}
+  dangerously_truncate: {{ get_env(name="DATABASE_DANGEROUSLY_TRUNCATE") }}
+  dangerously_recreate: {{ get_env(name="DATABASE_DANGEROUSLY_RECREATE") }}
+
 auth:
   jwt:
-    secret: {{ get_env(name="JWT_SECRET", default="FKAvOMDFPCthP6yZAl6e") }}
-    expiration: 604800
+    secret: {{ get_env(name="JWT_SECRET") }}
+    expiration: {{ get_env(name="JWT_EXPIRATION") }}

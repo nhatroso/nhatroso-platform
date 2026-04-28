@@ -1,0 +1,163 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        background-color: #f9fafb;
+        margin: 0;
+        padding: 20px;
+        font-family:
+          Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          sans-serif;
+        color: #111827;
+      }
+      .container {
+        max-width: 32rem;
+        margin: 0 auto;
+        background-color: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        padding: 1.5rem;
+        border-bottom: 1px solid #f3f4f6;
+        text-align: center;
+      }
+      .heading {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #111827;
+        margin: 0;
+      }
+      .content {
+        padding: 1.5rem;
+        line-height: 1.5rem;
+        color: #4b5563;
+      }
+      .badge {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        border-radius: 0.25rem;
+        text-transform: uppercase;
+        background-color: #e1effe;
+        color: #1e42af;
+      }
+      .info-grid {
+        background-color: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin: 1.5rem 0;
+      }
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #f3f4f6;
+      }
+      .info-row:last-child {
+        border-bottom: none;
+      }
+      .info-label {
+        font-size: 0.875rem;
+        color: #6b7280;
+      }
+      .info-value {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #111827;
+        text-align: right;
+      }
+      .button-container {
+        text-align: center;
+        margin: 2rem 0;
+      }
+      .button {
+        background-color: #1a56db;
+        color: #ffffff;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-block;
+      }
+      .footer {
+        padding: 1.5rem;
+        background-color: #f9fafb;
+        text-align: center;
+        border-top: 1px solid #f3f4f6;
+      }
+      .footer-text {
+        font-size: 0.75rem;
+        color: #9ca3af;
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1 class="heading">Thông báo hóa đơn mới</h1>
+      </div>
+      <div class="content">
+        <p>Xin chào <strong>{{ tenant_name }}</strong>,</p>
+        <p>
+          Hệ thống đã tạo hóa đơn mới cho phòng của bạn. Bạn vui lòng kiểm tra
+          thông tin dưới đây:
+        </p>
+
+        <div class="info-grid">
+          <div class="info-row">
+            <span class="info-label">Phòng:</span>
+            <span class="info-value">{{ room_code }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Trạng thái:</span>
+            <span class="info-value"
+              ><span class="badge">Chưa thanh toán</span></span
+            >
+          </div>
+          <div class="info-row">
+            <span class="info-label">Tổng tiền:</span>
+            <span class="info-value" style="color: #1a56db; font-size: 1.125rem"
+              >{{ total_amount | format_number }} VND</span
+            >
+          </div>
+          <div class="info-row">
+            <span class="info-label">Hạn thanh toán:</span>
+            <span class="info-value"
+              >{{ due_date | date(format="%d/%m/%Y") }}</span
+            >
+          </div>
+        </div>
+
+        <div class="button-container">
+          <a href="{{ invoice_url }}" class="button"
+            >Xem chi tiết & Thanh toán</a
+          >
+        </div>
+
+        <p>
+          Vui lòng hoàn tất thanh toán đúng hạn để đảm bảo các dịch vụ không bị
+          gián đoạn.
+        </p>
+
+        <p>Trân trọng,<br />Đội ngũ Nhatroso</p>
+      </div>
+      <div class="footer">
+        <p class="footer-text">
+          &copy; 2026 Nhatroso Platform. All rights reserved.
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

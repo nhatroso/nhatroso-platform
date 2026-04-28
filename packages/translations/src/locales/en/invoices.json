@@ -7,10 +7,10 @@
   "noInvoices": "No invoices generated yet",
   "unknownTenant": "Unknown Tenant",
   "roomPrefix": "Room: ",
-  "statusPAID": "PAID",
-  "statusUNPAID": "UNPAID",
-  "statusPENDING_CONFIRMATION": "PENDING CONFIRMATION",
-  "statusVOIDED": "VOIDED",
+  "statusPAID": "Paid",
+  "statusUNPAID": "Unpaid",
+  "statusPENDING_CONFIRMATION": "Pending Confirmation",
+  "statusVOIDED": "Voided",
   "manualGeneration": "Manual Invoice Generation",
   "manualGenerationDesc": "Invoice creation via UI directly is under construction based on requirements.",
   "cancel": "Cancel",
@@ -26,7 +26,7 @@
   "voidInvoice": "Void Invoice",
   "paymentHistory": "Payment History",
   "noHistory": "No history available",
-  "searchRoomOrTenant": "Search room or tenant...",
+  "searchRoomOrTenant": "Search room or tenant name...",
   "status_all": "-- All Statuses --",
   "select_room": "Select a room...",
   "period": "Billing Period",
@@ -37,6 +37,8 @@
   "createdAt": "Created At",
   "dueDate": "Due Date",
   "status_label": "Status",
+  "addInvoice": "Add Invoice",
+  "actions": "Actions",
   "details": "Details",
   "payment": {
     "amountToPay": "Amount to pay",
@@ -90,5 +92,9 @@
   "noActionsAvailable": "No actions available",
   "latest": "Latest",
   "tenant": "Tenant",
-  "voidReason_label": "Void Reason"
+  "voidReason_label": "Void Reason",
+  "remindTenant": "Remind Tenant",
+  "confirmRemind": "Send SMS reminder to tenant for this invoice?",
+  "remindSent": "Reminder SMS sent successfully",
+  "remindFailed": "Failed to send reminder SMS"
 }

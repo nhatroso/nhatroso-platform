@@ -107,3 +107,12 @@ export async function payInvoice(id: number): Promise<Invoice> {
   if (!res.ok) throw new Error('Failed to pay invoice');
   return res.json();
 }
+
+export async function remindInvoice(id: number): Promise<{ success: boolean }> {
+  const res = await apiFetch(`/invoices/${id}/remind`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (!res.ok) throw new Error('Failed to send reminder');
+  return res.json();
+}

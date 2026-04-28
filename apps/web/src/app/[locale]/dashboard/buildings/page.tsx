@@ -6,6 +6,7 @@ import { BuildingDetailPanel } from '@/components/buildings/BuildingDetailPanel'
 import { useBuildings } from '@/hooks/use-buildings';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { PageHeader } from '@/components/ui/PageHeader';
+import { Icons } from '@/components/icons';
 
 function ListSkeleton() {
   return (
@@ -60,19 +61,7 @@ export default function BuildingsPage() {
               className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-primary-hover font-medium text-white transition-colors hover:bg-primary-dark focus:outline-none focus:ring-4 focus:ring-primary-light dark:bg-primary dark:hover:bg-primary-hover dark:focus:ring-primary-dark"
               aria-label={t('CreateBuilding')}
             >
-              <svg
-                className="h-5 w-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
+              <Icons.Plus className="h-5 w-5" />
             </button>
           }
         />
@@ -107,19 +96,7 @@ export default function BuildingsPage() {
           <div className="hidden h-full w-full items-center justify-center md:flex">
             <div className="flex flex-col items-center text-center p-8 bg-gray-card rounded-xl shadow-sm border border-gray-border">
               <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-primary-light text-primary">
-                <svg
-                  className="h-10 w-10"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1.5}
-                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                  />
-                </svg>
+                <Icons.Property className="h-10 w-10" />
               </div>
               <h3 className="text-h2 font-bold text-gray-text">
                 {t('SelectPropertyFirst')}

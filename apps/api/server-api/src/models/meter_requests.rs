@@ -85,12 +85,68 @@ impl Model {
                 }
 
                 generated_count += 1;
+
+                // Fire & Forget Notification
+                let db_clone = db.clone();
+                tokio::spawn(async move {
+                    if let Err(e) = Model::notify_meter_request(&db_clone, request_id).await {
+                        tracing::error!(error=?e, request_id=%request_id, "Failed to send meter request notification");
+                    }
+                });
             }
         }
 
         Ok(generated_count)
     }
+
+    pub async fn notify_meter_request(db: &DatabaseConnection, request_id: uuid::Uuid) -> Result<(), anyhow::Error> {
+        let request = Entity::find_by_id(request_id)
+            .one(db)
+            .await?
+            .ok_or_else(|| anyhow::anyhow!("Meter request not found"))?;
+
+        let room = super::_entities::rooms::Entity::find_by_id(request.room_id)
+            .one(db)
+            .await?
+            .ok_or_else(|| anyhow::anyhow!("Room not found"))?;
+
+        let tenant = self::get_tenant_for_room(db, request.room_id).await
+            .map_err(|e| anyhow::anyhow!("Failed to find tenant: {:?}", e))?;
+
+        if let Some(email) = tenant.email {
+            let redis_url = std::env::var("REDIS_URL").unwrap_or_else(|_| "redis://localhost:6379".to_string());
+            let job = crate::jobs::email_job::EmailJob::new(
+                email,
+                format!("Yêu cầu nộp chỉ số điện nước - {} - {}", room.code, request.period_month),
+                "meter_request.html".to_string(),
+                serde_json::json!({
+                    "tenant_name": tenant.name,
+                    "room_code": room.code,
+                    "period_month": request.period_month,
+                    "due_date": request.due_date,
+                    "request_url": format!("{}/meter-requests/{}", std::env::var("SERVER_HOST").unwrap_or_default(), request.id),
+                }),
+            );
+            crate::jobs::email_job::EmailJob::enqueue_email(&redis_url, job).await?;
+        }
+        Ok(())
+    }
 }
+
+async fn get_tenant_for_room(db: &DatabaseConnection, room_id: uuid::Uuid) -> Result<crate::models::_entities::users::Model, DbErr> {
+    use crate::models::_entities::{contracts, contract_tenants, users};
+    use sea_orm::QuerySelect;
+
+    users::Entity::find()
+        .join(sea_orm::JoinType::InnerJoin, users::Relation::ContractTenants.def())
+        .join(sea_orm::JoinType::InnerJoin, contract_tenants::Relation::Contracts.def())
+        .filter(contracts::Column::RoomId.eq(room_id))
+        .filter(contracts::Column::Status.eq("ACTIVE"))
+        .one(db)
+        .await?
+        .ok_or_else(|| DbErr::Custom("Tenant not found".to_string()))
+}
+
 
 // implement your write-oriented logic here
 impl ActiveModel {}

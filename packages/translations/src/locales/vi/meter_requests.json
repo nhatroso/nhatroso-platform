@@ -52,5 +52,6 @@
     "SuccessGenerated": "Đã tạo thành công {count} yêu cầu nộp chỉ số."
   },
   "Period": "Kỳ hạn",
-  "Status": "Trạng thái"
+  "Status": "Trạng thái",
+  "SearchRoomPlaceholder": "Tìm số phòng hoặc khách thuê..."
 }

@@ -62,7 +62,33 @@ impl SESEmailService {
         let from_email = email_config.from.clone();
 
         let glob = format!("{}/**/*", template_dir);
-        let tera = Tera::new(&glob)?;
+        let mut tera = Tera::new(&glob)?;
+
+        // Register custom filters
+        tera.register_filter("format_number", |value: &tera::Value, _args: &std::collections::HashMap<String, tera::Value>| -> tera::Result<tera::Value> {
+            let num_str = match value {
+                tera::Value::Number(n) => n.to_string(),
+                tera::Value::String(s) => s.clone(),
+                _ => return Ok(value.clone()),
+            };
+
+            // Parse to check if it's a valid number
+            let Ok(n) = num_str.parse::<f64>() else {
+                return Ok(value.clone());
+            };
+
+            // Format with dots as thousands separators (Vietnamese style)
+            let s = format!("{:.0}", n); // Round to integer for currency
+            let mut result = String::new();
+            let chars: Vec<char> = s.chars().rev().collect();
+            for (i, c) in chars.iter().enumerate() {
+                if i > 0 && i % 3 == 0 {
+                    result.push('.');
+                }
+                result.push(*c);
+            }
+            Ok(tera::Value::String(result.chars().rev().collect()))
+        });
 
         Ok(Self {
             client,

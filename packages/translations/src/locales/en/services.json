@@ -1,9 +1,10 @@
 {
   "Title": "Service Catalog",
+  "Services": "Services",
   "Description": "Manage your property services (e.g., Electricity, Water) and their units of measurement.",
   "Loading": "LOADING SERVICES...",
   "Empty": "NO SERVICES DISCOVERED.",
-  "CreateNew": "+ NEW SERVICE",
+  "CreateNew": "Add new price",
   "SelectFirst": "SELECT A SERVICE TO MANAGE",
   "NameLabel": "Service Name",
   "UnitLabel": "Unit",

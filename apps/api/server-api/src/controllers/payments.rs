@@ -173,14 +173,23 @@ pub async fn sepay_webhook(
     let updated = active_payment.update(&ctx.db).await?;
 
     // Update invoice status too (Manual update since we don't have owner_id)
-    crate::models::_entities::invoices::ActiveModel {
+    let invoice_active = crate::models::_entities::invoices::ActiveModel {
         id: ActiveValue::set(updated.invoice_id),
         status: ActiveValue::set(Some("PAID".to_string())),
         ..Default::default()
-    }.update(&ctx.db).await?;
+    };
+    let invoice = invoice_active.update(&ctx.db).await?;
 
-    // Broadcast
+    // Broadcast UI update
     PAYMENT_HUB.broadcast(PaymentEvent::Success { invoice_id: updated.invoice_id });
+
+    // Send Email Notification
+    let db_clone = ctx.db.clone();
+    tokio::spawn(async move {
+        if let Err(e) = InvoiceModel::notify_payment_success(&db_clone, &invoice).await {
+            tracing::error!(error=?e, "Failed to send payment success notification (Payment Webhook)");
+        }
+    });
 
     format::json(serde_json::json!({ "success": true }))
 }

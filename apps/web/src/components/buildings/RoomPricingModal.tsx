@@ -73,13 +73,16 @@ export function RoomPricingModal({ room, onClose }: RoomPricingModalProps) {
 
         <div className="flex flex-1 overflow-hidden">
           {/* Left: Services Navigation */}
-          <div className="w-1/4 min-w-[200px] overflow-y-auto border-r border-gray-border bg-gray-surface">
+          <div className="w-1/3 min-w-[200px] overflow-y-auto border-r border-gray-border bg-gray-surface/30 px-4 py-8">
+            <h3 className="mb-6 px-2 text-[11px] font-bold uppercase tracking-widest text-gray-muted">
+              {tServices('Services')}
+            </h3>
             {loading ? (
-              <div className="space-y-4 p-4">
+              <div className="space-y-4">
                 {[1, 2, 3, 4].map((i) => (
                   <div
                     key={i}
-                    className="h-12 animate-pulse rounded bg-gray-subtle"
+                    className="h-12 animate-pulse rounded-xl bg-gray-subtle"
                   />
                 ))}
               </div>
@@ -88,7 +91,7 @@ export function RoomPricingModal({ room, onClose }: RoomPricingModalProps) {
                 {tServices('NoActiveServices')}
               </div>
             ) : (
-              <ul className="space-y-2 p-3 font-medium">
+              <ul className="space-y-2">
                 {services.map((s) => {
                   const isActive = s.id === selectedServiceId;
                   const hasAssigned = roomServices.some(
@@ -99,20 +102,22 @@ export function RoomPricingModal({ room, onClose }: RoomPricingModalProps) {
                     <li key={s.id}>
                       <button
                         onClick={() => setSelectedServiceId(s.id)}
-                        className={`group flex w-full items-center rounded-lg p-2 text-gray-text hover:bg-gray-surface ${isActive ? 'bg-gray-surface shadow-sm' : ''}`}
+                        className={`group relative flex w-full items-center gap-4 rounded-xl border border-gray-border bg-gray-card p-4 text-gray-text shadow-sm transition-all hover:border-primary/50 hover:shadow-md ${isActive ? 'border-primary bg-white ring-1 ring-primary shadow-lg shadow-primary/5 scale-[1.02] z-10' : 'opacity-80 hover:opacity-100 bg-gray-surface/50'}`}
                       >
-                        <div className="flex flex-1 flex-col text-left">
+                        <div className="flex flex-1 flex-col text-left overflow-hidden">
                           <span
-                            className={`text-body ${isActive ? 'font-bold' : ''}`}
+                            className={`truncate text-sm font-bold text-gray-text transition-colors ${isActive ? 'text-primary dark:text-primary-dark' : ''}`}
                           >
                             {getServiceDisplayName(s.name, tServices)}
                           </span>
-                          <span className="text-tiny text-gray-muted">
+                          <span className="text-tiny text-gray-muted mt-0.5">
                             {getUnitDisplayName(s.unit, tServices)}
                           </span>
                         </div>
                         {hasAssigned && (
-                          <span className="inline-flex h-2 w-2 items-center justify-center rounded-full bg-primary ms-3" />
+                          <div
+                            className={`h-2.5 w-2.5 rounded-full bg-primary transition-all ${isActive ? 'bg-primary ring-4 ring-primary/10' : ''}`}
+                          />
                         )}
                       </button>
                     </li>
@@ -123,7 +128,7 @@ export function RoomPricingModal({ room, onClose }: RoomPricingModalProps) {
           </div>
 
           {/* Right: Content Area */}
-          <div className="flex flex-1 flex-col overflow-y-auto bg-gray-card p-6">
+          <div className="flex flex-1 flex-col overflow-y-auto bg-gray-card p-8">
             {!selectedServiceId ? (
               <div className="flex h-full flex-col items-center justify-center text-center">
                 <p className="text-gray-muted">
@@ -133,10 +138,10 @@ export function RoomPricingModal({ room, onClose }: RoomPricingModalProps) {
             ) : (
               <div className="space-y-6">
                 {/* Status Toggle Area */}
-                <div className="rounded-lg border border-gray-border bg-gray-card px-6 py-5 shadow-sm">
-                  <div className="flex items-center justify-between">
+                <div className="rounded-2xl border border-gray-border bg-gray-card p-6 shadow-sm">
+                  <div className="flex items-center justify-between pb-6 border-b border-gray-surface">
                     <div>
-                      <h3 className="text-body font-semibold text-gray-text">
+                      <h3 className="text-body font-bold text-gray-text">
                         {tServices('EnableServiceForRoom')}
                       </h3>
                       <p className="text-body text-gray-muted mt-1">
@@ -157,7 +162,7 @@ export function RoomPricingModal({ room, onClose }: RoomPricingModalProps) {
                         disabled={isSaving}
                         className="peer sr-only"
                       />
-                      <div className="peer relative h-6 w-11 rounded-full bg-gray-subtle after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-border after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:border-white peer-focus:outline-none" />
+                      <div className="peer relative h-6 w-11 rounded-full bg-gray-subtle after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-border after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none" />
                     </label>
                   </div>
 
@@ -167,22 +172,26 @@ export function RoomPricingModal({ room, onClose }: RoomPricingModalProps) {
                     const reading =
                       meter.latest_reading ?? meter.initial_reading;
                     return (
-                      <div className="mt-4 flex items-center gap-3 rounded-lg bg-primary-light border border-primary-light/50">
-                        <Gauge
-                          size={16}
-                          className="text-primary dark:text-primary-dark"
-                        />
+                      <div className="mt-8 flex items-center gap-5 rounded-2xl bg-primary-light p-6 border border-primary-light/50 shadow-inner">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-primary/10">
+                          <Gauge
+                            size={28}
+                            className="text-primary dark:text-primary-dark"
+                          />
+                        </div>
                         <div className="flex-1">
-                          <p className="text-tiny font-medium text-primary dark:text-primary-dark">
+                          <p className="text-body font-bold text-primary dark:text-primary-dark opacity-80">
                             {tServices('CurrentMeterReading')}
                           </p>
-                          <p className="text-body font-bold text-gray-text mt-0.5">
+                          <p className="text-2xl font-black text-gray-text mt-1.5 tracking-tight">
                             {Number(reading).toLocaleString()}{' '}
-                            {meter.service_unit ||
-                              getUnitDisplayName(
-                                activeService?.unit || '',
-                                tServices,
-                              )}
+                            <span className="text-lg font-normal text-gray-muted ml-1 italic capitalize">
+                              {meter.service_unit ||
+                                getUnitDisplayName(
+                                  activeService?.unit || '',
+                                  tServices,
+                                )}
+                            </span>
                           </p>
                         </div>
                       </div>
@@ -275,7 +284,7 @@ export function RoomPricingModal({ room, onClose }: RoomPricingModalProps) {
                           >
                             {serviceTemplates.map((template) => (
                               <option key={template.id} value={template.id}>
-                                {template.name} ({template.unit_price} /{' '}
+                                {template.name} ({template.unit_price}/
                                 {getUnitDisplayName(
                                   activeService?.unit || '',
                                   tServices,

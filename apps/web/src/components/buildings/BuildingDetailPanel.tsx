@@ -150,7 +150,7 @@ export function BuildingDetailPanel({
             </li>
             <li className="mr-2">
               <Link
-                href={`/dashboard/floors?buildingId=${building.id}`}
+                href={`/dashboard/buildings/floors?buildingId=${building.id}`}
                 className="inline-flex items-center p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-text hover:border-gray-border"
               >
                 {t('Floors')}
@@ -158,7 +158,7 @@ export function BuildingDetailPanel({
             </li>
             <li className="mr-2">
               <Link
-                href={`/dashboard/rooms?buildingId=${building.id}`}
+                href={`/dashboard/buildings/rooms?buildingId=${building.id}`}
                 className="inline-flex items-center p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-text hover:border-gray-border"
               >
                 {t('Rooms')}

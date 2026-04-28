@@ -52,5 +52,6 @@
     "SuccessGenerated": "Successfully generated {count} meter requests."
   },
   "Period": "Period",
-  "Status": "Status"
+  "Status": "Status",
+  "SearchRoomPlaceholder": "Search room or tenant..."
 }

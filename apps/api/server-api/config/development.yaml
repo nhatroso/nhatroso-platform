@@ -28,6 +28,15 @@ settings:
       max_attempts: 3
       backoff_base: 2
 
+  sms:
+    provider: speedsms
+    access_token: {{ get_env(name="SPEEDSMS_ACCESS_TOKEN") }}
+    timeout_seconds: {{ get_env(name="SMS_TIMEOUT") }}
+    rate_limit_ms: {{ get_env(name="SMS_RATE_LIMIT") }}
+    retry:
+      max_attempts: 3
+      backoff_base: 2
+
 database:
   uri: {{ get_env(name="DATABASE_URL") }}
   enable_logging: {{ get_env(name="DATABASE_ENABLE_LOGGING") }}
