@@ -51,6 +51,10 @@ aws-sdk-sesv2 = "1.118.0"
 redis = { version = "1.2.0", features = ["aio", "tokio-comp"] }
 tera = "1.20.1"
 dotenvy = "0.15.7"
+google-cloud-vision-v1 = "1.8"
+google-cloud-auth = "1.9"
+image = "0.25"
+imageproc = "0.25"
 
 [[bin]]
 name = "server_api-cli"

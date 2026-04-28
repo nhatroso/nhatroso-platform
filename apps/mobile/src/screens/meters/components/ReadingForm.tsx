@@ -4,11 +4,11 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  Image,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Camera, X, CheckCircle2 } from '@/assets/icons';
+import { CheckCircle2, Camera, Image as ImageIcon, X } from '@/assets/icons';
 
 interface ReadingFormProps {
   reading: string;
@@ -67,6 +67,47 @@ export function ReadingForm({
         </View>
       ) : (
         <>
+          {/* Photo Section */}
+          {!imageUri ? (
+            <View className="flex-row space-x-3 mb-6">
+              <TouchableOpacity
+                onPress={onTakePhoto}
+                disabled={isProcessing}
+                className="flex-1 bg-primary/5 border border-primary/20 p-4 rounded-2xl items-center justify-center"
+              >
+                <Camera size={24} className="text-primary mb-1" />
+                <Text className="text-primary font-bold text-xs">
+                  {t('Services.submission.takePhoto')}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={onPickImage}
+                disabled={isProcessing}
+                className="flex-1 bg-muted/5 border border-muted/20 p-4 rounded-2xl items-center justify-center"
+              >
+                <ImageIcon size={24} className="text-muted mb-1" />
+                <Text className="text-muted font-bold text-xs">
+                  {t('Services.submission.pickImage')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View className="relative mb-6 rounded-2xl overflow-hidden aspect-[4/3] bg-muted/10">
+              <Image source={{ uri: imageUri }} className="w-full h-full" />
+              <TouchableOpacity
+                onPress={onClearImage}
+                className="absolute top-2 right-2 bg-black/50 p-2 rounded-full"
+              >
+                <X size={16} color="white" />
+              </TouchableOpacity>
+              <View className="absolute bottom-0 left-0 right-0 bg-black/30 p-2">
+                <Text className="text-white text-[10px] text-center font-bold">
+                  {t('Services.submission.ocrHint')}
+                </Text>
+              </View>
+            </View>
+          )}
+
           {/* Input */}
           <View
             className={`flex-row items-end border-b-2 ${validationError ? 'border-error' : 'border-primary/20'} pb-2 mb-2`}
@@ -84,7 +125,7 @@ export function ReadingForm({
           </View>
 
           {/* Previous reading hint */}
-          <View className="flex-row items-center mb-2">
+          <View className="flex-row items-center mb-4">
             <Text className="text-xs text-muted">
               {t('Services.submission.previousReading')}{' '}
             </Text>
@@ -95,65 +136,22 @@ export function ReadingForm({
           </View>
 
           {/* Inline error */}
-          {validationError ? (
+          {validationError && (
             <Text className="text-xs text-error mb-4">{validationError}</Text>
-          ) : (
-            <View className="mb-4" />
           )}
-
-          {/* Image */}
-          {imageUri ? (
-            <View className="mb-6 relative">
-              <View className="w-full h-48 rounded-2xl overflow-hidden border border-border">
-                <Image
-                  source={{ uri: imageUri }}
-                  className="w-full h-full"
-                  resizeMode="cover"
-                />
-              </View>
-              <TouchableOpacity
-                onPress={onClearImage}
-                className="absolute -top-2 -right-2 bg-error h-8 w-8 rounded-full items-center justify-center border-2 border-white shadow-sm"
-              >
-                <X size={16} className="text-white" />
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <View className="flex-row gap-4 mb-6">
-              <TouchableOpacity
-                onPress={onTakePhoto}
-                className="flex-1 flex-row items-center justify-center bg-input p-4 rounded-xl border border-dashed border-border"
-              >
-                <Camera size={20} className="text-primary mr-2" />
-                <Text className="text-primary font-bold">
-                  {t('Services.submission.takePhoto')}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={onPickImage}
-                className="flex-1 flex-row items-center justify-center bg-input p-4 rounded-xl border border-dashed border-border"
-              >
-                <Text className="text-primary font-bold">
-                  {t('Services.submission.pickImage')}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          )}
-
-          <Text className="text-xs text-muted mb-6 italic">
-            {t('Services.submission.photoGuideline')}
-          </Text>
 
           <TouchableOpacity
             onPress={onSubmit}
-            disabled={isProcessing || !!validationError}
+            disabled={isProcessing || (!!validationError && !imageUri)}
             className="bg-primary p-4 rounded-2xl items-center justify-center shadow-lg shadow-primary/30 active:scale-95 disabled:opacity-50"
           >
             {isProcessing ? (
               <ActivityIndicator color="white" />
             ) : (
               <Text className="text-white font-bold text-lg">
-                {t('Services.submission.submitReadingButton')}
+                {imageUri && !reading
+                  ? t('Services.submission.submitWithOcr')
+                  : t('Services.submission.submitReadingButton')}
               </Text>
             )}
           </TouchableOpacity>

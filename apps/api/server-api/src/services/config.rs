@@ -4,6 +4,13 @@ use serde::Deserialize;
 pub struct AppConfig {
     pub email: EmailConfig,
     pub sms: SmsConfig,
+    pub vision: VisionConfig,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct VisionConfig {
+    pub project_id: String,
+    pub key_path: String,
 }
 
 #[derive(Debug, Deserialize, Clone)]

@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import * as ImagePicker from 'expo-image-picker';
 import { useTranslation } from 'react-i18next';
+import * as ImagePicker from 'expo-image-picker';
 import { meterService } from '@/services/meter.service';
 import { userService } from '@/services/user.service';
 import { MeterResponse } from '@nhatroso/shared';
@@ -169,6 +169,77 @@ export function useMeterSubmission() {
     isServiceSubmitted(s.service_id),
   ).length;
 
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      setImageUri(result.assets[0].uri);
+    }
+  };
+
+  const takePhoto = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      showAlert(
+        t('Services.submission.permissionDenied'),
+        t('Services.submission.cameraPermissionRequired'),
+      );
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      setImageUri(result.assets[0].uri);
+    }
+  };
+
+  const ocrMutation = useMutation({
+    mutationFn: async (data: { meterId: string; uri: string }) => {
+      setIsUploading(true);
+      try {
+        // 1. Get presigned URL
+        const { url, key } = await meterService.getUploadUrl();
+
+        // 2. Upload directly to S3
+        await meterService.uploadToPresignedUrl(url, data.uri);
+
+        // 3. Submit OCR with the key
+        return await meterService.submitOcrReading(data.meterId, {
+          image_url: key,
+          period_month: period_month as string,
+        });
+      } finally {
+        setIsUploading(false);
+      }
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['my-meters'] });
+      queryClient.invalidateQueries({ queryKey: ['my-reading-requests'] });
+      showAlert(
+        t('Services.submission.processing'),
+        t('Services.submission.ocrProcessingMessage'),
+        'success',
+      );
+      setSubmittedServices((prev) => [...prev, selectedServiceId!]);
+      setImageUri(null);
+    },
+    onError: (error) => {
+      showAlert(
+        t('Services.submission.errorTitle'),
+        t('Services.submission.ocrErrorMessage'),
+      );
+      console.error(error);
+    },
+  });
+
   const submissionMutation = useMutation({
     mutationFn: (data: {
       meterId: string;
@@ -213,49 +284,26 @@ export function useMeterSubmission() {
     },
   });
 
-  const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      quality: 0.8,
-    });
-    if (!result.canceled) setImageUri(result.assets[0].uri);
-  };
-
-  const takePhoto = async () => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== 'granted') {
-      showAlert(
-        t('Services.submission.permissionDenied'),
-        t('Services.submission.cameraPermissionRequired'),
-      );
-      return;
-    }
-    const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      quality: 0.8,
-    });
-    if (!result.canceled) setImageUri(result.assets[0].uri);
-  };
-
   const handleSubmit = () => {
-    if (!selectedServiceId || !reading.trim()) {
+    if (!selectedServiceId || (!reading.trim() && !imageUri)) {
       showAlert(
         t('Services.submission.errorTitle'),
         t('Services.submission.validationReading'),
       );
       return;
     }
-    const val = parseFloat(reading);
-    if (
-      isNaN(val) ||
-      val < 0 ||
-      !/^\d+(\.\d{1,2})?$/.test(reading.trim()) ||
-      val < previousReading ||
-      val > MAX_READING_VALUE
-    ) {
-      setValidationError(validateReading(reading));
-      return;
+    if (reading.trim()) {
+      const val = parseFloat(reading);
+      if (
+        isNaN(val) ||
+        val < 0 ||
+        !/^\d+(\.\d{1,2})?$/.test(reading.trim()) ||
+        val < previousReading ||
+        val > MAX_READING_VALUE
+      ) {
+        setValidationError(validateReading(reading));
+        return;
+      }
     }
     setIsSubmitModalVisible(true);
   };
@@ -263,23 +311,6 @@ export function useMeterSubmission() {
   const confirmSubmit = async () => {
     setIsSubmitModalVisible(false);
     if (!selectedServiceId) return;
-    const val = parseFloat(reading);
-    let finalImageUrl = null;
-    if (imageUri) {
-      try {
-        setIsUploading(true);
-        finalImageUrl = await meterService.uploadImage(imageUri);
-      } catch {
-        showAlert(
-          t('Services.submission.uploadFailed'),
-          t('Services.submission.uploadFailedMessage'),
-        );
-        setIsUploading(false);
-        return;
-      } finally {
-        setIsUploading(false);
-      }
-    }
 
     let submitMeterId = (selectedMeter as any)?.id;
     if (!submitMeterId) {
@@ -303,16 +334,26 @@ export function useMeterSubmission() {
       }
     }
 
-    submissionMutation.mutate({
-      meterId: submitMeterId,
-      reading_value: val,
-      image_url: finalImageUrl,
-      period_month: period_month as string,
-    });
+    if (imageUri && !reading.trim()) {
+      // OCR flow
+      ocrMutation.mutate({ meterId: submitMeterId, uri: imageUri });
+    } else {
+      // Regular submission
+      const val = parseFloat(reading);
+      submissionMutation.mutate({
+        meterId: submitMeterId,
+        reading_value: val,
+        image_url: null,
+        period_month: period_month as string,
+      });
+    }
   };
 
   const isProcessing =
-    submissionMutation.isPending || isUploading || isCreatingMeter;
+    submissionMutation.isPending ||
+    ocrMutation.isPending ||
+    isCreatingMeter ||
+    isUploading;
 
   return {
     selectedServiceId,

@@ -59,7 +59,6 @@ export default function ContractsPage() {
     availableFloors,
     availableRooms,
     isLoading,
-    error,
     selectedBuildingId,
     selectedFloorId,
     selectedRoomId,

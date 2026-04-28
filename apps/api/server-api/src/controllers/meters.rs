@@ -63,12 +63,12 @@ pub async fn get_upload_url(
     _auth: JWT,
     State(_ctx): State<AppContext>,
 ) -> Result<Response> {
-    let bucket = std::env::var("S3_BUCKET").unwrap_or_else(|_| "nhatroso-dev".to_string());
+    let bucket = std::env::var("S3_BUCKET").map_err(|_| Error::BadRequest("Missing S3_BUCKET".to_string()))?;
     let storage = Storage::new(bucket).await;
 
-    let key = format!("uploads/{}.jpg", Uuid::new_v4());
-    let url = storage.get_presigned_upload_url(&key, Duration::from_secs(900)).await
-        .map_err(|e| Error::BadRequest(e.to_string()))?;
+    let key = format!("meters/{}.jpg", Uuid::new_v4());
+    let url = storage.get_presigned_upload_url(&key, Duration::from_secs(3600)).await
+        .map_err(|e| Error::BadRequest(format!("Failed to generate S3 URL: {}", e)))?;
 
     format::json(serde_json::json!({
         "url": url,

@@ -36,6 +36,9 @@ settings:
     retry:
       max_attempts: 3
       backoff_base: 2
+  vision:
+    project_id: {{ get_env(name="GOOGLE_VISION_PROJECT_ID") }}
+    key_path: {{ get_env(name="GOOGLE_VISION_KEY_PATH") }}
 
 database:
   uri: {{ get_env(name="DATABASE_URL") }}

@@ -240,18 +240,42 @@ impl Model {
     ) -> Result<MeterReadingResponse> {
         let db = &ctx.db;
 
-        // 1. Create a PENDING record
-        let active = ActiveModel {
-            id: ActiveValue::Set(Uuid::new_v4()),
-            meter_id: ActiveValue::Set(meter_id),
-            image_url: ActiveValue::Set(Some(params.image_url)),
-            tenant_id: ActiveValue::Set(Some(user_id)),
-            period_month: ActiveValue::Set(params.period_month),
-            status: ActiveValue::Set("PENDING".to_string()),
-            created_at: ActiveValue::Set(chrono::Utc::now().into()),
-            ..Default::default()
+        // 1. Check for existing PENDING or SUBMITTED record for this meter and period
+        let pending_record = if let Some(period) = &params.period_month {
+            MeterReadings::find()
+                .filter(crate::models::_entities::meter_readings::Column::MeterId.eq(meter_id))
+                .filter(crate::models::_entities::meter_readings::Column::PeriodMonth.eq(period))
+                .filter(
+                    crate::models::_entities::meter_readings::Column::Status
+                        .is_in(vec!["PENDING", "SUBMITTED"]),
+                )
+                .one(db)
+                .await?
+        } else {
+            None
         };
-        let model = active.insert(db).await?;
+
+        let model = if let Some(pending) = pending_record {
+            // Update existing record with new image and reset status to PENDING for re-processing
+            let mut active: ActiveModel = pending.into();
+            active.image_url = ActiveValue::Set(Some(params.image_url));
+            active.tenant_id = ActiveValue::Set(Some(user_id));
+            active.status = ActiveValue::Set("PENDING".to_string());
+            active.update(db).await?
+        } else {
+            // Create a new PENDING record
+            let active = ActiveModel {
+                id: ActiveValue::Set(Uuid::new_v4()),
+                meter_id: ActiveValue::Set(meter_id),
+                image_url: ActiveValue::Set(Some(params.image_url)),
+                tenant_id: ActiveValue::Set(Some(user_id)),
+                period_month: ActiveValue::Set(params.period_month),
+                status: ActiveValue::Set("PENDING".to_string()),
+                created_at: ActiveValue::Set(chrono::Utc::now().into()),
+                ..Default::default()
+            };
+            active.insert(db).await?
+        };
         let reading_id = model.id;
 
         // 2. Enqueue the worker

@@ -49,4 +49,16 @@ impl Storage {
 
         Ok(presigned_request.uri().to_string())
     }
+
+    pub async fn download(&self, key: &str) -> Result<Vec<u8>> {
+        let resp = self.client
+            .get_object()
+            .bucket(&self.bucket)
+            .key(key)
+            .send()
+            .await?;
+
+        let data = resp.body.collect().await?;
+        Ok(data.into_bytes().to_vec())
+    }
 }

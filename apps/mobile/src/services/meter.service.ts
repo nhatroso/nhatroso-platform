@@ -46,28 +46,38 @@ export const meterService = {
     return response.data;
   },
 
-  uploadImage: async (uri: string): Promise<string> => {
-    const formData = new FormData();
-    const filename = uri.split('/').pop() || 'upload.jpg';
-    const match = /\.(\w+)$/.exec(filename);
-    const type = match ? `image/${match[1]}` : `image/jpeg`;
+  getUploadUrl: async (): Promise<{ url: string; key: string }> => {
+    const response = await apiClient.get<{ url: string; key: string }>(
+      '/v1/meters/upload-url',
+    );
+    return response.data;
+  },
 
-    // @ts-ignore
-    formData.append('file', {
-      uri,
-      name: filename,
-      type,
+  submitOcrReading: async (
+    meterId: string,
+    data: { image_url: string; period_month?: string },
+  ): Promise<MeterReadingResponse> => {
+    const response = await apiClient.post<MeterReadingResponse>(
+      `/v1/meters/${meterId}/ocr`,
+      data,
+    );
+    return response.data;
+  },
+
+  uploadToPresignedUrl: async (url: string, uri: string): Promise<void> => {
+    const response = await fetch(uri);
+    const blob = await response.blob();
+
+    const uploadResponse = await fetch(url, {
+      method: 'PUT',
+      body: blob,
+      headers: {
+        'Content-Type': 'image/jpeg',
+      },
     });
 
-    const response = await apiClient.post<{ url: string }>(
-      '/v1/uploads',
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      },
-    );
-    return response.data.url;
+    if (!uploadResponse.ok) {
+      throw new Error(`Upload to S3 failed: ${uploadResponse.statusText}`);
+    }
   },
 };

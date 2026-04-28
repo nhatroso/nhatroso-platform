@@ -151,6 +151,7 @@ impl Hooks for App {
                 }
             });
 
+/*
             // Spawn SMS Worker
             let ctx_sms = ctx.clone();
             tokio::spawn(async move {
@@ -167,6 +168,7 @@ impl Hooks for App {
                     }
                 }
             });
+*/
 
             // 3. Daily Notification Task (Scans for Reminders, Deadline, Overdue)
             let ctx_notify = ctx.clone();
