@@ -28,6 +28,7 @@ impl std::error::Error for EmailError {}
 #[async_trait]
 pub trait EmailProvider: Send + Sync {
     async fn send_email(&self, job: EmailJob) -> Result<(), EmailError>;
+    async fn send_email_raw(&self, to: String, subject: String, template: String, data: serde_json::Value) -> Result<(), EmailError>;
 }
 
 pub struct SESEmailService {
@@ -101,22 +102,26 @@ impl SESEmailService {
 #[async_trait]
 impl EmailProvider for SESEmailService {
     async fn send_email(&self, job: EmailJob) -> Result<(), EmailError> {
+        self.send_email_raw(job.to, job.subject, job.template, job.data).await
+    }
+
+    async fn send_email_raw(&self, to: String, subject: String, template: String, data: serde_json::Value) -> Result<(), EmailError> {
         let mut context = tera::Context::new();
-        if let serde_json::Value::Object(map) = job.data {
+        if let serde_json::Value::Object(map) = data {
             for (k, v) in map {
                 context.insert(k, &v);
             }
         }
 
-        let html_body = self.tera.render(&job.template, &context)
+        let html_body = self.tera.render(&template, &context)
             .map_err(|e| EmailError::Permanent(format!("Template error: {}", e)))?;
 
-        let text_body = format!("Please view this email in an HTML compatible client. Subject: {}", job.subject);
+        let text_body = format!("Please view this email in an HTML compatible client. Subject: {}", subject);
 
         let content = EmailContent::builder()
             .simple(
                 Message::builder()
-                    .subject(Content::builder().data(&job.subject).charset("UTF-8").build().map_err(|e| EmailError::Permanent(e.to_string()))?)
+                    .subject(Content::builder().data(&subject).charset("UTF-8").build().map_err(|e| EmailError::Permanent(e.to_string()))?)
                     .body(
                         Body::builder()
                             .html(Content::builder().data(html_body).charset("UTF-8").build().map_err(|e| EmailError::Permanent(e.to_string()))?)
@@ -128,7 +133,7 @@ impl EmailProvider for SESEmailService {
             .build();
 
         let destination = Destination::builder()
-            .to_addresses(&job.to)
+            .to_addresses(&to)
             .build();
 
         let result = self.client

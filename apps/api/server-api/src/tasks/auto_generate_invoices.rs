@@ -85,7 +85,7 @@ impl Task for AutoGenerateInvoices {
                             };
 
 
-                            if let Err(e) = InvoiceModel::create(&ctx.db, &create_params, config.landlord_id).await {
+                            if let Err(e) = InvoiceModel::create(ctx, &create_params, config.landlord_id).await {
                                 tracing::error!("Failed to save invoice for room {}: {}", room.id, e);
                             }
                         }

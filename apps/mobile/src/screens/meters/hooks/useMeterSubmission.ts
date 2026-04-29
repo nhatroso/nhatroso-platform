@@ -133,7 +133,9 @@ export function useMeterSubmission() {
     if (selectedMeter && currentPeriod) {
       if (
         selectedMeter.latest_reading_period === currentPeriod &&
-        selectedMeter.latest_reading != null
+        selectedMeter.latest_reading_status != null &&
+        selectedMeter.latest_reading_status !== 'PENDING' &&
+        selectedMeter.latest_reading_status !== 'FAILED'
       ) {
         return true;
       }
@@ -155,7 +157,9 @@ export function useMeterSubmission() {
       if (sMeter && currentPeriod) {
         if (
           sMeter.latest_reading_period === currentPeriod &&
-          sMeter.latest_reading != null
+          sMeter.latest_reading_status != null &&
+          sMeter.latest_reading_status !== 'PENDING' &&
+          sMeter.latest_reading_status !== 'FAILED'
         ) {
           return true;
         }

@@ -49,10 +49,11 @@ impl ActiveModelBehavior for ActiveModel {
 
 impl Model {
     pub async fn create(
-        db: &DatabaseConnection,
+        ctx: &AppContext,
         params: &CreateInvoiceParams,
         owner_id: Uuid,
     ) -> ModelResult<InvoiceResponse> {
+        let db = &ctx.db;
         let txn = db.begin().await?;
 
         let landlord_id = if let Some(room_id) = params.room_id {
@@ -133,10 +134,10 @@ impl Model {
             histories: vec![history_model],
         };
 
-        // Fire & Forget Notification
-        let db_clone = db.clone();
+        // Fire & Forget Notification via Worker
+        let ctx_clone = ctx.clone();
         tokio::spawn(async move {
-            if let Err(e) = Self::notify_invoice_generated(&db_clone, &invoice).await {
+            if let Err(e) = Self::notify_invoice_generated(&ctx_clone, &invoice).await {
                 tracing::error!(error=?e, "Failed to send invoice generation notification");
             }
         });
@@ -261,10 +262,11 @@ impl Model {
     }
 
     pub async fn pay_invoice(
-        db: &DatabaseConnection,
+        ctx: &AppContext,
         id: i32,
         owner_id: Uuid,
     ) -> Result<InvoiceResponse, String> {
+        let db = &ctx.db;
         let txn = db.begin().await.map_err(|e| e.to_string())?;
 
         let invoice_opt = Entity::find_by_id(id).one(&txn).await.map_err(|e| e.to_string())?;
@@ -296,10 +298,10 @@ impl Model {
 
         let res = Self::get_one(db, updated_invoice.id, owner_id).await.map_err(|e| e.to_string())?;
 
-        let db_clone = db.clone();
+        let ctx_clone = ctx.clone();
         let inv_clone = updated_invoice.clone();
         tokio::spawn(async move {
-            if let Err(e) = Self::notify_payment_success(&db_clone, &inv_clone).await {
+            if let Err(e) = Self::notify_payment_success(&ctx_clone, &inv_clone).await {
                 tracing::error!(error=?e, "Failed to send payment success notification");
             }
         });
@@ -308,9 +310,10 @@ impl Model {
     }
 
     pub async fn sepay_webhook(
-        db: &DatabaseConnection,
+        ctx: &AppContext,
         payload: &crate::views::invoices::SePayWebhookPayload,
     ) -> Result<InvoiceResponse, String> {
+        let db = &ctx.db;
         let txn = db.begin().await.map_err(|e| e.to_string())?;
 
         // 1. Identify Invoice from content. Logic: Collect all numeric sequences and match against unpaid invoices.
@@ -372,10 +375,10 @@ impl Model {
 
         let res = Self::get_one(db, updated_invoice.id, Uuid::nil()).await.map_err(|e| e.to_string())?;
 
-        let db_clone = db.clone();
+        let ctx_clone = ctx.clone();
         let inv_clone = updated_invoice.clone();
         tokio::spawn(async move {
-            if let Err(e) = Self::notify_payment_success(&db_clone, &inv_clone).await {
+            if let Err(e) = Self::notify_payment_success(&ctx_clone, &inv_clone).await {
                 tracing::error!(error=?e, "Failed to send payment success notification (SePay)");
             }
         });
@@ -384,9 +387,10 @@ impl Model {
     }
 
     pub async fn automation_webhook(
-        db: &DatabaseConnection,
+        ctx: &AppContext,
         payload: &crate::views::invoices::AutomationWebhookPayload,
     ) -> Result<InvoiceResponse, String> {
+        let db = &ctx.db;
         let txn = db.begin().await.map_err(|e| e.to_string())?;
 
         // 1. Identify Invoice from invoice_id string (e.g., "INV123" -> 123)
@@ -431,10 +435,10 @@ impl Model {
 
         let res = Self::get_one(db, updated_invoice.id, Uuid::nil()).await.map_err(|e| e.to_string())?;
 
-        let db_clone = db.clone();
+        let ctx_clone = ctx.clone();
         let inv_clone = updated_invoice.clone();
         tokio::spawn(async move {
-            if let Err(e) = Self::notify_payment_success(&db_clone, &inv_clone).await {
+            if let Err(e) = Self::notify_payment_success(&ctx_clone, &inv_clone).await {
                 tracing::error!(error=?e, "Failed to send payment success notification (Automation)");
             }
         });
@@ -527,28 +531,41 @@ impl Model {
                 .one(db)
                 .await?;
 
-            let amount = if let Some(meter) = meter_opt {
+            if let Some(meter) = meter_opt {
                 // Metered service: usage * unit_price
                 let reading_opt = MeterReadings::find()
                     .filter(crate::models::_entities::meter_readings::Column::MeterId.eq(meter.id))
                     .filter(crate::models::_entities::meter_readings::Column::PeriodMonth.eq(&params.period_month))
-                    .filter(crate::models::_entities::meter_readings::Column::Status.eq("SUBMITTED"))
+                    .filter(
+                        crate::models::_entities::meter_readings::Column::Status
+                            .is_in(vec!["SUBMITTED", "COMPLETED"]),
+                    )
                     .one(db)
                     .await?;
 
-                let usage = reading_opt.and_then(|r| r.usage).unwrap_or(Decimal::new(0, 0));
-                usage * price_rule.unit_price
+                if let Some(reading) = reading_opt {
+                    let usage = reading.usage.unwrap_or(Decimal::new(0, 0));
+                    let amount = usage * price_rule.unit_price;
+                    if amount > Decimal::new(0, 0) {
+                        details.push(InvoiceDetailParams {
+                            description: format!("{} ({})", service.name, params.period_month),
+                            amount,
+                        });
+                        total_amount += amount;
+                    }
+                } else {
+                    tracing::info!(meter_id = %meter.id, period = %params.period_month, "Reading not ready for metered service, skipping from invoice");
+                }
             } else {
                 // Flat rate service
-                price_rule.unit_price
-            };
-
-            if amount > Decimal::new(0, 0) {
-                details.push(InvoiceDetailParams {
-                    description: service.name,
-                    amount,
-                });
-                total_amount += amount;
+                let amount = price_rule.unit_price;
+                if amount > Decimal::new(0, 0) {
+                    details.push(InvoiceDetailParams {
+                        description: format!("{} ({})", service.name, params.period_month),
+                        amount,
+                    });
+                    total_amount += amount;
+                }
             }
         }
 
@@ -560,10 +577,10 @@ impl Model {
         })
     }
 
-    pub async fn notify_invoice_generated(db: &DatabaseConnection, invoice: &Model) -> ModelResult<()> {
+    pub async fn notify_invoice_generated(ctx: &AppContext, invoice: &Model) -> ModelResult<()> {
+        let db = &ctx.db;
         let tenant = self::get_tenant_for_invoice(db, invoice.id).await?;
         if let Some(email) = tenant.email {
-            let redis_url = std::env::var("REDIS_URL").unwrap_or_else(|_| "redis://localhost:6379".to_string());
             let job = crate::jobs::email_job::EmailJob::new(
                 email,
                 format!("Thông báo hóa đơn mới - {}", invoice.room_code.as_deref().unwrap_or("")),
@@ -576,15 +593,15 @@ impl Model {
                     "invoice_url": format!("{}/invoices/{}", std::env::var("SERVER_HOST").unwrap_or_default(), invoice.id),
                 }),
             );
-            crate::jobs::email_job::EmailJob::enqueue_email(&redis_url, job).await.map_err(|e| ModelError::Any(e.into()))?;
+            crate::jobs::email_job::EmailJob::enqueue_email(ctx, job).await.map_err(|e| ModelError::Any(e.into()))?;
         }
         Ok(())
     }
 
-    pub async fn notify_payment_success(db: &DatabaseConnection, invoice: &Model) -> ModelResult<()> {
+    pub async fn notify_payment_success(ctx: &AppContext, invoice: &Model) -> ModelResult<()> {
+        let db = &ctx.db;
         let tenant = self::get_tenant_for_invoice(db, invoice.id).await?;
         if let Some(email) = tenant.email {
-            let redis_url = std::env::var("REDIS_URL").unwrap_or_else(|_| "redis://localhost:6379".to_string());
             let job = crate::jobs::email_job::EmailJob::new(
                 email,
                 format!("Thanh toán thành công - {}", invoice.room_code.as_deref().unwrap_or("")),
@@ -596,12 +613,13 @@ impl Model {
                     "payment_date": chrono::Utc::now(),
                 }),
             );
-            crate::jobs::email_job::EmailJob::enqueue_email(&redis_url, job).await.map_err(|e| ModelError::Any(e.into()))?;
+            crate::jobs::email_job::EmailJob::enqueue_email(ctx, job).await.map_err(|e| ModelError::Any(e.into()))?;
         }
         Ok(())
     }
 
-    pub async fn remind_tenant(db: &DatabaseConnection, id: i32, owner_id: Uuid) -> ModelResult<()> {
+    pub async fn remind_tenant(ctx: &AppContext, id: i32, owner_id: Uuid) -> ModelResult<()> {
+        let db = &ctx.db;
         let invoice = Entity::find_by_id(id)
             .one(db)
             .await?
@@ -616,7 +634,6 @@ impl Model {
         }
 
         let tenant = self::get_tenant_for_invoice(db, invoice.id).await?;
-        let redis_url = std::env::var("REDIS_URL").unwrap_or_else(|_| "redis://localhost:6379".to_string());
 
         let job = crate::jobs::sms_job::SmsJob::new(
             tenant.phone,
@@ -625,13 +642,12 @@ impl Model {
             ),
         );
 
-        crate::jobs::sms_job::SmsJob::enqueue_sms(&redis_url, job).await.map_err(|e| ModelError::Any(e.into()))?;
+        crate::jobs::sms_job::SmsJob::enqueue_sms(ctx, job).await.map_err(|e| ModelError::Any(e.into()))?;
 
         Ok(())
     }
     pub async fn process_automated_notifications(ctx: &AppContext) -> ModelResult<()> {
         let db = &ctx.db;
-        let redis_url = std::env::var("REDIS_URL").unwrap_or_else(|_| "redis://localhost:6379".to_string());
         let now = chrono::Utc::now();
 
         let unpaid_invoices = Entity::find()
@@ -666,7 +682,7 @@ impl Model {
                             "due_date": inv.due_date,
                         }),
                     );
-                    let _ = crate::jobs::email_job::EmailJob::enqueue_email(&redis_url, job).await;
+                    let _ = crate::jobs::email_job::EmailJob::enqueue_email(ctx, job).await;
                 }
             } else if days_diff == 1 {
                 // Gần deadline (1 ngày) - SMS
@@ -677,7 +693,7 @@ impl Model {
                         due_date.format("%d/%m/%Y")
                     ),
                 );
-                let _ = crate::jobs::sms_job::SmsJob::enqueue_sms(&redis_url, job).await;
+                let _ = crate::jobs::sms_job::SmsJob::enqueue_sms(ctx, job).await;
             } else if days_diff == -1 {
                 // Quá hạn (1 ngày) - SMS
                 let job = crate::jobs::sms_job::SmsJob::new(
@@ -686,7 +702,7 @@ impl Model {
                         inv.room_code.as_deref().unwrap_or("")
                     ),
                 );
-                let _ = crate::jobs::sms_job::SmsJob::enqueue_sms(&redis_url, job).await;
+                let _ = crate::jobs::sms_job::SmsJob::enqueue_sms(ctx, job).await;
             }
         }
 

@@ -43,7 +43,10 @@ impl Model {
         // 2. Fetch the latest SUBMITTED reading for continuity and constraints
         let last_submitted = MeterReadings::find()
             .filter(crate::models::_entities::meter_readings::Column::MeterId.eq(meter_id))
-            .filter(crate::models::_entities::meter_readings::Column::Status.eq("SUBMITTED"))
+            .filter(
+                crate::models::_entities::meter_readings::Column::Status
+                    .is_in(vec!["SUBMITTED", "COMPLETED", "MANUAL_REVIEW"]),
+            )
             .order_by_desc(crate::models::_entities::meter_readings::Column::ReadingDate)
             .one(db)
             .await?;
@@ -64,7 +67,6 @@ impl Model {
             MeterReadings::find()
                 .filter(crate::models::_entities::meter_readings::Column::MeterId.eq(meter_id))
                 .filter(crate::models::_entities::meter_readings::Column::PeriodMonth.eq(period))
-                .filter(crate::models::_entities::meter_readings::Column::Status.eq("PENDING"))
                 .one(db)
                 .await?
         } else {
@@ -80,6 +82,7 @@ impl Model {
             active.tenant_id = ActiveValue::Set(Some(user_id));
             active.usage = ActiveValue::Set(Some(usage_delta));
             active.status = ActiveValue::Set("SUBMITTED".to_string());
+            active.ocr_raw_result = ActiveValue::Set(None); // Clear any OCR errors if manually recorded
             active.update(db).await?
         } else {
             // Create new SUBMITTED record
@@ -100,48 +103,8 @@ impl Model {
         };
 
         // --- Auto-completion logic for meter_requests ---
-        let room_id = meter.room_id;
-
-        // Find PENDING or LATE requests for this room
-        let pending_requests = crate::models::_entities::meter_requests::Entity::find()
-            .filter(crate::models::_entities::meter_requests::Column::RoomId.eq(room_id))
-            .filter(
-                crate::models::_entities::meter_requests::Column::Status
-                    .is_in(vec!["PENDING", "LATE"]),
-            )
-            .all(db)
-            .await?;
-
-        for req in pending_requests {
-            // Check if ALL meters in this room have a SUBMITTED reading for this period
-            let room_meters = crate::models::_entities::meters::Entity::find()
-                .filter(crate::models::_entities::meters::Column::RoomId.eq(room_id))
-                .filter(crate::models::_entities::meters::Column::Status.eq("ACTIVE"))
-                .all(db)
-                .await?;
-
-            let mut all_submitted = true;
-            for rm in room_meters {
-                let has_reading = crate::models::_entities::meter_readings::Entity::find()
-                    .filter(crate::models::_entities::meter_readings::Column::MeterId.eq(rm.id))
-                    .filter(crate::models::_entities::meter_readings::Column::PeriodMonth.eq(&req.period_month))
-                    .filter(crate::models::_entities::meter_readings::Column::Status.eq("SUBMITTED"))
-                    .one(db)
-                    .await?;
-
-                if has_reading.is_none() {
-                    all_submitted = false;
-                    break;
-                }
-            }
-
-            if all_submitted {
-                let mut req_active: crate::models::_entities::meter_requests::ActiveModel =
-                    req.into();
-                req_active.status = ActiveValue::Set("SUBMITTED".to_string());
-                req_active.updated_at = ActiveValue::Set(chrono::Utc::now().into());
-                req_active.update(db).await?;
-            }
+        if let Some(period) = &result_model.period_month {
+            crate::models::meter_requests::Model::check_and_update_status(db, meter.room_id, period).await?;
         }
         // --- End of auto-completion logic ---
 
@@ -245,10 +208,6 @@ impl Model {
             MeterReadings::find()
                 .filter(crate::models::_entities::meter_readings::Column::MeterId.eq(meter_id))
                 .filter(crate::models::_entities::meter_readings::Column::PeriodMonth.eq(period))
-                .filter(
-                    crate::models::_entities::meter_readings::Column::Status
-                        .is_in(vec!["PENDING", "SUBMITTED"]),
-                )
                 .one(db)
                 .await?
         } else {
@@ -261,6 +220,7 @@ impl Model {
             active.image_url = ActiveValue::Set(Some(params.image_url));
             active.tenant_id = ActiveValue::Set(Some(user_id));
             active.status = ActiveValue::Set("PENDING".to_string());
+            active.ocr_raw_result = ActiveValue::Set(None); // Clear previous errors
             active.update(db).await?
         } else {
             // Create a new PENDING record
@@ -278,11 +238,9 @@ impl Model {
         };
         let reading_id = model.id;
 
-        // 2. Enqueue the worker
-        let args = crate::workers::meter_reading_worker::MeterReadingWorkerArgs {
-            reading_id,
-        };
-        crate::workers::meter_reading_worker::MeterReadingWorker::perform_later(ctx, args).await?;
+        // 2. Enqueue the OCR job
+        let job = crate::jobs::ocr_job::OcrJob::new(reading_id);
+        crate::jobs::ocr_job::OcrJob::enqueue_ocr(ctx, job).await?;
 
         Ok(MeterReadingResponse::from(model))
     }

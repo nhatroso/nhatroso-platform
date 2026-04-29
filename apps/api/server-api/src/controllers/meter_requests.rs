@@ -160,7 +160,7 @@ pub async fn generate_manual(
     };
 
     let generated_count = MeterRequestModel::generate_manual_requests(
-        db,
+        &ctx,
         building.id,
         &params.period_month,
         params.due_date,

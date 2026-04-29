@@ -4,20 +4,73 @@ import { useTranslation } from 'react-i18next';
 import { Zap } from '@/assets/icons';
 
 interface MeterInfoCardProps {
-  selectedMeter: any;
+  meter: any;
   selectedService: any;
-  isAlreadySubmitted: boolean;
+  previousReading: number;
 }
 
 export function MeterInfoCard({
-  selectedMeter,
+  meter,
   selectedService,
-  isAlreadySubmitted,
+  previousReading,
 }: MeterInfoCardProps) {
   const { t } = useTranslation();
 
-  const unitKey = `Services.Unit_${selectedService?.unit || ''}`;
-  const unitFallback = selectedService?.unit || '';
+  const getStatusInfo = () => {
+    const status = meter?.latest_reading_status || 'PENDING';
+
+    switch (status) {
+      case 'COMPLETED':
+      case 'SUBMITTED':
+        return {
+          color: 'bg-success',
+          label: t('Services.submission.status_completed', 'Đã ghi nhận'),
+          textClass: 'text-success',
+        };
+      case 'PROCESSING':
+        return {
+          color: 'bg-primary',
+          label: t(
+            'Services.submission.status_processing',
+            'Đang xử lý OCR...',
+          ),
+          textClass: 'text-primary',
+        };
+      case 'MANUAL_REVIEW':
+        return {
+          color: 'bg-warning',
+          label: t('Services.submission.status_review', 'Chờ duyệt'),
+          textClass: 'text-warning',
+        };
+      case 'FAILED':
+        let errorLabel = t('Services.submission.status_failed', 'Lỗi xử lý');
+        const error = meter?.latest_reading_error;
+        if (error?.includes('MismatchedType')) {
+          errorLabel = t(
+            'Services.submission.error_mismatch',
+            'Ảnh không hợp lệ',
+          );
+        } else if (error?.includes('InvalidImage')) {
+          errorLabel = t(
+            'Services.submission.error_invalid_image',
+            'Ảnh không hợp lệ',
+          );
+        }
+        return {
+          color: 'bg-error',
+          label: errorLabel,
+          textClass: 'text-error',
+        };
+      default:
+        return {
+          color: 'bg-warning',
+          label: t('Services.submission.status_pending', 'Chưa nộp'),
+          textClass: 'text-muted',
+        };
+    }
+  };
+
+  const statusInfo = getStatusInfo();
 
   return (
     <View className="bg-primary/5 p-5 rounded-2xl border border-primary/10 flex-row">
@@ -38,12 +91,10 @@ export function MeterInfoCard({
             </Text>
             <View className="flex-row items-center">
               <View
-                className={`h-2 w-2 rounded-full mr-1.5 ${isAlreadySubmitted ? 'bg-success' : 'bg-warning'}`}
+                className={`h-2 w-2 rounded-full mr-1.5 ${statusInfo.color}`}
               />
-              <Text className="text-text font-medium text-xs">
-                {isAlreadySubmitted
-                  ? t('Services.submission.submitted')
-                  : t('Services.submission.notSubmitted')}
+              <Text className={`font-medium text-xs ${statusInfo.textClass}`}>
+                {statusInfo.label}
               </Text>
             </View>
           </View>
@@ -53,20 +104,23 @@ export function MeterInfoCard({
               {t('Services.submission.lastRecorded')}
             </Text>
             <Text className="text-text font-bold text-xs">
-              {selectedMeter
-                ? selectedMeter.latest_reading || selectedMeter.initial_reading
-                : '0'}{' '}
-              {t(unitKey, unitFallback)}
+              {previousReading}{' '}
+              {String(
+                t(
+                  `Services.Unit_${selectedService?.unit || ''}`,
+                  selectedService?.unit || '',
+                ),
+              )}
             </Text>
           </View>
 
-          {selectedMeter?.serial_number && (
+          {meter?.serial_number && (
             <View className="flex-row items-center mt-1">
               <Text className="text-muted text-xs w-24">
                 {t('Services.submission.serialNumber')}
               </Text>
               <Text className="text-text font-medium text-xs uppercase">
-                {selectedMeter.serial_number}
+                {meter.serial_number}
               </Text>
             </View>
           )}

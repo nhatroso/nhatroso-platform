@@ -16,14 +16,12 @@ export function MeterSubmissionScreen() {
     selectedServiceId,
     setSelectedServiceId,
     reading,
-    validationError,
     imageUri,
     setImageUri,
     isSubmitModalVisible,
     setIsSubmitModalVisible,
     alertState,
     setAlertState,
-    meters,
     isLoadingMeters,
     isLoadingRoom,
     requiredServices,
@@ -33,14 +31,12 @@ export function MeterSubmissionScreen() {
     completedServicesCount,
     isAlreadySubmitted,
     isProcessing,
-    handleReadingChange,
     handleSubmit,
     confirmSubmit,
     pickImage,
     takePhoto,
     getServiceLabel,
     submittedServices,
-    isServiceSubmitted,
   } = useMeterSubmission();
 
   if (isLoadingMeters || isLoadingRoom) {
@@ -74,53 +70,62 @@ export function MeterSubmissionScreen() {
   }
 
   return (
-    <ScrollView className="flex-1 bg-background">
+    <View className="flex-1 bg-background">
       <Stack.Screen
         options={{
-          title: t('Dashboard.tenant.reportMeterReading') || 'Nộp chỉ số',
-          headerBackTitle: '',
+          title: t('Services.submission.title', 'Nộp chỉ số điện nước'),
           headerShadowVisible: false,
         }}
       />
-      <View className="p-6">
-        <View className="mb-8 mt-2">
-          <Text className="text-3xl font-extrabold text-text tracking-tight">
-            {t('Dashboard.tenant.reportMeterReading') || 'Nộp chỉ số'}
-          </Text>
+
+      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+        <View className="p-6">
+          {/* Header Summary */}
+          <View className="flex-row items-center justify-between mb-8 bg-white p-5 rounded-3xl border border-border shadow-sm">
+            <View className="flex-1">
+              <Text className="text-sm font-bold text-muted uppercase tracking-widest mb-1">
+                {t('Services.submission.progress', 'Tiến độ')}
+              </Text>
+              <Text className="text-2xl font-black text-text">
+                {completedServicesCount}/{requiredServices.length}{' '}
+                {t('Services.submission.services', 'Dịch vụ')}
+              </Text>
+            </View>
+            <View className="h-14 w-14 bg-primary/10 rounded-full items-center justify-center">
+              <CheckCircle2 size={28} className="text-primary" />
+            </View>
+          </View>
+
+          {/* Service Selector */}
+          <ServiceSelector
+            services={requiredServices}
+            selectedId={selectedServiceId}
+            onSelect={setSelectedServiceId}
+            getLabel={getServiceLabel}
+            submittedServices={submittedServices}
+          />
+
+          {/* Meter Info Card */}
+          <MeterInfoCard
+            meter={selectedMeter}
+            previousReading={previousReading}
+            selectedService={selectedService}
+          />
+
+          {/* Reading Form */}
+          <ReadingForm
+            imageUri={imageUri}
+            onClearImage={() => setImageUri(null)}
+            onTakePhoto={takePhoto}
+            onPickImage={pickImage}
+            onSubmit={handleSubmit}
+            isProcessing={isProcessing}
+            isAlreadySubmitted={isAlreadySubmitted}
+            previousReading={previousReading}
+            selectedService={selectedService}
+          />
         </View>
-
-        <ServiceSelector
-          requiredServices={requiredServices}
-          selectedServiceId={selectedServiceId}
-          onSelect={setSelectedServiceId}
-          meters={meters}
-          submittedServices={submittedServices}
-          getServiceLabel={getServiceLabel}
-          completedServicesCount={completedServicesCount}
-          isServiceSubmitted={isServiceSubmitted}
-        />
-
-        <ReadingForm
-          reading={reading}
-          validationError={validationError}
-          onReadingChange={handleReadingChange}
-          imageUri={imageUri}
-          onClearImage={() => setImageUri(null)}
-          onTakePhoto={takePhoto}
-          onPickImage={pickImage}
-          onSubmit={handleSubmit}
-          isProcessing={isProcessing}
-          isAlreadySubmitted={isAlreadySubmitted}
-          previousReading={previousReading}
-          selectedService={selectedService}
-        />
-
-        <MeterInfoCard
-          selectedMeter={selectedMeter}
-          selectedService={selectedService}
-          isAlreadySubmitted={isAlreadySubmitted}
-        />
-      </View>
+      </ScrollView>
 
       <ConfirmModal
         visible={isSubmitModalVisible}
@@ -151,6 +156,6 @@ export function MeterSubmissionScreen() {
         hideCancel
         isDestructive={alertState.type === 'error'}
       />
-    </ScrollView>
+    </View>
   );
 }

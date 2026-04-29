@@ -108,7 +108,7 @@ pub async fn forgot_password(
         serde_json::json!({ "otp_code": otp_str }),
     );
 
-    EmailJob::enqueue_email(&redis_url, email_job).await.map_err(|e| Error::Message(e.to_string()))?;
+    EmailJob::enqueue_email(&ctx, email_job).await?;
 
     format::empty()
 }

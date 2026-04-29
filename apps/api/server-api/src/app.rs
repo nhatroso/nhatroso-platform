@@ -11,9 +11,7 @@ use loco_rs::{
 };
 use migration::Migrator;
 use std::path::Path;
-
-#[allow(unused_imports)]
-use crate::{controllers, tasks, workers};
+use crate::{controllers, tasks, workers, models};
 
 pub struct App;
 
@@ -38,176 +36,61 @@ impl Hooks for App {
         environment: &Environment,
         config: Config,
     ) -> Result<BootResult> {
-        if dotenvy::dotenv().is_ok() {
-            tracing::info!("Environment configured successfully");
-        } else {
-            tracing::warn!("No .env file found or failed to load");
-        }
-
-        tracing::info!("Starting server...");
-
-        let db_url = std::env::var("DATABASE_URL").unwrap_or_default();
-        if !db_url.is_empty() {
-            tracing::info!("Database connection mapped");
-        } else {
-            tracing::error!("Missing DATABASE_URL");
-        }
-
-        let redis_url = std::env::var("REDIS_URL").unwrap_or_default();
-        if !redis_url.is_empty() {
-            tracing::info!("Redis connection mapped");
-        } else {
-            tracing::warn!("Missing REDIS_URL configuration");
-        }
-
-        let ses_key = std::env::var("AWS_SES_ACCESS_KEY_ID").unwrap_or_default();
-        if !ses_key.is_empty() {
-            tracing::info!("AWS SES Credential found");
-        } else {
-            tracing::warn!("Missing AWS SES Credential");
-        }
-
-        let s3_key = std::env::var("AWS_S3_ACCESS_KEY_ID").unwrap_or_default();
-        if !s3_key.is_empty() {
-            tracing::info!("AWS S3 Credential found");
-        } else {
-            tracing::warn!("Missing AWS S3 Credential");
-        }
-
-        match create_app::<Self, Migrator>(mode, environment, config).await {
-            Ok(boot_result) => {
-                tracing::info!("Core services started successfully.");
-                Ok(boot_result)
-            }
-            Err(e) => {
-                tracing::error!("Failed to start server. Please check DB or Redis status.");
-                tracing::error!("Error details: {:?}", e);
-                Err(e)
-            }
-        }
-    }
-
-    async fn initializers(_ctx: &AppContext) -> Result<Vec<Box<dyn Initializer>>> {
-        Ok(vec![])
+        create_app::<Self, Migrator>(mode, environment, config).await
     }
 
     fn routes(_ctx: &AppContext) -> AppRoutes {
-        AppRoutes::empty()
-            .add_route(controllers::auto_invoice_configs::routes())
-            .add_route(controllers::meter_request_configs::routes())
-            .add_route(controllers::meter_requests::routes())
-            .add_route(controllers::meters::routes())
-            .add_route(controllers::room_services::routes())
+        AppRoutes::with_default_routes()
             .add_route(controllers::auth::routes())
+            .add_route(controllers::users::routes())
             .add_route(controllers::buildings::routes())
             .add_route(controllers::floors::routes())
             .add_route(controllers::rooms::routes())
             .add_route(controllers::services::routes())
+            .add_route(controllers::room_services::routes())
+            .add_route(controllers::meters::routes())
+            .add_route(controllers::meter_request_configs::routes())
+            .add_route(controllers::meter_requests::routes())
+            .add_route(controllers::invoices::routes())
+            .add_route(controllers::auto_invoice_configs::routes())
             .add_route(controllers::price_rules::routes())
             .add_route(controllers::contracts::routes())
-            .add_route(controllers::users::routes())
-            .add_route(controllers::uploads::routes())
-            .add_route(controllers::invoices::routes())
             .add_route(controllers::payments::routes())
+            .add_route(controllers::uploads::routes())
     }
 
     async fn after_routes(router: axum::Router, ctx: &AppContext) -> Result<axum::Router> {
-        let ctx = ctx.clone();
+        // 1. Pre-flight System Checks
+        Self::run_system_checks(ctx);
 
-        let _ = dotenvy::dotenv().ok();
+        // 2. Background Schedulers
+        Self::start_schedulers(ctx);
 
-        // 1. Spawn Payment Expiration background task with Recoverability
-        let ctx_clone = ctx.clone();
-        tokio::spawn(async move {
-            let mut interval = tokio::time::interval(tokio::time::Duration::from_secs(60));
-            loop {
-                interval.tick().await;
-                let ctx_inner = ctx_clone.clone();
-                // Isolate into sub-task to protect main ticker from internal panics
-                tokio::spawn(async move {
-                    if let Err(e) = crate::models::payments::Model::update_expired(&ctx_inner.db).await {
-                        tracing::error!(error = ?e, "[Worker] Payment expiration job failed");
-                    }
-                });
-            }
-        });
-
-        // 2. Spawn Email Worker with Redis conditioning and backoff retries
-        let has_redis = ctx.config.queue.is_some() || std::env::var("REDIS_URL").is_ok();
-        if has_redis {
-            let ctx_email = ctx.clone();
-            tokio::spawn(async move {
-                tracing::info!("Starting Email Worker (SES)...");
-                let mut retries = 0;
-                loop {
-                    match workers::email_worker::start_worker(&ctx_email).await {
-                        Ok(_) => break, // Graceful exit
-                        Err(e) => {
-                            retries += 1;
-                            tracing::error!("Email worker crashed: {:?}. Retrying {}/∞ in 5s...", e, retries);
-                            tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
-                        }
-                    }
-                }
-            });
-
-/*
-            // Spawn SMS Worker
-            let ctx_sms = ctx.clone();
-            tokio::spawn(async move {
-                tracing::info!("Starting SMS Worker (SpeedSMS)...");
-                let mut retries = 0;
-                loop {
-                    match workers::sms_worker::start_worker(&ctx_sms).await {
-                        Ok(_) => break,
-                        Err(e) => {
-                            retries += 1;
-                            tracing::error!("SMS worker crashed: {:?}. Retrying {}/∞ in 5s...", e, retries);
-                            tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
-                        }
-                    }
-                }
-            });
-*/
-
-            // 3. Daily Notification Task (Scans for Reminders, Deadline, Overdue)
-            let ctx_notify = ctx.clone();
-            tokio::spawn(async move {
-                tracing::info!("Starting Daily Notification Scheduler...");
-                let mut interval = tokio::time::interval(tokio::time::Duration::from_secs(3600 * 24)); // Every 24h
-                loop {
-                    interval.tick().await;
-                    let ctx_inner = ctx_notify.clone();
-                    tokio::spawn(async move {
-                        if let Err(e) = crate::models::invoices::Model::process_automated_notifications(&ctx_inner).await {
-                             tracing::error!(error = ?e, "[Worker] Automated notifications job failed");
-                        }
-                    });
-                }
-            });
-        } else {
-            tracing::warn!("Skipping Notification Workers: REDIS Queue is not configured.");
-        }
-
-        // 3. Inject explicit application Health Check endpoint
+        // 3. Health Check & Static Assets
         let router = router
-            .route("/api/health", axum::routing::get(|| async { axum::Json(serde_json::json!({ "status": "ok", "service": "nhatroso-platform-api" })) }))
+            .route("/api/health", axum::routing::get(|| async { 
+                axum::Json(serde_json::json!({ 
+                    "status": "ok", 
+                    "service": "nhatroso-platform-api",
+                    "version": Self::app_version()
+                })) 
+            }))
             .nest_service("/static", tower_http::services::ServeDir::new("static"));
 
         Ok(router)
     }
 
     async fn connect_workers(ctx: &AppContext, queue: &Queue) -> Result<()> {
-        queue.register(
-            workers::meter_reading_worker::MeterReadingWorker::build(ctx),
-        ).await?;
+        queue.register(workers::meter_reading_worker::MeterReadingWorker::build(ctx)).await?;
+        queue.register(workers::email_worker::EmailWorker::build(ctx)).await?;
+        queue.register(workers::sms_worker::SmsWorker::build(ctx)).await?;
         Ok(())
     }
 
     fn register_tasks(tasks: &mut Tasks) {
         tasks.register(tasks::seed_data::SeedData);
-        tasks.register(tasks::auto_generate_invoices::AutoGenerateInvoices);
         tasks.register(tasks::auto_generate_meter_requests::AutoGenerateMeterRequests);
+        tasks.register(tasks::auto_generate_invoices::AutoGenerateInvoices);
     }
 
     async fn truncate(_ctx: &AppContext) -> Result<()> {
@@ -216,5 +99,67 @@ impl Hooks for App {
 
     async fn seed(_ctx: &AppContext, _base: &Path) -> Result<()> {
         Ok(())
+    }
+
+    async fn initializers(_ctx: &AppContext) -> Result<Vec<Box<dyn Initializer>>> {
+        Ok(vec![])
+    }
+}
+
+/// Helper methods for clean lifecycle management
+impl App {
+    /// Validates application-specific requirements
+    fn run_system_checks(ctx: &AppContext) {
+        tracing::info!("Starting Nhatroso Platform Pre-flight Checks...");
+
+        // 1. Google Vision Key
+        if let Some(settings) = &ctx.config.settings {
+            if let Ok(app_config) = serde_json::from_value::<crate::services::config::AppConfig>(settings.clone()) {
+                if Path::new(&app_config.vision.key_path).exists() {
+                    tracing::info!("Google Vision: Service key verified.");
+                } else {
+                    tracing::warn!("Google Vision: Key file missing at {}. OCR will not work.", app_config.vision.key_path);
+                }
+            }
+        }
+
+        // 2. S3 Bucket
+        if let Ok(bucket) = std::env::var("S3_BUCKET") {
+            tracing::info!("S3 Storage: Bucket '{}' verified.", bucket);
+        } else {
+            tracing::error!("S3 Storage: S3_BUCKET is missing.");
+        }
+
+        tracing::info!("System pre-flight checks completed.");
+    }
+
+    /// Spawns background maintainance threads
+    fn start_schedulers(ctx: &AppContext) {
+        let ctx = ctx.clone();
+
+        // Payment Expiration (1m)
+        let ctx_payment = ctx.clone();
+        tokio::spawn(async move {
+            let mut interval = tokio::time::interval(tokio::time::Duration::from_secs(60));
+            loop {
+                interval.tick().await;
+                if let Err(e) = models::payments::Model::update_expired(&ctx_payment.db).await {
+                    tracing::error!(error = ?e, "[Scheduler] Payment expiration job failed");
+                }
+            }
+        });
+
+        // Daily Notification (24h)
+        let ctx_notify = ctx.clone();
+        tokio::spawn(async move {
+            tracing::info!("Automated Notification Scheduler initialized.");
+            let mut interval = tokio::time::interval(tokio::time::Duration::from_secs(3600 * 24));
+            loop {
+                interval.tick().await;
+                if let Err(e) = models::invoices::Model::process_automated_notifications(&ctx_notify).await {
+                    tracing::error!(error = ?e, "[Scheduler] Daily notifications job failed");
+                }
+            }
+        });
     }
 }

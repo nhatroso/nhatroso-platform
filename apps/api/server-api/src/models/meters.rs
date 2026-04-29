@@ -38,7 +38,6 @@ impl Model {
             let mut response = MeterResponse::from_model(m.clone(), s);
             let latest = meter_readings::Entity::find()
                 .filter(meter_readings::Column::MeterId.eq(m.id))
-                .filter(meter_readings::Column::Status.eq("SUBMITTED"))
                 .order_by_desc(meter_readings::Column::ReadingDate)
                 .one(db)
                 .await?;
@@ -46,6 +45,10 @@ impl Model {
                 response.latest_reading = r.reading_value;
                 response.latest_reading_date = r.reading_date.map(|d| d.into());
                 response.latest_reading_period = r.period_month.clone();
+                response.latest_reading_status = Some(r.status.clone());
+                if r.status == "FAILED" {
+                    response.latest_reading_error = r.ocr_raw_result.clone();
+                }
             }
             results.push(response);
         }
@@ -85,7 +88,6 @@ impl Model {
             let mut response = MeterResponse::from_model(m.clone(), s);
             let latest = meter_readings::Entity::find()
                 .filter(meter_readings::Column::MeterId.eq(m.id))
-                .filter(meter_readings::Column::Status.eq("SUBMITTED"))
                 .order_by_desc(meter_readings::Column::ReadingDate)
                 .one(db)
                 .await?;
@@ -93,6 +95,10 @@ impl Model {
                 response.latest_reading = r.reading_value;
                 response.latest_reading_date = r.reading_date.map(|d| d.into());
                 response.latest_reading_period = r.period_month.clone();
+                response.latest_reading_status = Some(r.status.clone());
+                if r.status == "FAILED" {
+                    response.latest_reading_error = r.ocr_raw_result.clone();
+                }
             }
             results.push(response);
         }
@@ -254,12 +260,15 @@ impl Model {
             if let Some(reading) = reading_in_period {
                 detail.last_reading = reading.reading_value;
                 detail.last_reading_date = reading.reading_date.map(|d| d.into());
-                detail.status = "SUBMITTED".to_string();
+                detail.status = reading.status;
             } else {
                 // If no reading in target period, show the latest available reading for context
                 let latest = meter_readings::Entity::find()
                     .filter(meter_readings::Column::MeterId.eq(m.id))
-                    .filter(meter_readings::Column::Status.eq("SUBMITTED"))
+                    .filter(
+                        meter_readings::Column::Status
+                            .is_in(vec!["SUBMITTED", "COMPLETED", "MANUAL_REVIEW"]),
+                    )
                     .order_by_desc(meter_readings::Column::ReadingDate)
                     .one(db)
                     .await?;

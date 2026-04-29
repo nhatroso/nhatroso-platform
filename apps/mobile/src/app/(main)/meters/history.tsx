@@ -100,7 +100,7 @@ export default function MeterHistoryScreen() {
                       </Text>
                     </View>
 
-                    {r.usage && Number(r.usage) > 0 && (
+                    {!!r.usage && Number(r.usage) > 0 && (
                       <View className="flex-row items-center mt-1 mb-2">
                         <View className="bg-green-500/10 px-2.5 py-1 rounded-full flex-row items-center">
                           <TrendingUp

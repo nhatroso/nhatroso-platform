@@ -184,9 +184,9 @@ pub async fn sepay_webhook(
     PAYMENT_HUB.broadcast(PaymentEvent::Success { invoice_id: updated.invoice_id });
 
     // Send Email Notification
-    let db_clone = ctx.db.clone();
+    let ctx_clone = ctx.clone();
     tokio::spawn(async move {
-        if let Err(e) = InvoiceModel::notify_payment_success(&db_clone, &invoice).await {
+        if let Err(e) = InvoiceModel::notify_payment_success(&ctx_clone, &invoice).await {
             tracing::error!(error=?e, "Failed to send payment success notification (Payment Webhook)");
         }
     });

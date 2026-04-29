@@ -1,4 +1,5 @@
 use sea_orm::entity::prelude::*;
+use loco_rs::app::AppContext;
 pub use super::_entities::meter_requests::{ActiveModel, Model, Entity, Column};
 pub type MeterRequests = Entity;
 
@@ -21,11 +22,12 @@ impl ActiveModelBehavior for ActiveModel {
 // implement your read-oriented logic here
 impl Model {
     pub async fn generate_manual_requests(
-        db: &DatabaseConnection,
+        ctx: &AppContext,
         building_id: uuid::Uuid,
         period_month: &str,
         due_date: chrono::DateTime<chrono::FixedOffset>,
     ) -> std::result::Result<usize, DbErr> {
+        let db = &ctx.db;
         use crate::models::_entities::rooms;
 
         // Get all occupied rooms in building
@@ -86,10 +88,10 @@ impl Model {
 
                 generated_count += 1;
 
-                // Fire & Forget Notification
-                let db_clone = db.clone();
+                // Fire & Forget Notification via Worker
+                let ctx_clone = ctx.clone();
                 tokio::spawn(async move {
-                    if let Err(e) = Model::notify_meter_request(&db_clone, request_id).await {
+                    if let Err(e) = Model::notify_meter_request(&ctx_clone, request_id).await {
                         tracing::error!(error=?e, request_id=%request_id, "Failed to send meter request notification");
                     }
                 });
@@ -99,7 +101,8 @@ impl Model {
         Ok(generated_count)
     }
 
-    pub async fn notify_meter_request(db: &DatabaseConnection, request_id: uuid::Uuid) -> Result<(), anyhow::Error> {
+    pub async fn notify_meter_request(ctx: &AppContext, request_id: uuid::Uuid) -> Result<(), anyhow::Error> {
+        let db = &ctx.db;
         let request = Entity::find_by_id(request_id)
             .one(db)
             .await?
@@ -114,7 +117,6 @@ impl Model {
             .map_err(|e| anyhow::anyhow!("Failed to find tenant: {:?}", e))?;
 
         if let Some(email) = tenant.email {
-            let redis_url = std::env::var("REDIS_URL").unwrap_or_else(|_| "redis://localhost:6379".to_string());
             let job = crate::jobs::email_job::EmailJob::new(
                 email,
                 format!("Yêu cầu nộp chỉ số điện nước - {} - {}", room.code, request.period_month),
@@ -127,8 +129,65 @@ impl Model {
                     "request_url": format!("{}/meter-requests/{}", std::env::var("SERVER_HOST").unwrap_or_default(), request.id),
                 }),
             );
-            crate::jobs::email_job::EmailJob::enqueue_email(&redis_url, job).await?;
+            crate::jobs::email_job::EmailJob::enqueue_email(ctx, job).await?;
         }
+        Ok(())
+    }
+
+    pub async fn check_and_update_status(
+        db: &DatabaseConnection,
+        room_id: uuid::Uuid,
+        period_month: &str,
+    ) -> std::result::Result<(), DbErr> {
+        use crate::models::_entities::{meters, meter_readings};
+
+        // Find PENDING or LATE requests for this room and period
+        let pending_requests = Entity::find()
+            .filter(Column::RoomId.eq(room_id))
+            .filter(Column::PeriodMonth.eq(period_month))
+            .filter(Column::Status.is_in(vec!["PENDING", "LATE"]))
+            .all(db)
+            .await?;
+
+        if pending_requests.is_empty() {
+            return Ok(());
+        }
+
+        // Get all ACTIVE meters in this room
+        let room_meters = meters::Entity::find()
+            .filter(meters::Column::RoomId.eq(room_id))
+            .filter(meters::Column::Status.eq("ACTIVE"))
+            .all(db)
+            .await?;
+
+        let mut all_submitted = true;
+        for rm in room_meters {
+            // Check if this meter has a reading for this period with status that counts as "submitted"
+            let has_reading = meter_readings::Entity::find()
+                .filter(meter_readings::Column::MeterId.eq(rm.id))
+                .filter(meter_readings::Column::PeriodMonth.eq(period_month))
+                .filter(
+                    meter_readings::Column::Status
+                        .is_in(vec!["SUBMITTED", "COMPLETED", "MANUAL_REVIEW"]),
+                )
+                .one(db)
+                .await?;
+
+            if has_reading.is_none() {
+                all_submitted = false;
+                break;
+            }
+        }
+
+        if all_submitted {
+            for req in pending_requests {
+                let mut req_active: ActiveModel = req.into();
+                req_active.status = sea_orm::ActiveValue::Set("SUBMITTED".to_string());
+                req_active.updated_at = sea_orm::ActiveValue::Set(chrono::Utc::now().into());
+                req_active.update(db).await?;
+            }
+        }
+
         Ok(())
     }
 }

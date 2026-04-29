@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
-import { meterService } from '../../../services/meter.service';
+import { meterService } from '@/services/meter.service';
 
 const formatDate = (dateString: string) => {
   try {
@@ -39,6 +39,8 @@ export function useMeterHistory() {
         .filter(
           (r) =>
             r.status === 'SUBMITTED' ||
+            r.status === 'COMPLETED' ||
+            r.status === 'MANUAL_REVIEW' ||
             !r.status ||
             (r.reading_value && parseFloat(r.reading_value) > 0),
         )

@@ -15,7 +15,7 @@ pub async fn create(
 ) -> Result<Response> {
     let owner_id = auth::get_user_id(&auth)?;
 
-    match InvoiceModel::create(&ctx.db, &params, owner_id).await {
+    match InvoiceModel::create(&ctx, &params, owner_id).await {
         Ok(invoice) => format::json(invoice),
         Err(e) => {
             tracing::error!(error = %e, "Failed to create invoice");
@@ -89,7 +89,7 @@ pub async fn pay_invoice(
 ) -> Result<Response> {
     let owner_id = auth::get_user_id(&auth)?;
 
-    match InvoiceModel::pay_invoice(&ctx.db, id, owner_id).await {
+    match InvoiceModel::pay_invoice(&ctx, id, owner_id).await {
         Ok(invoice) => format::json(invoice),
         Err(msg) => {
             if msg == "INVOICE_NOT_FOUND" {
@@ -131,7 +131,7 @@ pub async fn remind_tenant(
 ) -> Result<Response> {
     let owner_id = auth::get_user_id(&auth)?;
 
-    match InvoiceModel::remind_tenant(&ctx.db, id, owner_id).await {
+    match InvoiceModel::remind_tenant(&ctx, id, owner_id).await {
         Ok(_) => format::json(serde_json::json!({ "success": true })),
         Err(e) => {
             if let loco_rs::model::ModelError::EntityNotFound = e {

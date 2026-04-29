@@ -55,7 +55,7 @@ impl Task for AutoGenerateMeterRequests {
                 tracing::info!("Auto-generating meter requests for building {}", building.id);
 
                 match MeterRequestModel::generate_manual_requests(
-                    &ctx.db,
+                    ctx,
                     building.id,
                     &period,
                     due_date.into()

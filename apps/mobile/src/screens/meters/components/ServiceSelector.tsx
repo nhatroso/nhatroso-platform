@@ -4,40 +4,34 @@ import { useTranslation } from 'react-i18next';
 import { Zap, Droplets, CheckCircle2 } from '@/assets/icons';
 
 interface ServiceSelectorProps {
-  requiredServices: any[];
-  selectedServiceId: string | null;
+  services: any[];
+  selectedId: string | null;
   onSelect: (serviceId: string) => void;
-  meters: any[] | undefined;
+  getLabel: (name?: string | null) => string;
   submittedServices: string[];
-  getServiceLabel: (name?: string | null) => string;
-  completedServicesCount: number;
-  isServiceSubmitted: (serviceId: string) => boolean;
 }
 
 export function ServiceSelector({
-  requiredServices,
-  selectedServiceId,
+  services,
+  selectedId,
   onSelect,
-  getServiceLabel,
-  completedServicesCount,
-  isServiceSubmitted,
+  getLabel,
+  submittedServices,
 }: ServiceSelectorProps) {
   const { t } = useTranslation();
 
   return (
     <>
       <Text className="text-sm font-bold text-muted uppercase tracking-widest mb-4">
-        {t('Services.submission.requiredSubmissions')} ({completedServicesCount}
-        /{requiredServices.length})
+        {t('Services.submission.requiredSubmissions')}
       </Text>
       <View className="flex-row gap-4 mb-8">
-        {requiredServices.map((service: any) => {
+        {services.map((service: any) => {
           const name = service.name?.toLowerCase() || '';
           const isElectricity = name.includes('electricity');
-          const isSelected = selectedServiceId === service.service_id;
+          const isSelected = selectedId === service.service_id;
           const Icon = isElectricity ? Zap : Droplets;
-
-          const isSubmitted = isServiceSubmitted(service.service_id);
+          const isSubmitted = submittedServices.includes(service.service_id);
 
           return (
             <TouchableOpacity
@@ -59,7 +53,7 @@ export function ServiceSelector({
                   />
                 </View>
                 {isSubmitted && (
-                  <View className="absolute -top-1 -right-1 bg-success rounded-full p-0.5 border-2 border-white">
+                  <View className="absolute -top-1 -right-1 rounded-full p-0.5 border-2 border-white bg-success">
                     <CheckCircle2 size={12} color="white" />
                   </View>
                 )}
@@ -67,7 +61,7 @@ export function ServiceSelector({
               <Text
                 className={`font-bold text-sm ${isSelected ? 'text-white' : 'text-text'}`}
               >
-                {getServiceLabel(service.name)}
+                {getLabel(service.name)}
               </Text>
             </TouchableOpacity>
           );
