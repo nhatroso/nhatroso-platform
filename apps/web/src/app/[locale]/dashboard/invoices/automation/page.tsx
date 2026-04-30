@@ -1,6 +1,6 @@
 'use client';
 
-import { useAutoInvoiceConfig } from '@/hooks/use-auto-invoice-config';
+import { useAutoInvoiceConfig } from '@/hooks/invoice/useAutoInvoiceConfig';
 import { Icons } from '@/components/icons';
 import { useTranslations } from 'next-intl';
 import { PageHeader } from '@/components/ui/PageHeader';

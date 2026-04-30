@@ -1,10 +1,10 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { ContractResponse, Building, Floor, Room } from '@nhatroso/shared';
 import { contractsService } from '@/services/api/contracts';
-import { getBuildings, getAllFloors } from '@/services/api/buildings';
-import { getAllRooms } from '@/services/api/rooms';
+import { buildingsService } from '@/services/api/buildings';
+import { roomsService } from '@/services/api/rooms';
 
-export function useContracts() {
+export function useContractList() {
   const [contracts, setContracts] = useState<ContractResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -27,9 +27,9 @@ export function useContracts() {
     try {
       const [cData, bData, fData, rData] = await Promise.all([
         contractsService.list(),
-        getBuildings(),
-        getAllFloors(),
-        getAllRooms(),
+        buildingsService.getBuildings(),
+        buildingsService.getAllFloors(),
+        roomsService.getAllRooms(),
       ]);
       setContracts(cData);
       setBuildings(bData);

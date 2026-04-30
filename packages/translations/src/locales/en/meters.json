@@ -15,6 +15,7 @@
   "Status_PENDING": "Pending",
   "Status_SUBMITTED": "Submitted",
   "Status_OVERDUE": "Overdue",
+  "Status_COMPLETED": "Completed",
   "Status": "Status",
   "Period": "Period",
   "StatusLabel": "Status",

@@ -49,6 +49,7 @@ impl Hooks for App {
             .add_route(controllers::services::routes())
             .add_route(controllers::room_services::routes())
             .add_route(controllers::meters::routes())
+            .add_route(controllers::meter_readings::routes())
             .add_route(controllers::meter_request_configs::routes())
             .add_route(controllers::meter_requests::routes())
             .add_route(controllers::invoices::routes())
@@ -56,7 +57,6 @@ impl Hooks for App {
             .add_route(controllers::price_rules::routes())
             .add_route(controllers::contracts::routes())
             .add_route(controllers::payments::routes())
-            .add_route(controllers::uploads::routes())
     }
 
     async fn after_routes(router: axum::Router, ctx: &AppContext) -> Result<axum::Router> {

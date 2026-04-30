@@ -40,7 +40,6 @@ pub async fn update_config(
 
 pub fn routes() -> Routes {
     Routes::new()
-        .prefix("api/v1/meter-request-configs")
-        .add("/", get(get_config))
-        .add("/", post(update_config))
+        .prefix("api/v1")
+        .add("/landlord/meter-request-configs", get(get_config).post(update_config))
 }

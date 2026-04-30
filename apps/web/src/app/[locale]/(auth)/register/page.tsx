@@ -4,7 +4,7 @@ import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { register } from '@/services/api/auth';
+import { authService } from '@/services/api/auth';
 import { RegisterSchema } from '@nhatroso/shared';
 
 export default function RegisterPage() {
@@ -34,7 +34,7 @@ export default function RegisterPage() {
     }
 
     try {
-      await register(result.data);
+      await authService.register(result.data);
       router.push('/dashboard');
     } catch (err) {
       const key = err instanceof Error ? err.message : 'UNKNOWN_ERROR';

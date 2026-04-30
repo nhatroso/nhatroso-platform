@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
-import { useRooms } from '@/hooks/use-rooms';
+import { useRooms } from '@/hooks/room/useRooms';
 import { RoomCard } from '@/components/buildings/RoomCard';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { PageHeader } from '@/components/ui/PageHeader';

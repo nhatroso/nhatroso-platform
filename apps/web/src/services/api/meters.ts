@@ -8,9 +8,9 @@ import {
 } from '@nhatroso/shared';
 import { apiFetch } from './base';
 
-export const metersApi = {
+export const metersService = {
   listByRoom: async (roomId: string): Promise<Meter[]> => {
-    const res = await apiFetch(`/meters/room/${roomId}`);
+    const res = await apiFetch(`/rooms/${roomId}/meters`);
     if (!res.ok) throw new Error('Failed to fetch meters');
     return res.json();
   },
@@ -47,7 +47,7 @@ export const metersApi = {
   getLandlordSummary: async (
     periodMonth?: string,
   ): Promise<LandlordMeterSummary> => {
-    let url = `/meters/landlord/summary`;
+    let url = `/landlord/meters/summary`;
     if (periodMonth) {
       url += `?period_month=${encodeURIComponent(periodMonth)}`;
     }
@@ -60,7 +60,7 @@ export const metersApi = {
     buildingId?: string,
     periodMonth?: string,
   ): Promise<LandlordMeterDetail[]> => {
-    let url = `/meters/landlord/list`;
+    let url = `/landlord/meters`;
     const params = new URLSearchParams();
     if (buildingId && buildingId !== 'all') {
       params.append('building_id', buildingId);
@@ -97,7 +97,7 @@ export const metersApi = {
       query.append('building_id', params.buildingId);
     if (params.periodMonth) query.append('period_month', params.periodMonth);
     const res = await apiFetch(
-      `/meters/landlord/readings?${query.toString()}`,
+      `/landlord/meter-readings?${query.toString()}`,
     );
     if (!res.ok) throw new Error('Failed to fetch landlord readings');
     return res.json();

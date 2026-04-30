@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Room, Meter, MeterReading } from '@nhatroso/shared';
-import { metersApi } from '@/services/api/meters';
+import { metersService } from '@/services/api/meters';
 
 export function useMeterManagement(room: Room) {
   const [meters, setMeters] = React.useState<Meter[]>([]);
@@ -15,7 +15,7 @@ export function useMeterManagement(room: Room) {
   const fetchMeters = React.useCallback(async () => {
     try {
       setLoading(true);
-      const data = await metersApi.listByRoom(room.id);
+      const data = await metersService.listByRoom(room.id);
       const activeMeters = data.filter((m) => m.status === 'ACTIVE');
       setMeters(activeMeters);
       if (activeMeters.length > 0 && !selectedMeter) {
@@ -30,7 +30,7 @@ export function useMeterManagement(room: Room) {
 
   const fetchReadings = React.useCallback(async (meterId: string) => {
     try {
-      const data = await metersApi.listReadings(meterId);
+      const data = await metersService.listReadings(meterId);
       setReadings(data);
     } catch (err) {
       console.error(err);
@@ -51,7 +51,7 @@ export function useMeterManagement(room: Room) {
     if (!selectedMeter || !newReadingValue) return;
     try {
       setSubmitting(true);
-      await metersApi.recordReading(selectedMeter.id, {
+      await metersService.recordReading(selectedMeter.id, {
         reading_value: newReadingValue,
         reading_date: new Date().toISOString(),
       });

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMeterConfig } from '@/hooks/use-meter-config';
+import { useMeterConfig } from '@/hooks/meter/useMeterConfig';
 import { AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 

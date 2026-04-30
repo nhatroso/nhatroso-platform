@@ -15,6 +15,7 @@
   "Status_PENDING": "Chưa nộp",
   "Status_SUBMITTED": "Đã nộp",
   "Status_OVERDUE": "Quá hạn",
+  "Status_COMPLETED": "Hoàn thành",
   "Status": "Trạng thái",
   "Period": "Kỳ hạn",
   "StatusLabel": "Trạng thái",

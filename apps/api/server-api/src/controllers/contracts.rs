@@ -42,8 +42,7 @@ pub async fn list(
 
 pub fn routes() -> Routes {
     Routes::new()
-        .prefix("api/v1/contracts")
-        .add("/", post(create))
-        .add("/", get(list))
-        .add("/{id}", get(get_by_id))
+        .prefix("api/v1")
+        .add("/landlord/contracts", post(create).get(list))
+        .add("/landlord/contracts/{id}", get(get_by_id))
 }

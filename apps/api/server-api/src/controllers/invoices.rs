@@ -150,12 +150,13 @@ pub async fn remind_tenant(
 
 pub fn routes() -> Routes {
     Routes::new()
-        .prefix("api/v1/invoices")
-        .add("/", post(create))
-        .add("/", get(list))
-        .add("/calculate", post(calculate))
-        .add("/{id}", get(get_one))
-        .add("/{id}/void", post(void_invoice))
-        .add("/{id}/pay", post(pay_invoice))
-        .add("/{id}/remind", post(remind_tenant))
+        .prefix("api/v1")
+        .add("/landlord/invoices", post(create).get(list))
+        .add("/me/invoices", get(list))
+        .add("/landlord/invoices/calculate", post(calculate))
+        .add("/me/invoices/{id}", get(get_one))
+        .add("/landlord/invoices/{id}", get(get_one))
+        .add("/landlord/invoices/{id}/void", post(void_invoice))
+        .add("/landlord/invoices/{id}/pay", post(pay_invoice))
+        .add("/landlord/invoices/{id}/remind", post(remind_tenant))
 }

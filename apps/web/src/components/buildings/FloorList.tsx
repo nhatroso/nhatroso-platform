@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useTranslations } from 'next-intl';
 import { Floor, CreateFloorInput } from '@nhatroso/shared';
-import { getFloors, createFloor } from '@/services/api/buildings';
+import { buildingsService } from '@/services/api/buildings';
 import { RoomList } from './RoomList';
 
 interface FloorListProps {
@@ -26,7 +26,7 @@ export function FloorList({ buildingId }: FloorListProps) {
   const fetchFloors = async () => {
     try {
       setLoading(true);
-      const data = await getFloors(buildingId);
+      const data = await buildingsService.getFloors(buildingId);
       setFloors(data);
     } catch (err) {
       console.error(err);
@@ -41,7 +41,7 @@ export function FloorList({ buildingId }: FloorListProps) {
     try {
       setIsCreating(true);
       const payload: CreateFloorInput = { identifier: newIdentifier };
-      const newFloor = await createFloor(buildingId, payload);
+      const newFloor = await buildingsService.createFloor(buildingId, payload);
       setNewIdentifier('');
       setExpandedFloorId(newFloor.id);
       fetchFloors();

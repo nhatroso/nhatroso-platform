@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
-import { useFloors } from '@/hooks/use-floors';
+import { useFloors } from '@/hooks/building/useFloors';
 import { RoomList } from '@/components/buildings/RoomList';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { PageHeader } from '@/components/ui/PageHeader';
@@ -40,7 +40,8 @@ function FloorsPageContent() {
 
   const {
     buildings,
-    filteredFloors,
+    filteredAndSearchedFloors,
+    uniqueFloorIdentifiers,
     loading,
     selectedBuildingId,
     expandedFloorId,
@@ -48,26 +49,20 @@ function FloorsPageContent() {
     newBuildingId,
     newFloorName,
     isSubmitting,
+    searchTerm,
+    statusFilter,
+    floorFilter,
     setSelectedBuildingId,
     setIsCreateModalOpen,
     setNewBuildingId,
     setNewFloorName,
+    setSearchTerm,
+    setStatusFilter,
+    setFloorFilter,
     handleCreate,
     toggleFloorExpansion,
+    clearFilters,
   } = useFloors({ initialBuildingId });
-
-  const [searchTerm, setSearchTerm] = React.useState('');
-  const [statusFilter, setStatusFilter] = React.useState('all');
-
-  const filteredAndSearchedFloors = React.useMemo(() => {
-    return filteredFloors.filter((f) => {
-      const matchSearch = f.identifier
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
-      const matchStatus = statusFilter === 'all' || f.status === statusFilter;
-      return matchSearch && matchStatus;
-    });
-  }, [filteredFloors, searchTerm, statusFilter]);
 
   return (
     <div className="flex h-[calc(100vh-112px)] w-full flex-col overflow-hidden rounded-2xl border border-gray-border bg-gray-card shadow-sm animate-in fade-in duration-500">
@@ -107,6 +102,22 @@ function FloorsPageContent() {
             </div>
 
             <div className="flex items-center relative">
+              <Icons.Floor className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-muted" />
+              <select
+                value={floorFilter}
+                onChange={(e) => setFloorFilter(e.target.value)}
+                className="block w-48 rounded-xl border border-gray-border bg-gray-input py-2 pl-9 pr-10 text-body text-gray-text focus:border-primary focus:ring-primary shadow-sm appearance-none"
+              >
+                <option value="all">{t('AllFloors') || 'Tất cả tầng'}</option>
+                {uniqueFloorIdentifiers.map((id) => (
+                  <option key={id} value={id}>
+                    {id}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex items-center relative">
               <Icons.Meter className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-muted" />
               <select
                 value={statusFilter}
@@ -120,13 +131,10 @@ function FloorsPageContent() {
             </div>
             {(selectedBuildingId !== 'all' ||
               searchTerm !== '' ||
-              statusFilter !== 'all') && (
+              statusFilter !== 'all' ||
+              floorFilter !== 'all') && (
               <button
-                onClick={() => {
-                  setSelectedBuildingId('all');
-                  setSearchTerm('');
-                  setStatusFilter('all');
-                }}
+                onClick={clearFilters}
                 className="inline-flex items-center text-[11px] font-bold text-danger hover:text-danger-hover uppercase tracking-wider"
               >
                 <Icons.Close className="mr-1 h-3.5 w-3.5" />

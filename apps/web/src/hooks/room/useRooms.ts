@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Building, Floor, Room } from '@nhatroso/shared';
-import { getBuildings, getAllFloors } from '@/services/api/buildings';
-import { getAllRooms, createRoom } from '@/services/api/rooms';
+import { buildingsService } from '@/services/api/buildings';
+import { roomsService } from '@/services/api/rooms';
 
 interface UseRoomsOptions {
   initialBuildingId?: string;
@@ -33,9 +33,9 @@ export function useRooms(options: UseRoomsOptions = {}) {
     try {
       setLoading(true);
       const [bData, fData, rData] = await Promise.all([
-        getBuildings(),
-        getAllFloors(),
-        getAllRooms(),
+        buildingsService.getBuildings(),
+        buildingsService.getAllFloors(),
+        roomsService.getAllRooms(),
       ]);
       setBuildings(bData);
       setFloors(fData);
@@ -87,7 +87,7 @@ export function useRooms(options: UseRoomsOptions = {}) {
     if (!newFloorId || !newRoomCode.trim()) return;
     try {
       setIsSubmitting(true);
-      await createRoom(newFloorId, { code: newRoomCode });
+      await roomsService.createRoom(newFloorId, { code: newRoomCode });
       setIsCreateModalOpen(false);
       setNewRoomCode('');
       setNewFloorId('');

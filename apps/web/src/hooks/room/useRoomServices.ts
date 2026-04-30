@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { Building, Floor, Room, Meter } from '@nhatroso/shared';
-import { getBuildings, getAllFloors } from '@/services/api/buildings';
-import { getAllRooms } from '@/services/api/rooms';
-import { metersApi } from '@/services/api/meters';
+import { buildingsService } from '@/services/api/buildings';
+import { roomsService } from '@/services/api/rooms';
+import { metersService } from '@/services/api/meters';
 
-export function useRoomServicesDashboard() {
+export function useRoomServices() {
   const [buildings, setBuildings] = React.useState<Building[]>([]);
   const [floors, setFloors] = React.useState<Floor[]>([]);
   const [rooms, setRooms] = React.useState<Room[]>([]);
@@ -24,9 +24,9 @@ export function useRoomServicesDashboard() {
     try {
       setLoading(true);
       const [bData, fData, rData] = await Promise.all([
-        getBuildings(),
-        getAllFloors(),
-        getAllRooms(),
+        buildingsService.getBuildings(),
+        buildingsService.getAllFloors(),
+        roomsService.getAllRooms(),
       ]);
       setBuildings(bData);
       setFloors(fData);
@@ -34,9 +34,9 @@ export function useRoomServicesDashboard() {
 
       // Fetch meters for all rooms in parallel
       const metersEntries = await Promise.all(
-        rData.map(async (rm) => {
+        rData.map(async (rm: Room) => {
           try {
-            const meters = await metersApi.listByRoom(rm.id);
+            const meters = await metersService.listByRoom(rm.id);
             return [rm.id, meters.filter((m) => m.status === 'ACTIVE')] as [
               string,
               Meter[],

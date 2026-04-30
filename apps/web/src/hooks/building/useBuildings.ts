@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Building } from '@nhatroso/shared';
-import { getBuildings } from '@/services/api/buildings';
+import { buildingsService } from '@/services/api/buildings';
 
 export function useBuildings() {
   const [buildings, setBuildings] = React.useState<Building[]>([]);
@@ -13,7 +13,7 @@ export function useBuildings() {
   const fetchBuildings = React.useCallback(async () => {
     setIsLoading(true);
     try {
-      const data = await getBuildings();
+      const data = await buildingsService.getBuildings();
       setBuildings(data);
     } catch (err) {
       console.error('Failed to fetch buildings', err);

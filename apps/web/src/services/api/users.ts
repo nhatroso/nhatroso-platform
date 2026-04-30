@@ -27,7 +27,7 @@ export interface LookupUserResponse {
 export const usersService = {
   lookupByPhone: async (phone: string): Promise<LookupUserResponse> => {
     const res = await apiFetch(
-      `/users/lookup?phone=${encodeURIComponent(phone)}`,
+      `/landlord/users/lookup?phone=${encodeURIComponent(phone)}`,
       {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },

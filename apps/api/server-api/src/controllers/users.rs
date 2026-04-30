@@ -101,6 +101,6 @@ pub async fn lookup(
 
 pub fn routes() -> Routes {
     Routes::new()
-        .prefix("api/v1/users")
-        .add("/lookup", get(lookup))
+        .prefix("api/v1")
+        .add("/landlord/users/lookup", get(lookup))
 }

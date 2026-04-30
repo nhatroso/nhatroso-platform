@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { BuildingStream } from '@/components/buildings/BuildingStream';
 import { BuildingDetailPanel } from '@/components/buildings/BuildingDetailPanel';
-import { useBuildings } from '@/hooks/use-buildings';
+import { useBuildings } from '@/hooks/building/useBuildings';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Icons } from '@/components/icons';

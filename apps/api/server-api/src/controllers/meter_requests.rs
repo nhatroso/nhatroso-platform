@@ -174,9 +174,9 @@ pub async fn generate_manual(
 
 pub fn routes() -> Routes {
     Routes::new()
-        .prefix("api/v1/meter-requests")
-        .add("/", get(get_all))
-        .add("/my-requests", get(my_requests))
-        .add("/generate-manual", post(generate_manual))
-        .add("/{id}/submit", post(submit))
+        .prefix("api/v1")
+        .add("/landlord/meter-requests", get(get_all))
+        .add("/me/meter-requests", get(my_requests))
+        .add("/landlord/meter-requests/generate", post(generate_manual))
+        .add("/meter-requests/{id}/submit", post(submit))
 }

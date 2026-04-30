@@ -3,18 +3,20 @@ import { InvoiceResponse } from '@nhatroso/shared';
 
 export const invoiceService = {
   getMyInvoices: async (): Promise<InvoiceResponse[]> => {
-    const response = await apiClient.get<InvoiceResponse[]>('/v1/invoices');
+    const response = await apiClient.get<InvoiceResponse[]>('/v1/me/invoices');
     return response.data;
   },
 
   getInvoiceDetail: async (id: number): Promise<InvoiceResponse> => {
-    const response = await apiClient.get<InvoiceResponse>(`/v1/invoices/${id}`);
+    const response = await apiClient.get<InvoiceResponse>(
+      `/v1/me/invoices/${id}`,
+    );
     return response.data;
   },
 
   payInvoice: async (id: number): Promise<InvoiceResponse> => {
     const response = await apiClient.post<InvoiceResponse>(
-      `/v1/invoices/${id}/pay`,
+      `/v1/landlord/invoices/${id}/pay`,
     );
     return response.data;
   },
@@ -31,7 +33,7 @@ export const invoiceService = {
       transaction_id: string;
       token: string;
       payment_url: string;
-    }>('/v1/payments', { invoice_id, amount });
+    }>('/v1/me/payments', { invoice_id, amount });
     return response.data;
   },
 };

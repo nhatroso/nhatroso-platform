@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { Icons } from '@/components/icons';
-import { useContracts } from '@/hooks/use-contracts';
+import { useContractList } from '@/hooks/contract/useContractList';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { ContractResponse } from '@nhatroso/shared';
@@ -69,7 +69,7 @@ export default function ContractsPage() {
     setSelectedRoomId,
     setStatusFilter,
     setSearchTerm,
-  } = useContracts();
+  } = useContractList();
 
   const tabs: { id: ContractStatusFilter; label: string }[] = [
     { id: 'ACTIVE', label: t('active') },

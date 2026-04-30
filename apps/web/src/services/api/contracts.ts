@@ -3,7 +3,7 @@ import { apiFetch } from './base';
 
 export const contractsService = {
   create: async (data: CreateContractParams): Promise<ContractResponse> => {
-    const res = await apiFetch(`/contracts`, {
+    const res = await apiFetch(`/landlord/contracts`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -16,7 +16,7 @@ export const contractsService = {
   },
 
   getById: async (id: string): Promise<ContractResponse> => {
-    const res = await apiFetch(`/contracts/${id}`, {
+    const res = await apiFetch(`/landlord/contracts/${id}`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
     });
@@ -29,7 +29,7 @@ export const contractsService = {
   },
 
   list: async (): Promise<ContractResponse[]> => {
-    const res = await apiFetch(`/contracts`, {
+    const res = await apiFetch(`/landlord/contracts`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
     });

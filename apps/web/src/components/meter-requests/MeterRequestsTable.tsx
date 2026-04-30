@@ -1,6 +1,6 @@
 'use client';
 
-import { useMeterRequests } from '@/hooks/use-meter-requests';
+import { useMeterRequests } from '@/hooks/meter/useMeterRequests';
 import {
   Image as ImageIcon,
   Calendar,

@@ -27,20 +27,36 @@ impl Model {
         user_id: Uuid,
         params: RecordReadingParams,
     ) -> Result<std::result::Result<MeterReadingResponse, (StatusCode, &'static str)>> {
-        // Validate that reading date is not in the future
-        if let Some(date) = params.reading_date {
-            if date > chrono::Utc::now() {
-                return Ok(Err((StatusCode::BAD_REQUEST, "FUTURE_DATE_NOT_ALLOWED")));
-            }
-        }
-
-        // 1. Fetch the meter to get its initial_reading if needed
+        // 1. Fetch the meter
         let meter = crate::models::_entities::meters::Entity::find_by_id(meter_id)
             .one(db)
             .await?
             .ok_or_else(|| Error::NotFound)?;
 
-        // 2. Fetch the latest SUBMITTED reading for continuity and constraints
+        // 2. Strict Deadline Check
+        if let Some(period) = &params.period_month {
+            use crate::models::_entities::meter_requests;
+            let request = meter_requests::Entity::find()
+                .filter(meter_requests::Column::RoomId.eq(meter.room_id))
+                .filter(meter_requests::Column::PeriodMonth.eq(period))
+                .one(db)
+                .await?;
+            
+            if let Some(req) = request {
+                // Rule: now >= deadline -> OVERDUE (Reject)
+                // Rule: status == OVERDUE -> Reject
+                if req.status == "OVERDUE" || req.due_date.timestamp() <= chrono::Utc::now().timestamp() {
+                    return Ok(Err((StatusCode::BAD_REQUEST, "SUBMISSION_OVERDUE")));
+                }
+            }
+        }
+
+        // 3. Basic Validation
+        if params.reading_value < Decimal::new(0, 0) {
+            return Ok(Err((StatusCode::BAD_REQUEST, "READING_NEGATIVE")));
+        }
+
+        // 4. Fetch the latest SUBMITTED reading for continuity and constraints
         let last_submitted = MeterReadings::find()
             .filter(crate::models::_entities::meter_readings::Column::MeterId.eq(meter_id))
             .filter(
@@ -60,10 +76,10 @@ impl Model {
         }
 
         let usage_delta = params.reading_value - prev_value;
-        let reading_date = params.reading_date.unwrap_or_else(chrono::Utc::now);
+        let server_now = chrono::Utc::now();
 
-        // 3. Look for a PENDING record for this meter and period
-        let pending_record = if let Some(period) = &params.period_month {
+        // 5. Look for a PENDING/OPEN record for this meter and period
+        let existing_record = if let Some(period) = &params.period_month {
             MeterReadings::find()
                 .filter(crate::models::_entities::meter_readings::Column::MeterId.eq(meter_id))
                 .filter(crate::models::_entities::meter_readings::Column::PeriodMonth.eq(period))
@@ -73,40 +89,37 @@ impl Model {
             None
         };
 
-        let result_model = if let Some(pending) = pending_record {
-            // Update existing PENDING record
-            let mut active: ActiveModel = pending.into();
+        let result_model = if let Some(existing) = existing_record {
+            let mut active: ActiveModel = existing.into();
             active.reading_value = ActiveValue::Set(Some(params.reading_value));
-            active.reading_date = ActiveValue::Set(Some(reading_date.into()));
+            active.reading_date = ActiveValue::Set(Some(server_now.into()));
             active.image_url = ActiveValue::Set(params.image_url);
             active.tenant_id = ActiveValue::Set(Some(user_id));
             active.usage = ActiveValue::Set(Some(usage_delta));
             active.status = ActiveValue::Set("SUBMITTED".to_string());
-            active.ocr_raw_result = ActiveValue::Set(None); // Clear any OCR errors if manually recorded
+            active.ocr_raw_result = ActiveValue::Set(None);
             active.update(db).await?
         } else {
-            // Create new SUBMITTED record
             let active = ActiveModel {
                 id: ActiveValue::Set(Uuid::new_v4()),
                 meter_id: ActiveValue::Set(meter_id),
                 reading_value: ActiveValue::Set(Some(params.reading_value)),
-                reading_date: ActiveValue::Set(Some(reading_date.into())),
+                reading_date: ActiveValue::Set(Some(server_now.into())),
                 image_url: ActiveValue::Set(params.image_url),
                 tenant_id: ActiveValue::Set(Some(user_id)),
                 usage: ActiveValue::Set(Some(usage_delta)),
                 period_month: ActiveValue::Set(params.period_month),
                 status: ActiveValue::Set("SUBMITTED".to_string()),
-                created_at: ActiveValue::Set(chrono::Utc::now().into()),
+                created_at: ActiveValue::Set(server_now.into()),
                 ..Default::default()
             };
             active.insert(db).await?
         };
 
-        // --- Auto-completion logic for meter_requests ---
+        // 6. Update MeterRequest status
         if let Some(period) = &result_model.period_month {
             crate::models::meter_requests::Model::check_and_update_status(db, meter.room_id, period).await?;
         }
-        // --- End of auto-completion logic ---
 
         Ok(Ok(MeterReadingResponse::from(result_model)))
     }
@@ -203,7 +216,29 @@ impl Model {
     ) -> Result<MeterReadingResponse> {
         let db = &ctx.db;
 
-        // 1. Check for existing PENDING or SUBMITTED record for this meter and period
+        // 1. Fetch meter to get room_id for deadline check
+        let meter = crate::models::_entities::meters::Entity::find_by_id(meter_id)
+            .one(db)
+            .await?
+            .ok_or_else(|| Error::NotFound)?;
+
+        // 2. Deadline Check
+        if let Some(period) = &params.period_month {
+            use crate::models::_entities::meter_requests;
+            let request = meter_requests::Entity::find()
+                .filter(meter_requests::Column::RoomId.eq(meter.room_id))
+                .filter(meter_requests::Column::PeriodMonth.eq(period))
+                .one(db)
+                .await?;
+            
+            if let Some(req) = request {
+                if req.status == "OVERDUE" || req.due_date.timestamp() <= chrono::Utc::now().timestamp() {
+                    return Err(Error::BadRequest("SUBMISSION_OVERDUE".to_string()));
+                }
+            }
+        }
+
+        // 3. Check for existing PENDING or SUBMITTED record for this meter and period
         let pending_record = if let Some(period) = &params.period_month {
             MeterReadings::find()
                 .filter(crate::models::_entities::meter_readings::Column::MeterId.eq(meter_id))
@@ -238,7 +273,7 @@ impl Model {
         };
         let reading_id = model.id;
 
-        // 2. Enqueue the OCR job
+        // 4. Enqueue the OCR job
         let job = crate::jobs::ocr_job::OcrJob::new(reading_id);
         crate::jobs::ocr_job::OcrJob::enqueue_ocr(ctx, job).await?;
 

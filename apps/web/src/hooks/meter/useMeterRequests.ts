@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useTranslations } from 'next-intl';
 import {
-  getMeterRequests,
+  meterAutomationService,
   MeterRequest,
 } from '@/services/api/meter-automation';
 
@@ -15,7 +15,7 @@ export function useMeterRequests(periodMonth?: string) {
     setLoading(true);
     setError(null);
     try {
-      const data = await getMeterRequests(periodMonth);
+      const data = await meterAutomationService.getMeterRequests(periodMonth);
       setRequests(data);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : t('FetchError');

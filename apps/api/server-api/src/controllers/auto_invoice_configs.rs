@@ -40,7 +40,6 @@ pub async fn update_config(
 
 pub fn routes() -> Routes {
     Routes::new()
-        .prefix("api/v1/auto-invoice-configs")
-        .add("/", get(get_config))
-        .add("/", post(update_config))
+        .prefix("api/v1")
+        .add("/landlord/auto-invoice-configs", get(get_config).post(update_config))
 }

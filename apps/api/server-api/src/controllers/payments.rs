@@ -204,10 +204,10 @@ pub async fn automation_webhook(
 
 pub fn routes() -> Routes {
     Routes::new()
-        .prefix("api/v1/payments")
-        .add("/", post(create_payment))
-        .add("/status/{token}", get(get_payment_status))
-        .add("/webhook", post(sepay_webhook))
-        .add("/automation", post(automation_webhook))
-        .add("/ws", get(subscribe_payment))
+        .prefix("api/v1")
+        .add("/me/payments", post(create_payment))
+        .add("/me/payments/status/{token}", get(get_payment_status))
+        .add("/payments/webhook", post(sepay_webhook))
+        .add("/payments/automation", post(automation_webhook))
+        .add("/payments/ws", get(subscribe_payment))
 }

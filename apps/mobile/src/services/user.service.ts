@@ -19,7 +19,7 @@ export interface TenantRoom {
 
 export const userService = {
   getMyRoom: async (): Promise<TenantRoom> => {
-    const response = await apiClient.get<TenantRoom>('/v1/tenant/room');
+    const response = await apiClient.get<TenantRoom>('/v1/me/room');
     return response.data;
   },
 };
