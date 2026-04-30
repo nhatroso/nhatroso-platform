@@ -38,9 +38,13 @@ export function MeterStatusList({
         const isSubmittedThisMonth = activeRequest?.period_month
           ? m.latest_reading_period === activeRequest.period_month &&
             m.latest_reading_status != null &&
-            m.latest_reading_status !== 'PENDING'
+            ['SUBMITTED', 'COMPLETED', 'MANUAL_REVIEW'].includes(
+              m.latest_reading_status,
+            )
           : m.latest_reading_status != null &&
-            m.latest_reading_status !== 'PENDING';
+            ['SUBMITTED', 'COMPLETED', 'MANUAL_REVIEW'].includes(
+              m.latest_reading_status,
+            );
 
         const serviceLabel =
           getServiceLabel(m.service_name) ||

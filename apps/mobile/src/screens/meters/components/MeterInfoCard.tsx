@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Zap } from '@/assets/icons';
+import { Zap, Droplets } from '@/assets/icons';
 
 interface MeterInfoCardProps {
   meter: any;
@@ -15,6 +15,10 @@ export function MeterInfoCard({
   previousReading,
 }: MeterInfoCardProps) {
   const { t } = useTranslation();
+  const isElectricity = selectedService?.name
+    ?.toLowerCase()
+    .includes('electricity');
+  const Icon = isElectricity ? Zap : Droplets;
 
   const getStatusInfo = () => {
     const status = meter?.latest_reading_status || 'PENDING';
@@ -73,38 +77,41 @@ export function MeterInfoCard({
   const statusInfo = getStatusInfo();
 
   return (
-    <View className="bg-primary/5 p-5 rounded-2xl border border-primary/10 flex-row">
-      <View className="h-8 w-8 bg-primary/20 rounded-full items-center justify-center mr-4">
-        <Zap size={16} className="text-primary" />
+    <View className="bg-white p-4 rounded-xl border border-border shadow-sm flex-row items-center mb-5">
+      <View
+        className={`h-10 w-10 ${isElectricity ? 'bg-warning/10' : 'bg-primary/10'} rounded-xl items-center justify-center mr-3`}
+      >
+        <Icon
+          size={20}
+          className={isElectricity ? 'text-warning' : 'text-primary'}
+        />
       </View>
       <View className="flex-1">
-        <Text className="text-primary font-bold text-sm">
-          {t('Services.submission.meterInfo', {
-            serviceName: selectedService?.name?.toLowerCase() || '',
-          })}
+        <Text className="text-muted text-[10px] font-bold uppercase tracking-widest mb-1">
+          {t('Services.submission.meterInfo')}
+        </Text>
+        <Text className="text-text font-bold text-base capitalize">
+          {selectedService?.name || ''}
         </Text>
 
-        <View className="mt-2 space-y-1">
-          <View className="flex-row items-center">
-            <Text className="text-muted text-xs w-24">
-              {t('Services.submission.status')}
+        <View className="mt-3 flex-row items-center justify-between">
+          <View className="flex-row items-center bg-gray-50 px-2 py-1 rounded-lg">
+            <View
+              className={`h-1.5 w-1.5 rounded-full mr-2 ${statusInfo.color}`}
+            />
+            <Text className={`font-bold text-[11px] ${statusInfo.textClass}`}>
+              {statusInfo.label}
             </Text>
-            <View className="flex-row items-center">
-              <View
-                className={`h-2 w-2 rounded-full mr-1.5 ${statusInfo.color}`}
-              />
-              <Text className={`font-medium text-xs ${statusInfo.textClass}`}>
-                {statusInfo.label}
-              </Text>
-            </View>
           </View>
 
-          <View className="flex-row items-center mt-1">
-            <Text className="text-muted text-xs w-24">
-              {t('Services.submission.lastRecorded')}
+          <View className="flex-row items-baseline">
+            <Text className="text-muted text-[10px] mr-1">
+              {t('Services.submission.lastRecorded', 'Số cuối:')}
             </Text>
-            <Text className="text-text font-bold text-xs">
-              {previousReading}{' '}
+            <Text className="text-text font-black text-sm">
+              {previousReading}
+            </Text>
+            <Text className="text-muted text-[10px] ml-0.5 font-bold italic">
               {String(
                 t(
                   `Services.Unit_${selectedService?.unit || ''}`,
@@ -113,17 +120,6 @@ export function MeterInfoCard({
               )}
             </Text>
           </View>
-
-          {meter?.serial_number && (
-            <View className="flex-row items-center mt-1">
-              <Text className="text-muted text-xs w-24">
-                {t('Services.submission.serialNumber')}
-              </Text>
-              <Text className="text-text font-medium text-xs uppercase">
-                {meter.serial_number}
-              </Text>
-            </View>
-          )}
         </View>
       </View>
     </View>

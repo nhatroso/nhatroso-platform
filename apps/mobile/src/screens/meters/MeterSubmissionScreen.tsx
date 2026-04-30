@@ -15,7 +15,6 @@ export function MeterSubmissionScreen() {
   const {
     selectedServiceId,
     setSelectedServiceId,
-    reading,
     imageUri,
     setImageUri,
     isSubmitModalVisible,
@@ -78,21 +77,24 @@ export function MeterSubmissionScreen() {
         }}
       />
 
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        className="flex-1"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 40 }}
+      >
         <View className="p-6">
           {/* Header Summary */}
-          <View className="flex-row items-center justify-between mb-8 bg-white p-5 rounded-3xl border border-border shadow-sm">
+          <View className="bg-white p-5 rounded-3xl border border-border shadow-sm mb-6 flex-row items-center overflow-hidden">
             <View className="flex-1">
-              <Text className="text-sm font-bold text-muted uppercase tracking-widest mb-1">
-                {t('Services.submission.progress', 'Tiến độ')}
+              <Text className="text-muted text-[10px] font-black uppercase tracking-[1px] mb-1">
+                {t('Services.submission.progress', 'Tiến độ hoàn thành')}
               </Text>
               <Text className="text-2xl font-black text-text">
                 {completedServicesCount}/{requiredServices.length}{' '}
-                {t('Services.submission.services', 'Dịch vụ')}
+                <Text className="text-sm font-bold text-muted">
+                  {t('Services.submission.services', 'Dịch vụ')}
+                </Text>
               </Text>
-            </View>
-            <View className="h-14 w-14 bg-primary/10 rounded-full items-center justify-center">
-              <CheckCircle2 size={28} className="text-primary" />
             </View>
           </View>
 
@@ -131,16 +133,10 @@ export function MeterSubmissionScreen() {
         visible={isSubmitModalVisible}
         onClose={() => setIsSubmitModalVisible(false)}
         onConfirm={confirmSubmit}
-        title={t('Services.submission.confirmTitle', 'Xác nhận nộp chỉ số')}
-        description={t(
-          'Services.submission.confirmMessage',
-          `Bạn có chắc chắn muốn nộp chỉ số ${reading} ${t(
-            `Services.Unit_${selectedService?.unit || ''}`,
-            selectedService?.unit || '',
-          )} không?`,
-        )}
-        confirmText={t('Services.submission.submit', 'Nộp')}
-        cancelText={t('Services.submission.cancel', 'Hủy')}
+        title={t('Services.submission.confirmTitle')}
+        description={t('Services.submission.confirmMessage')}
+        confirmText={t('Services.submission.submit')}
+        cancelText={t('Services.submission.cancel')}
         isDestructive={false}
       />
 

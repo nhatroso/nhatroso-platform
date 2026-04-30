@@ -35,96 +35,105 @@ export function ReadingForm({
   const { t } = useTranslation();
 
   return (
-    <View className="bg-white p-6 rounded-3xl border border-border shadow-sm mb-8">
-      <Text className="text-sm font-bold text-muted uppercase tracking-widest mb-2">
-        {t('Services.submission.newReading')}
-      </Text>
-
-      {isAlreadySubmitted ? (
-        <View className="items-center py-6">
-          <View className="h-16 w-16 bg-success/10 rounded-full items-center justify-center mb-4">
-            <CheckCircle2 size={32} className="text-success" />
-          </View>
-          <Text className="text-lg font-bold text-text mb-1 text-center">
-            {t('Services.submission.alreadySubmitted')}
+    <View className="bg-white p-5 rounded-2xl border border-border shadow-sm mb-6">
+      {!isAlreadySubmitted && (
+        <View className="mb-4">
+          <Text className="text-[11px] font-bold text-muted uppercase tracking-widest mb-3">
+            {t('Services.submission.newReading', 'Nộp chỉ số mới')}
           </Text>
-          <Text className="text-muted text-center text-sm">
+
+          {/* Photo Selection Area */}
+          {!imageUri ? (
+            <View className="flex-row gap-4">
+              <TouchableOpacity
+                onPress={onTakePhoto}
+                disabled={isProcessing}
+                className="flex-1 bg-white border border-border p-5 rounded-2xl items-center justify-center shadow-sm active:scale-95 transition-transform"
+              >
+                <View className="h-12 w-12 bg-primary/10 rounded-xl items-center justify-center mb-2">
+                  <Camera size={24} className="text-primary" />
+                </View>
+                <Text className="text-text font-bold text-xs">
+                  {t('Services.submission.takePhoto', 'Chụp ảnh')}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={onPickImage}
+                disabled={isProcessing}
+                className="flex-1 bg-white border border-border p-5 rounded-2xl items-center justify-center shadow-sm active:scale-95 transition-transform"
+              >
+                <View className="h-12 w-12 bg-primary/10 rounded-xl items-center justify-center mb-2">
+                  <ImageIcon size={24} className="text-primary" />
+                </View>
+                <Text className="text-text font-bold text-xs">
+                  {t('Services.submission.pickImage', 'Chọn từ máy')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View className="relative rounded-3xl overflow-hidden aspect-[4/3] bg-muted border border-border">
+              <Image source={{ uri: imageUri }} className="w-full h-full" />
+              <TouchableOpacity
+                onPress={onClearImage}
+                className="absolute top-4 right-4 bg-black/60 p-2.5 rounded-full"
+              >
+                <X size={18} color="white" />
+              </TouchableOpacity>
+              <View className="absolute bottom-0 left-0 right-0 bg-black/50 p-4 backdrop-blur-md">
+                <Text className="text-white text-xs text-center font-bold">
+                  {t(
+                    'Services.submission.ocrHint',
+                    'Hệ thống sẽ tự động quét chỉ số từ ảnh này',
+                  )}
+                </Text>
+              </View>
+            </View>
+          )}
+
+          {/* OCR Instruction / Placeholder */}
+          {!imageUri && (
+            <View className="mt-4 flex-row items-center justify-center p-4 bg-warning/5 rounded-2xl border border-dashed border-warning/30">
+              <View className="h-2 w-2 rounded-full bg-warning mr-3" />
+              <Text className="text-warning text-xs font-bold italic">
+                {t(
+                  'Services.submission.photoRequiredMessage',
+                  'Vui lòng chụp ảnh đồng hồ rõ nét để tự động ghi nhận',
+                )}
+              </Text>
+            </View>
+          )}
+
+          <TouchableOpacity
+            onPress={onSubmit}
+            disabled={isProcessing || !imageUri}
+            className="mt-6 bg-primary h-14 rounded-2xl items-center justify-center shadow-lg shadow-primary/30 active:scale-[0.98] disabled:opacity-40"
+          >
+            {isProcessing ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <Text className="text-white font-black text-base">
+                {t('Services.submission.submitPhotoButton')}
+              </Text>
+            )}
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {isAlreadySubmitted && (
+        <View className="items-center py-10 bg-success/5 rounded-3xl border border-success/10">
+          <View className="h-20 w-20 bg-success/10 rounded-full items-center justify-center mb-6">
+            <CheckCircle2 size={40} className="text-success" />
+          </View>
+          <Text className="text-xl font-black text-text mb-2 text-center">
+            {t('Services.submission.alreadySubmitted', 'Đã nộp chỉ số')}
+          </Text>
+          <Text className="text-muted text-center text-sm px-8 leading-5">
             {t('Services.submission.alreadySubmittedMessage', {
               month: new Date().getMonth() + 1,
               year: new Date().getFullYear(),
             })}
           </Text>
         </View>
-      ) : (
-        <>
-          {/* Photo Section */}
-          {!imageUri ? (
-            <View className="flex-row gap-4 mb-6">
-              <TouchableOpacity
-                onPress={onTakePhoto}
-                disabled={isProcessing}
-                className="flex-1 bg-primary/5 border border-primary/20 p-4 rounded-2xl items-center justify-center"
-              >
-                <Camera size={24} className="text-primary mb-1" />
-                <Text className="text-primary font-bold text-xs">
-                  {t('Services.submission.takePhoto')}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={onPickImage}
-                disabled={isProcessing}
-                className="flex-1 bg-muted/5 border border-muted/20 p-4 rounded-2xl items-center justify-center"
-              >
-                <ImageIcon size={24} className="text-muted mb-1" />
-                <Text className="text-muted font-bold text-xs">
-                  {t('Services.submission.pickImage')}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <View className="relative mb-6 rounded-2xl overflow-hidden aspect-[4/3] bg-muted/10">
-              <Image source={{ uri: imageUri }} className="w-full h-full" />
-              <TouchableOpacity
-                onPress={onClearImage}
-                className="absolute top-2 right-2 bg-black/50 p-2 rounded-full"
-              >
-                <X size={16} color="white" />
-              </TouchableOpacity>
-              <View className="absolute bottom-0 left-0 right-0 bg-black/30 p-2">
-                <Text className="text-white text-[10px] text-center font-bold">
-                  {t('Services.submission.ocrHint')}
-                </Text>
-              </View>
-            </View>
-          )}
-
-          {/* Input - Removed for OCR-only flow as requested */}
-          <View className="mb-6 items-center justify-center py-4 bg-muted/5 rounded-2xl border border-dashed border-muted/30">
-            <Text className="text-muted text-sm italic">
-              {t(
-                'Services.submission.photoRequiredMessage',
-                'Hãy chụp ảnh để hệ thống tự động ghi nhận',
-              )}
-            </Text>
-          </View>
-
-          <TouchableOpacity
-            onPress={onSubmit}
-            disabled={isProcessing || !imageUri}
-            className="bg-primary p-5 rounded-2xl items-center justify-center shadow-lg shadow-primary/30 active:scale-95 disabled:opacity-50"
-          >
-            {isProcessing ? (
-              <ActivityIndicator color="white" />
-            ) : (
-              <Text className="text-white font-bold text-lg">
-                {t(
-                  'Services.submission.submitPhotoButton',
-                  'Nộp ảnh đồng hồ chỉ số',
-                )}
-              </Text>
-            )}
-          </TouchableOpacity>
-        </>
       )}
     </View>
   );

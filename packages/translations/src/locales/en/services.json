@@ -140,7 +140,7 @@
     "pickImage": "Choose from Library",
     "photoGuideline": "* Please ensure the photo clearly shows the meter reading.",
     "submitReadingButton": "Submit Reading",
-    "meterInfo": "{{serviceName}} Meter Info",
+    "meterInfo": "Meter Info",
     "status": "Status:",
     "lastRecorded": "Last Recorded:",
     "serialNumber": "Serial Number:",

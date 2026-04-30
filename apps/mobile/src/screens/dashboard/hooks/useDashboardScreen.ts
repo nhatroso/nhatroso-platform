@@ -28,7 +28,9 @@ export function useDashboardScreen() {
   });
 
   const activeRequest = Array.isArray(readingRequests)
-    ? readingRequests.find((r) => r.status === 'PENDING')
+    ? readingRequests.find((r) =>
+        ['OPEN', 'PARTIAL', 'OVERDUE', 'PENDING', 'LATE'].includes(r.status),
+      )
     : null;
 
   const isRequestCompleted = !activeRequest;

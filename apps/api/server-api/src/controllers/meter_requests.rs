@@ -117,7 +117,7 @@ pub async fn my_requests(
 
     let requests_with_rooms = meter_requests::Entity::find()
         .filter(meter_requests::Column::RoomId.is_in(room_ids))
-        .filter(meter_requests::Column::Status.is_in(["PENDING", "LATE"]))
+        .filter(meter_requests::Column::Status.is_in(["OPEN", "PARTIAL", "OVERDUE"]))
         .find_also_related(rooms::Entity)
         .all(db)
         .await?;
