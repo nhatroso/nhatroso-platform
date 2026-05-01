@@ -13,6 +13,13 @@ pub struct InvoiceDetailParams {
     pub amount: Decimal,
 }
 
+#[derive(Clone, Debug, Deserialize, Default)]
+pub struct InvoiceListParams {
+    pub status: Option<String>,
+    pub page: Option<u64>,
+    pub limit: Option<u64>,
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct CreateInvoiceParams {
     pub room_id: Option<Uuid>,

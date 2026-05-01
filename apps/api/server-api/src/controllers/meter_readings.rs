@@ -4,7 +4,7 @@ use axum::{Json, http::StatusCode, extract::Query};
 use uuid::Uuid;
 
 use crate::{
-    views::meters::{RecordReadingParams, LandlordReadingsParams, OcrReadingParams},
+    views::meter_readings::{RecordReadingParams, LandlordReadingsParams, OcrReadingParams},
     models::meters::Model as Meter,
     models::meter_readings::Model as MeterReading,
     utils::{auth, error::error_response, storage::Storage},
@@ -73,6 +73,16 @@ pub async fn list_readings(
     format::json(readings)
 }
 
+pub async fn list_tenant_readings(
+    auth: JWT,
+    State(ctx): State<AppContext>,
+    Query(params): Query<crate::views::meter_readings::TenantReadingsParams>,
+) -> Result<Response> {
+    let tenant_id = auth::get_user_id(&auth)?;
+    let readings = MeterReading::list_tenant_readings(&ctx.db, tenant_id, &params).await?;
+    format::json(readings)
+}
+
 pub async fn list_landlord_readings(
     auth: JWT,
     State(ctx): State<AppContext>,
@@ -88,6 +98,7 @@ pub fn routes() -> Routes {
         .prefix("api/v1")
         .add("/attachments/upload-url", get(get_upload_url))
         .add("/meters/{id}/readings", post(record_reading).get(list_readings))
+        .add("/me/meter-readings", get(list_tenant_readings))
         .add("/meters/{id}/ocr", post(submit_ocr))
         .add("/landlord/meter-readings", get(list_landlord_readings))
 }

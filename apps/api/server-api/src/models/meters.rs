@@ -38,6 +38,10 @@ impl Model {
             let mut response = MeterResponse::from_model(m.clone(), s);
             let latest = meter_readings::Entity::find()
                 .filter(meter_readings::Column::MeterId.eq(m.id))
+                .filter(
+                    meter_readings::Column::Status
+                        .is_in(vec!["SUBMITTED", "COMPLETED", "MANUAL_REVIEW"]),
+                )
                 .order_by_desc(meter_readings::Column::ReadingDate)
                 .one(db)
                 .await?;
@@ -46,6 +50,7 @@ impl Model {
                 response.latest_reading_date = r.reading_date.map(|d| d.into());
                 response.latest_reading_period = r.period_month.clone();
                 response.latest_reading_status = Some(r.status.clone());
+                response.latest_usage = r.usage;
                 if r.status == "FAILED" {
                     response.latest_reading_error = r.ocr_raw_result.clone();
                 }
@@ -88,6 +93,10 @@ impl Model {
             let mut response = MeterResponse::from_model(m.clone(), s);
             let latest = meter_readings::Entity::find()
                 .filter(meter_readings::Column::MeterId.eq(m.id))
+                .filter(
+                    meter_readings::Column::Status
+                        .is_in(vec!["SUBMITTED", "COMPLETED", "MANUAL_REVIEW"]),
+                )
                 .order_by_desc(meter_readings::Column::ReadingDate)
                 .one(db)
                 .await?;
@@ -96,6 +105,7 @@ impl Model {
                 response.latest_reading_date = r.reading_date.map(|d| d.into());
                 response.latest_reading_period = r.period_month.clone();
                 response.latest_reading_status = Some(r.status.clone());
+                response.latest_usage = r.usage;
                 if r.status == "FAILED" {
                     response.latest_reading_error = r.ocr_raw_result.clone();
                 }

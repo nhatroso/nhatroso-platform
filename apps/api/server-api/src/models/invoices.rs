@@ -145,9 +145,11 @@ impl Model {
         Ok(res)
     }
 
-    pub async fn list(db: &DatabaseConnection, user_id: Uuid) -> ModelResult<Vec<InvoiceResponse>> {
+    pub async fn list(db: &DatabaseConnection, user_id: Uuid, params: &crate::views::invoices::InvoiceListParams) -> ModelResult<Vec<InvoiceResponse>> {
+        use sea_orm::QueryOrder;
+
         // Query as Landlord (owner) OR as Tenant (via contract)
-        let invoices = Entity::find()
+        let mut query = Entity::find()
             .filter(
                 Condition::any()
                     .add(InvoiceColumn::LandlordId.eq(user_id))
@@ -161,9 +163,23 @@ impl Model {
                                 .into_query()
                         )
                     )
+            );
 
-            )
+        if let Some(status_filter) = &params.status {
+            let statuses: Vec<String> = status_filter.split(',').map(|s| s.trim().to_uppercase()).collect();
+            if !statuses.is_empty() {
+                query = query.filter(InvoiceColumn::Status.is_in(statuses));
+            }
+        }
+
+        let limit = params.limit.unwrap_or(20);
+        let page = params.page.unwrap_or(1);
+        let offset = (page.saturating_sub(1)) * limit;
+
+        let invoices = query
             .order_by_desc(InvoiceColumn::CreatedAt)
+            .limit(limit)
+            .offset(offset)
             .all(db)
             .await?;
 
@@ -545,7 +561,7 @@ impl Model {
                 let usage = reading_opt
                     .and_then(|r| r.usage)
                     .unwrap_or(Decimal::new(0, 0));
-                
+
                 let amount = usage * price_rule.unit_price;
                 details.push(InvoiceDetailParams {
                     description: format!("{} ({})", service.name, params.period_month),

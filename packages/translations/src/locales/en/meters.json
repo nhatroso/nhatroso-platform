@@ -13,6 +13,8 @@
   "FilterStatus": "Status",
   "Status_ALL": "All Status",
   "Status_PENDING": "Pending",
+  "Status_OPEN": "Pending",
+  "Status_PARTIAL": "Partial",
   "Status_SUBMITTED": "Submitted",
   "Status_OVERDUE": "Overdue",
   "Status_COMPLETED": "Completed",

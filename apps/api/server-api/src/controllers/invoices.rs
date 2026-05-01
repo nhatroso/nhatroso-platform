@@ -1,10 +1,10 @@
 use loco_rs::prelude::*;
 use loco_rs::controller::extractor::auth::JWT;
-use axum::{extract::Path, Json};
+use axum::{extract::{Path, Query}, Json};
 
 use crate::{
     models::invoices::Model as InvoiceModel,
-    views::invoices::{CalculateInvoiceParams, CreateInvoiceParams, VoidInvoiceParams},
+    views::invoices::{CalculateInvoiceParams, CreateInvoiceParams, VoidInvoiceParams, InvoiceListParams},
     utils::{auth, error::error_response},
 };
 
@@ -24,10 +24,10 @@ pub async fn create(
     }
 }
 
-pub async fn list(auth: JWT, State(ctx): State<AppContext>) -> Result<Response> {
+pub async fn list(auth: JWT, State(ctx): State<AppContext>, Query(params): Query<InvoiceListParams>) -> Result<Response> {
     let owner_id = auth::get_user_id(&auth)?;
 
-    match InvoiceModel::list(&ctx.db, owner_id).await {
+    match InvoiceModel::list(&ctx.db, owner_id, &params).await {
         Ok(invoices) => format::json(invoices),
         Err(e) => {
             tracing::error!(error = %e, "Failed to list invoices");

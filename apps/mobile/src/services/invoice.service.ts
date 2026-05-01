@@ -2,8 +2,14 @@ import { apiClient } from './api';
 import { InvoiceResponse } from '@nhatroso/shared';
 
 export const invoiceService = {
-  getMyInvoices: async (): Promise<InvoiceResponse[]> => {
-    const response = await apiClient.get<InvoiceResponse[]>('/v1/me/invoices');
+  getMyInvoices: async (params?: {
+    status?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<InvoiceResponse[]> => {
+    const response = await apiClient.get<InvoiceResponse[]>('/v1/me/invoices', {
+      params,
+    });
     return response.data;
   },
 

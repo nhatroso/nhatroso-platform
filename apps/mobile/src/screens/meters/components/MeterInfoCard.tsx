@@ -7,12 +7,14 @@ interface MeterInfoCardProps {
   meter: any;
   selectedService: any;
   previousReading: number;
+  currentPeriod: string | null;
 }
 
 export function MeterInfoCard({
   meter,
   selectedService,
   previousReading,
+  currentPeriod,
 }: MeterInfoCardProps) {
   const { t } = useTranslation();
   const isElectricity = selectedService?.name
@@ -21,7 +23,10 @@ export function MeterInfoCard({
   const Icon = isElectricity ? Zap : Droplets;
 
   const getStatusInfo = () => {
-    const status = meter?.latest_reading_status || 'PENDING';
+    const isCurrentPeriod = meter?.latest_reading_period === currentPeriod;
+    const status = isCurrentPeriod
+      ? meter?.latest_reading_status || 'PENDING'
+      : 'PENDING';
 
     switch (status) {
       case 'COMPLETED':

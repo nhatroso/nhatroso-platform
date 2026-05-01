@@ -36,6 +36,7 @@ export function MeterSubmissionScreen() {
     takePhoto,
     getServiceLabel,
     submittedServices,
+    currentPeriod,
   } = useMeterSubmission();
 
   if (isLoadingMeters || isLoadingRoom) {
@@ -112,6 +113,7 @@ export function MeterSubmissionScreen() {
             meter={selectedMeter}
             previousReading={previousReading}
             selectedService={selectedService}
+            currentPeriod={currentPeriod}
           />
 
           {/* Reading Form */}

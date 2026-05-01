@@ -13,6 +13,8 @@
   "FilterStatus": "Trạng thái",
   "Status_ALL": "Trạng thái",
   "Status_PENDING": "Chưa nộp",
+  "Status_OPEN": "Chưa nộp",
+  "Status_PARTIAL": "Chờ nộp đủ",
   "Status_SUBMITTED": "Đã nộp",
   "Status_OVERDUE": "Quá hạn",
   "Status_COMPLETED": "Hoàn thành",

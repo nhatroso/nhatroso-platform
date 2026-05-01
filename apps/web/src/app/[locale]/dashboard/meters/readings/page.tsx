@@ -29,12 +29,12 @@ export default function MeterReadingsPage() {
         title={t('ReadingHistory')}
         description={t('ReadingHistoryDesc')}
         icon={Icons.History}
-        actions={
-          <button className="flex items-center gap-2 px-4 py-2 bg-primary border border-transparent rounded-xl text-body font-bold text-white hover:bg-primary-hover transition-all shadow-sm active:scale-95">
-            <Icons.Export className="h-4 w-4" strokeWidth={2.5} />
-            {t('ExportExcel')}
-          </button>
-        }
+        // actions={
+        //   <button className="flex items-center gap-2 px-4 py-2 bg-primary border border-transparent rounded-xl text-body font-bold text-white hover:bg-primary-hover transition-all shadow-sm active:scale-95">
+        //     <Icons.Export className="h-4 w-4" strokeWidth={2.5} />
+        //     {t('ExportExcel')}
+        //   </button>
+        // }
       >
         <div className="flex flex-col gap-4 py-1">
           <div className="flex flex-wrap items-center gap-4">

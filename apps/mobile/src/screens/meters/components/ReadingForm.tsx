@@ -1,13 +1,8 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ActivityIndicator,
-  Image,
-} from 'react-native';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { CheckCircle2, Camera, Image as ImageIcon, X } from '@/assets/icons';
+import { AppButton } from '@/components/core/AppButton';
 
 interface ReadingFormProps {
   imageUri: string | null;
@@ -44,31 +39,38 @@ export function ReadingForm({
 
           {/* Photo Selection Area */}
           {!imageUri ? (
-            <View className="flex-row gap-4">
-              <TouchableOpacity
-                onPress={onTakePhoto}
-                disabled={isProcessing}
-                className="flex-1 bg-white border border-border p-5 rounded-2xl items-center justify-center shadow-sm active:scale-95 transition-transform"
-              >
-                <View className="h-12 w-12 bg-primary/10 rounded-xl items-center justify-center mb-2">
-                  <Camera size={24} className="text-primary" />
-                </View>
-                <Text className="text-text font-bold text-xs">
-                  {t('Services.submission.takePhoto', 'Chụp ảnh')}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={onPickImage}
-                disabled={isProcessing}
-                className="flex-1 bg-white border border-border p-5 rounded-2xl items-center justify-center shadow-sm active:scale-95 transition-transform"
-              >
-                <View className="h-12 w-12 bg-primary/10 rounded-xl items-center justify-center mb-2">
-                  <ImageIcon size={24} className="text-primary" />
-                </View>
-                <Text className="text-text font-bold text-xs">
-                  {t('Services.submission.pickImage', 'Chọn từ máy')}
-                </Text>
-              </TouchableOpacity>
+            <View className="flex-row w-full mb-4">
+              <View className="flex-1 mr-2">
+                <TouchableOpacity
+                  onPress={onTakePhoto}
+                  disabled={isProcessing}
+                  className="bg-white border border-gray-100 p-4 py-6 rounded-3xl items-center justify-center shadow-sm active:bg-gray-50"
+                >
+                  <View className="h-12 w-12 bg-primary/10 rounded-2xl items-center justify-center mb-3">
+                    <Camera size={24} className="text-primary" />
+                  </View>
+                  <Text className="text-gray-900 font-bold text-xs">
+                    {t('Services.submission.takePhoto', 'Chụp ảnh')}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              <View className="flex-1 ml-2">
+                <TouchableOpacity
+                  onPress={onPickImage}
+                  disabled={isProcessing}
+                  className="bg-white border border-gray-100 p-4 py-6 rounded-3xl items-center justify-center shadow-sm active:bg-gray-50"
+                >
+                  <View className="h-12 w-12 bg-primary/10 rounded-2xl items-center justify-center mb-3">
+                    <ImageIcon size={24} className="text-primary" />
+                  </View>
+                  <Text
+                    className="text-gray-900 font-bold text-xs"
+                    numberOfLines={1}
+                  >
+                    {t('Services.submission.pickImage', 'Chọn từ máy')}
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
           ) : (
             <View className="relative rounded-3xl overflow-hidden aspect-[4/3] bg-muted border border-border">
@@ -103,19 +105,14 @@ export function ReadingForm({
             </View>
           )}
 
-          <TouchableOpacity
-            onPress={onSubmit}
-            disabled={isProcessing || !imageUri}
-            className="mt-6 bg-primary h-14 rounded-2xl items-center justify-center shadow-lg shadow-primary/30 active:scale-[0.98] disabled:opacity-40"
-          >
-            {isProcessing ? (
-              <ActivityIndicator color="white" />
-            ) : (
-              <Text className="text-white font-black text-base">
-                {t('Services.submission.submitPhotoButton')}
-              </Text>
-            )}
-          </TouchableOpacity>
+          <View className="mt-6">
+            <AppButton
+              onPress={onSubmit}
+              disabled={isProcessing || !imageUri}
+              loading={isProcessing}
+              label={t('Services.submission.submitPhotoButton', 'Gửi chỉ số')}
+            />
+          </View>
         </View>
       )}
 

@@ -2,7 +2,7 @@ use loco_rs::prelude::*;
 use sea_orm::{ActiveModelTrait, EntityTrait, QueryFilter, ColumnTrait, ActiveValue, QueryOrder};
 use uuid::Uuid;
 use axum::http::StatusCode;
-use crate::views::meters::{RecordReadingParams, MeterReadingResponse};
+use crate::views::meter_readings::{RecordReadingParams, MeterReadingResponse, TenantMeterReadingDetail};
 use rust_decimal::Decimal;
 
 pub use super::_entities::meter_readings::{ActiveModel, Model, Entity};
@@ -41,7 +41,7 @@ impl Model {
                 .filter(meter_requests::Column::PeriodMonth.eq(period))
                 .one(db)
                 .await?;
-            
+
             if let Some(req) = request {
                 // Rule: now >= deadline -> OVERDUE (Reject)
                 // Rule: status == OVERDUE -> Reject
@@ -124,12 +124,120 @@ impl Model {
         Ok(Ok(MeterReadingResponse::from(result_model)))
     }
 
+    pub async fn list_tenant_readings(
+        db: &DatabaseConnection,
+        tenant_id: Uuid,
+        params: &crate::views::meter_readings::TenantReadingsParams,
+    ) -> Result<Vec<TenantMeterReadingDetail>> {
+        use crate::models::_entities::{meter_readings, meters, services};
+        use sea_orm::{FromQueryResult, QuerySelect, RelationTrait, QueryOrder};
+        use chrono::NaiveDate;
+
+        #[derive(FromQueryResult)]
+        struct TenantReadingQueryResult {
+            id: Uuid,
+            meter_id: Uuid,
+            service_name: String,
+            service_unit: String,
+            reading_value: Option<Decimal>,
+            usage: Option<Decimal>,
+            reading_date: Option<DateTimeWithTimeZone>,
+            period_month: Option<String>,
+            image_url: Option<String>,
+            status: String,
+        }
+
+        let mut query = MeterReadings::find()
+            .join(
+                sea_orm::JoinType::InnerJoin,
+                meter_readings::Relation::Meters.def(),
+            )
+            .join(
+                sea_orm::JoinType::InnerJoin,
+                meters::Relation::Services.def(),
+            )
+            .filter(meter_readings::Column::TenantId.eq(tenant_id));
+
+        if let Some(svc_type) = &params.r#type {
+            if !svc_type.is_empty() {
+                match svc_type.to_uppercase().as_str() {
+                    "ELECTRIC" => {
+                        query = query.filter(
+                            services::Column::Name.contains("electricity")
+                        );
+                    },
+                    "WATER" => {
+                        query = query.filter(
+                            services::Column::Name.contains("water")
+                        );
+                    },
+                    _ => {
+                        query = query.filter(services::Column::Name.contains(svc_type));
+                    }
+                }
+            }
+        }
+
+        if let Some(from_date) = &params.from {
+            if let Ok(from_parsed) = NaiveDate::parse_from_str(from_date, "%Y-%m-%d") {
+                let from_dt = from_parsed.and_hms_opt(0, 0, 0).unwrap().and_utc();
+                query = query.filter(meter_readings::Column::CreatedAt.gte(from_dt));
+            }
+        }
+
+        if let Some(to_date) = &params.to {
+            if let Ok(to_parsed) = NaiveDate::parse_from_str(to_date, "%Y-%m-%d") {
+                let to_dt = to_parsed.and_hms_opt(23, 59, 59).unwrap().and_utc();
+                query = query.filter(meter_readings::Column::CreatedAt.lte(to_dt));
+            }
+        }
+
+        let limit = params.limit.unwrap_or(20);
+        let page = params.page.unwrap_or(1);
+        let offset = (page.saturating_sub(1)) * limit;
+
+        let results = query
+            .select_only()
+            .column(meter_readings::Column::Id)
+            .column(meter_readings::Column::MeterId)
+            .column_as(services::Column::Name, "service_name")
+            .column_as(services::Column::Unit, "service_unit")
+            .column(meter_readings::Column::ReadingValue)
+            .column(meter_readings::Column::Usage)
+            .column(meter_readings::Column::ReadingDate)
+            .column(meter_readings::Column::PeriodMonth)
+            .column(meter_readings::Column::ImageUrl)
+            .column(meter_readings::Column::Status)
+            .order_by_desc(meter_readings::Column::CreatedAt)
+            .limit(limit)
+            .offset(offset)
+            .into_model::<TenantReadingQueryResult>()
+            .all(db)
+            .await?;
+
+        Ok(results
+            .into_iter()
+            .map(|r| crate::views::meter_readings::TenantMeterReadingDetail {
+                id: r.id,
+                meter_id: r.meter_id,
+                service_name: r.service_name,
+                service_unit: r.service_unit,
+                reading_value: r.reading_value,
+                usage: r.usage,
+                reading_date: r.reading_date.map(|d| d.into()),
+                period_month: r.period_month,
+                image_url: r.image_url,
+                status: r.status,
+            })
+            .collect())
+    }
+
     pub async fn list_landlord_readings(
         db: &DatabaseConnection,
         landlord_id: Uuid,
         building_id: Option<Uuid>,
         period_month: Option<String>,
-    ) -> Result<Vec<crate::views::meters::LandlordMeterReadingDetail>> {
+    ) -> Result<Vec<crate::views::meter_readings::LandlordMeterReadingDetail>> {
         use crate::models::_entities::{buildings, meter_readings, meters, rooms, services};
         use sea_orm::{FromQueryResult, QuerySelect, RelationTrait};
 
@@ -191,7 +299,7 @@ impl Model {
 
         Ok(results
             .into_iter()
-            .map(|r| crate::views::meters::LandlordMeterReadingDetail {
+            .map(|r| crate::views::meter_readings::LandlordMeterReadingDetail {
                 id: r.id,
                 meter_id: r.meter_id,
                 room_code: r.room_code,
@@ -212,7 +320,7 @@ impl Model {
         ctx: &AppContext,
         meter_id: Uuid,
         user_id: Uuid,
-        params: crate::views::meters::OcrReadingParams,
+        params: crate::views::meter_readings::OcrReadingParams,
     ) -> Result<MeterReadingResponse> {
         let db = &ctx.db;
 
@@ -230,7 +338,7 @@ impl Model {
                 .filter(meter_requests::Column::PeriodMonth.eq(period))
                 .one(db)
                 .await?;
-            
+
             if let Some(req) = request {
                 if req.status == "OVERDUE" || req.due_date.timestamp() <= chrono::Utc::now().timestamp() {
                     return Err(Error::BadRequest("SUBMISSION_OVERDUE".to_string()));

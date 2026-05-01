@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
 import { CreditCard, ChevronRight } from '@/assets/icons';
 import { formatDate, formatCurrency } from '@/utils/format';
+import { StatusBadge } from '@/components/core/StatusBadge';
 import { InvoiceResponse } from '@nhatroso/shared';
 
 interface InvoiceItemCardProps {
@@ -16,18 +17,11 @@ export function InvoiceItemCard({ item }: InvoiceItemCardProps) {
 
   const renderStatus = (status: string | null) => {
     const isPaid = status === 'PAID';
-    const label = isPaid
-      ? t('Invoices.status.paid')
-      : t('Invoices.status.unpaid');
-    const colorClass = isPaid ? 'bg-success' : 'bg-error';
-
     return (
-      <View className="flex-row items-center bg-muted/5 px-2.5 py-1 rounded-lg">
-        <View className={`h-1.5 w-1.5 rounded-full mr-2 ${colorClass}`} />
-        <Text className="text-muted text-[10px] font-bold uppercase tracking-wider">
-          {label}
-        </Text>
-      </View>
+      <StatusBadge
+        status={isPaid ? 'success' : 'error'}
+        label={isPaid ? t('Invoices.status.paid') : t('Invoices.status.unpaid')}
+      />
     );
   };
 

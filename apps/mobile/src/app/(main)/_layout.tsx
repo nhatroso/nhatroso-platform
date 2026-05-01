@@ -71,8 +71,8 @@ export default function MainLayout() {
         options={{ title: t('Invoices.payNow') }}
       />
       <Stack.Screen
-        name="meters/history"
-        options={{ title: t('Meters.ReadingHistory') }}
+        name="meters/index"
+        options={{ title: t('Meters.title', 'Chỉ số') }}
       />
       <Stack.Screen
         name="meters/submission"

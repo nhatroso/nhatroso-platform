@@ -30,9 +30,12 @@ pub async fn submit(
     format::json(())
 }
 
-#[derive(Debug, serde::Deserialize)]
+#[derive(Debug, serde::Deserialize, Default)]
 pub struct FilterParams {
     pub period_month: Option<String>,
+    pub status: Option<String>,
+    pub page: Option<u64>,
+    pub limit: Option<u64>,
 }
 
 #[debug_handler]
@@ -92,11 +95,12 @@ pub async fn get_all(
 pub async fn my_requests(
     auth: loco_rs::controller::extractor::auth::JWT,
     State(ctx): State<AppContext>,
+    Query(params): Query<FilterParams>,
 ) -> Result<Response> {
     let tenant_id = crate::utils::auth::get_user_id(&auth)?;
     let db = &ctx.db;
 
-    use sea_orm::{QueryFilter, ColumnTrait};
+    use sea_orm::{QueryFilter, ColumnTrait, QuerySelect, QueryOrder};
     use crate::models::_entities::{contract_tenants, contracts, rooms, meter_requests};
 
     // Find active contract for this tenant
@@ -115,10 +119,25 @@ pub async fn my_requests(
         }
     }
 
-    let requests_with_rooms = meter_requests::Entity::find()
-        .filter(meter_requests::Column::RoomId.is_in(room_ids))
-        .filter(meter_requests::Column::Status.is_in(["OPEN", "PARTIAL", "OVERDUE"]))
+    let mut query = meter_requests::Entity::find()
+        .filter(meter_requests::Column::RoomId.is_in(room_ids));
+
+    if let Some(status_str) = &params.status {
+        let statuses: Vec<String> = status_str.split(',').map(|s| s.trim().to_uppercase()).collect();
+        if !statuses.is_empty() {
+            query = query.filter(meter_requests::Column::Status.is_in(statuses));
+        }
+    }
+
+    let limit = params.limit.unwrap_or(20);
+    let page = params.page.unwrap_or(1);
+    let offset = (page.saturating_sub(1)) * limit;
+
+    let requests_with_rooms: Vec<(meter_requests::Model, Option<rooms::Model>)> = query
         .find_also_related(rooms::Entity)
+        .order_by_desc(meter_requests::Column::CreatedAt)
+        .limit(limit)
+        .offset(offset)
         .all(db)
         .await?;
 

@@ -46,8 +46,8 @@ export function useMeterSubmission() {
   });
 
   const { data: readingRequests, isLoading: isLoadingRequests } = useQuery({
-    queryKey: ['my-reading-requests'],
-    queryFn: meterService.getReadingRequests,
+    queryKey: ['meter-requests', 'active'],
+    queryFn: () => meterService.getReadingRequests({ status: 'OPEN,PARTIAL' }),
   });
 
   const requiredServices = useMemo(() => {
@@ -127,9 +127,12 @@ export function useMeterSubmission() {
     setValidationError(text ? validateReading(text) : null);
   };
 
+  const currentPeriod = useMemo(() => {
+    return (period_month as string) || targetRequest?.period_month;
+  }, [period_month, targetRequest]);
+
   const isAlreadySubmitted = useMemo(() => {
     if (submittedServices.includes(selectedServiceId || '')) return true;
-    const currentPeriod = period_month || targetRequest?.period_month;
     if (selectedMeter && currentPeriod) {
       if (
         selectedMeter.latest_reading_period === currentPeriod &&
@@ -142,19 +145,12 @@ export function useMeterSubmission() {
       }
     }
     return false;
-  }, [
-    selectedServiceId,
-    submittedServices,
-    selectedMeter,
-    period_month,
-    targetRequest,
-  ]);
+  }, [selectedServiceId, submittedServices, selectedMeter, currentPeriod]);
 
   const isServiceSubmitted = useCallback(
     (serviceId: string) => {
       if (submittedServices.includes(serviceId)) return true;
       const sMeter = (meters || []).find((m) => m.service_id === serviceId);
-      const currentPeriod = period_month || targetRequest?.period_month;
       if (sMeter && currentPeriod) {
         if (
           sMeter.latest_reading_period === currentPeriod &&
@@ -168,7 +164,7 @@ export function useMeterSubmission() {
       }
       return false;
     },
-    [submittedServices, meters, period_month, targetRequest],
+    [submittedServices, meters, currentPeriod],
   );
 
   const completedServicesCount = requiredServices.filter((s: any) =>
@@ -392,5 +388,6 @@ export function useMeterSubmission() {
     getServiceLabel,
     submittedServices,
     isServiceSubmitted,
+    currentPeriod,
   };
 }

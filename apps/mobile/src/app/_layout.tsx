@@ -1,4 +1,5 @@
 import { Stack } from 'expo-router';
+import { PaperProvider, MD3LightTheme } from 'react-native-paper';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { I18nextProvider } from 'react-i18next';
 import { queryClient } from '@/services/api';
@@ -12,15 +13,17 @@ export default function RootLayout() {
       <I18nextProvider i18n={i18n}>
         <QueryClientProvider client={queryClient}>
           <AppProvider>
-            <Stack
-              screenOptions={{
-                headerShown: false,
-              }}
-            >
-              <Stack.Screen name="index" />
-              <Stack.Screen name="(auth)" />
-              <Stack.Screen name="(main)" />
-            </Stack>
+            <PaperProvider theme={MD3LightTheme}>
+              <Stack
+                screenOptions={{
+                  headerShown: false,
+                }}
+              >
+                <Stack.Screen name="index" />
+                <Stack.Screen name="(auth)" />
+                <Stack.Screen name="(main)" />
+              </Stack>
+            </PaperProvider>
           </AppProvider>
         </QueryClientProvider>
       </I18nextProvider>

@@ -10,12 +10,12 @@ export function useDashboardScreen() {
     refetch: refetchMeters,
   } = useQuery({
     queryKey: ['my-meters'],
-    queryFn: meterService.getMyMeters,
+    queryFn: () => meterService.getMyMeters(),
   });
 
-  const { data: readingRequests, refetch: refetchRequests } = useQuery({
-    queryKey: ['my-reading-requests'],
-    queryFn: meterService.getReadingRequests,
+  const { data: activeRequests, refetch: refetchRequests } = useQuery({
+    queryKey: ['meter-requests', 'active'],
+    queryFn: () => meterService.getReadingRequests({ status: 'OPEN,PARTIAL' }),
   });
 
   const {
@@ -24,14 +24,13 @@ export function useDashboardScreen() {
     refetch: refetchInvoices,
   } = useQuery({
     queryKey: ['my-invoices'],
-    queryFn: invoiceService.getMyInvoices,
+    queryFn: () => invoiceService.getMyInvoices(),
   });
 
-  const activeRequest = Array.isArray(readingRequests)
-    ? readingRequests.find((r) =>
-        ['OPEN', 'PARTIAL', 'OVERDUE', 'PENDING', 'LATE'].includes(r.status),
-      )
-    : null;
+  const activeRequest =
+    Array.isArray(activeRequests) && activeRequests.length > 0
+      ? activeRequests[0]
+      : null;
 
   const isRequestCompleted = !activeRequest;
 

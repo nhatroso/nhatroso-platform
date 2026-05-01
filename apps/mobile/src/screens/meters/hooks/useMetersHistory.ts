@@ -1,19 +1,18 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { invoiceService } from '@/services/invoice.service';
+import { meterService } from '@/services/meter.service';
 
-export const useInvoices = (status: string) => {
+export const useMetersHistory = (type?: string) => {
   const query = useInfiniteQuery({
-    queryKey: ['invoices', { status }],
+    queryKey: ['meters-history', { type }],
     queryFn: async ({ pageParam = 1 }) => {
-      return await invoiceService.getMyInvoices({
-        status,
+      return await meterService.getAllMyReadings({
+        type,
         page: pageParam,
         limit: 10,
       });
     },
     getNextPageParam: (lastPage, allPages) => {
-      // If the last page has less than the limit (10), there are no more pages
-      if (lastPage.length < 10) {
+      if (!lastPage || lastPage.length < 10) {
         return undefined;
       }
       return allPages.length + 1;
@@ -30,7 +29,6 @@ export const useInvoices = (status: string) => {
     ...query,
     refreshing: query.isRefetching && !query.isFetchingNextPage,
     onRefresh,
-    // Flatten the paginated data
     data: query.data?.pages.flat() ?? [],
   };
 };

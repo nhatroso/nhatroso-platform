@@ -36,6 +36,7 @@ import {
   Loader2,
   FileText,
   Filter,
+  ClipboardList,
 } from 'lucide-react-native';
 
 const iconList = [
@@ -75,6 +76,7 @@ const iconList = [
   Loader2,
   FileText,
   Filter,
+  ClipboardList,
 ];
 
 iconList.forEach((icon) => {
@@ -125,4 +127,5 @@ export {
   Loader2,
   FileText,
   Filter,
+  ClipboardList,
 };

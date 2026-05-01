@@ -183,14 +183,14 @@ impl Model {
         } else if submitted_count < room_meters.len() {
             "PARTIAL".to_string()
         } else {
-            "SUBMITTED".to_string()
+            "COMPLETED".to_string()
         };
 
         for req in requests {
             // Check if actually overdue based on server time
             let is_overdue = req.due_date.timestamp() < chrono::Utc::now().timestamp();
             
-            let status_to_set = if is_overdue && new_status != "SUBMITTED" {
+            let status_to_set = if is_overdue && new_status != "COMPLETED" {
                 "OVERDUE".to_string()
             } else {
                 new_status.clone()
