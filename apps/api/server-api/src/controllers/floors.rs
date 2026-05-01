@@ -62,7 +62,7 @@ pub async fn update(
 pub fn routes() -> Routes {
     Routes::new()
         .prefix("api/v1")
-        .add("/buildings/{building_id}/floors", post(create).get(list_by_building))
-        .add("/floors", get(list_owner_floors))
-        .add("/floors/{id}", patch(update))
+        .add("/landlord/buildings/{building_id}/floors", post(create).get(list_by_building))
+        .add("/landlord/floors", get(list_owner_floors))
+        .add("/landlord/floors/{id}", patch(update))
 }

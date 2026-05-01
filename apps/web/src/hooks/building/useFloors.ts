@@ -1,10 +1,6 @@
 import * as React from 'react';
 import { Building, Floor } from '@nhatroso/shared';
-import {
-  getBuildings,
-  getAllFloors,
-  createFloor,
-} from '@/services/api/buildings';
+import { buildingsService } from '@/services/api/buildings';
 
 interface UseFloorsOptions {
   initialBuildingId?: string;
@@ -21,6 +17,11 @@ export function useFloors(options: UseFloorsOptions = {}) {
     null,
   );
 
+  // Filters State
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [statusFilter, setStatusFilter] = React.useState('all');
+  const [floorFilter, setFloorFilter] = React.useState('all');
+
   // Modal State
   const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false);
   const [newBuildingId, setNewBuildingId] = React.useState('');
@@ -31,8 +32,8 @@ export function useFloors(options: UseFloorsOptions = {}) {
     try {
       setLoading(true);
       const [bData, fData] = await Promise.all([
-        getBuildings(),
-        getAllFloors(),
+        buildingsService.getBuildings(),
+        buildingsService.getAllFloors(),
       ]);
       setBuildings(bData);
       setFloors(fData);
@@ -48,16 +49,37 @@ export function useFloors(options: UseFloorsOptions = {}) {
   }, [fetchData]);
 
   const filteredFloors = React.useMemo(() => {
-    if (selectedBuildingId === 'all') return floors;
-    return floors.filter((f) => f.building_id === selectedBuildingId);
+    let result = floors;
+    if (selectedBuildingId !== 'all') {
+      result = result.filter((f) => f.building_id === selectedBuildingId);
+    }
+    return result;
   }, [floors, selectedBuildingId]);
+
+  const uniqueFloorIdentifiers = React.useMemo(() => {
+    const ids = floors.map((f) => f.identifier);
+    return Array.from(new Set(ids)).sort();
+  }, [floors]);
+
+  const filteredAndSearchedFloors = React.useMemo(() => {
+    return filteredFloors.filter((f) => {
+      const matchSearch = f.identifier
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+      const matchStatus = statusFilter === 'all' || f.status === statusFilter;
+      const matchFloor = floorFilter === 'all' || f.identifier === floorFilter;
+      return matchSearch && matchStatus && matchFloor;
+    });
+  }, [filteredFloors, searchTerm, statusFilter, floorFilter]);
 
   const handleCreate = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!newBuildingId || !newFloorName.trim()) return;
     try {
       setIsSubmitting(true);
-      await createFloor(newBuildingId, { identifier: newFloorName });
+      await buildingsService.createFloor(newBuildingId, {
+        identifier: newFloorName,
+      });
       setIsCreateModalOpen(false);
       setNewFloorName('');
       setNewBuildingId('');
@@ -76,11 +98,19 @@ export function useFloors(options: UseFloorsOptions = {}) {
     setExpandedFloorId((prev) => (prev === floorId ? null : floorId));
   };
 
+  const clearFilters = () => {
+    setSelectedBuildingId('all');
+    setSearchTerm('');
+    setStatusFilter('all');
+    setFloorFilter('all');
+  };
+
   return {
     // Data
     buildings,
     floors,
-    filteredFloors,
+    filteredAndSearchedFloors,
+    uniqueFloorIdentifiers,
 
     // UI State
     loading,
@@ -90,6 +120,9 @@ export function useFloors(options: UseFloorsOptions = {}) {
     newBuildingId,
     newFloorName,
     isSubmitting,
+    searchTerm,
+    statusFilter,
+    floorFilter,
 
     // Actions
     setSelectedBuildingId,
@@ -97,8 +130,12 @@ export function useFloors(options: UseFloorsOptions = {}) {
     setIsCreateModalOpen,
     setNewBuildingId,
     setNewFloorName,
+    setSearchTerm,
+    setStatusFilter,
+    setFloorFilter,
     handleCreate,
     toggleFloorExpansion,
+    clearFilters,
     refresh: fetchData,
   };
 }

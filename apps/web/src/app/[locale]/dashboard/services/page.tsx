@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useServices } from '@/hooks/use-services';
+import { useServices } from '@/hooks/service/useServices';
 import { getServiceDisplayName, getUnitDisplayName } from '@/lib/utils';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Icons } from '@/components/icons';

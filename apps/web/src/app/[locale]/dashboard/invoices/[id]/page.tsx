@@ -1,73 +1,28 @@
 'use client';
 
 import * as React from 'react';
-import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Icons } from '@/components/icons';
 import Link from 'next/link';
 import { PageHeader } from '@/components/ui/PageHeader';
-import {
-  Invoice,
-  getInvoice,
-  payInvoice,
-  voidInvoice,
-} from '@/services/api/invoices';
+import { useInvoiceDetail } from '@/hooks/invoice/useInvoiceDetail';
 
 export default function InvoiceDetailPage() {
   const t = useTranslations('Invoices');
-  const params = useParams();
   const router = useRouter();
-  const [invoice, setInvoice] = useState<Invoice | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isActionLoading, setIsActionLoading] = useState(false);
-  const [voidReason, setVoidReason] = useState('');
-  const [showVoidPrompt, setShowVoidPrompt] = useState(false);
 
-  const fetchInvoice = React.useCallback(async () => {
-    try {
-      if (!params?.id) return;
-      const id = Number(params.id);
-      if (isNaN(id)) return;
-      const data = await getInvoice(id);
-      setInvoice(data);
-    } catch (err) {
-      console.error('Failed to fetch invoice', err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [params?.id]);
-
-  useEffect(() => {
-    fetchInvoice();
-  }, [fetchInvoice]);
-
-  const handlePay = async () => {
-    if (!invoice) return;
-    setIsActionLoading(true);
-    try {
-      await payInvoice(invoice.id);
-      await fetchInvoice();
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setIsActionLoading(false);
-    }
-  };
-
-  const handleVoid = async () => {
-    if (!invoice || voidReason.length < 10) return;
-    setIsActionLoading(true);
-    try {
-      await voidInvoice(invoice.id, voidReason);
-      setShowVoidPrompt(false);
-      await fetchInvoice();
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setIsActionLoading(false);
-    }
-  };
+  const {
+    invoice,
+    isLoading,
+    isActionLoading,
+    voidReason,
+    setVoidReason,
+    showVoidPrompt,
+    setShowVoidPrompt,
+    handlePay,
+    handleVoid,
+  } = useInvoiceDetail();
 
   if (isLoading) {
     return (

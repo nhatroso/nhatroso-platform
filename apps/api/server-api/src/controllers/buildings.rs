@@ -58,9 +58,8 @@ pub async fn archive(
 
 pub fn routes() -> Routes {
     Routes::new()
-        .prefix("api/v1/buildings")
-        .add("/", post(create))
-        .add("/", get(list))
-        .add("/{id}", patch(update))
-        .add("/{id}/archive", post(archive))
+        .prefix("api/v1")
+        .add("/landlord/buildings", post(create).get(list))
+        .add("/landlord/buildings/{id}", patch(update))
+        .add("/landlord/buildings/{id}/archive", post(archive))
 }

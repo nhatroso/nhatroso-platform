@@ -1,10 +1,10 @@
 use loco_rs::prelude::*;
 use loco_rs::controller::extractor::auth::JWT;
-use axum::{extract::Path, Json};
+use axum::{extract::{Path, Query}, Json};
 
 use crate::{
     models::invoices::Model as InvoiceModel,
-    views::invoices::{CalculateInvoiceParams, CreateInvoiceParams, VoidInvoiceParams},
+    views::invoices::{CalculateInvoiceParams, CreateInvoiceParams, VoidInvoiceParams, InvoiceListParams},
     utils::{auth, error::error_response},
 };
 
@@ -24,10 +24,10 @@ pub async fn create(
     }
 }
 
-pub async fn list(auth: JWT, State(ctx): State<AppContext>) -> Result<Response> {
+pub async fn list(auth: JWT, State(ctx): State<AppContext>, Query(params): Query<InvoiceListParams>) -> Result<Response> {
     let owner_id = auth::get_user_id(&auth)?;
 
-    match InvoiceModel::list(&ctx.db, owner_id).await {
+    match InvoiceModel::list(&ctx.db, owner_id, &params).await {
         Ok(invoices) => format::json(invoices),
         Err(e) => {
             tracing::error!(error = %e, "Failed to list invoices");
@@ -150,12 +150,13 @@ pub async fn remind_tenant(
 
 pub fn routes() -> Routes {
     Routes::new()
-        .prefix("api/v1/invoices")
-        .add("/", post(create))
-        .add("/", get(list))
-        .add("/calculate", post(calculate))
-        .add("/{id}", get(get_one))
-        .add("/{id}/void", post(void_invoice))
-        .add("/{id}/pay", post(pay_invoice))
-        .add("/{id}/remind", post(remind_tenant))
+        .prefix("api/v1")
+        .add("/landlord/invoices", post(create).get(list))
+        .add("/me/invoices", get(list))
+        .add("/landlord/invoices/calculate", post(calculate))
+        .add("/me/invoices/{id}", get(get_one))
+        .add("/landlord/invoices/{id}", get(get_one))
+        .add("/landlord/invoices/{id}/void", post(void_invoice))
+        .add("/landlord/invoices/{id}/pay", post(pay_invoice))
+        .add("/landlord/invoices/{id}/remind", post(remind_tenant))
 }

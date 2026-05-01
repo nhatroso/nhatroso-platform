@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { useTranslations } from 'next-intl';
 import { Service, PriceRule, PREDEFINED_SERVICES } from '@nhatroso/shared';
-import { servicesApi } from '@/services/api/services';
-import { priceRulesApi } from '@/services/api/price-rules';
+import { servicesService } from '@/services/api/services';
+import { priceRulesService } from '@/services/api/price-rules';
 
 export function useServices() {
   const t = useTranslations('Services');
@@ -31,7 +31,7 @@ export function useServices() {
   const fetchServices = React.useCallback(async () => {
     setIsLoading(true);
     try {
-      const srvs = await servicesApi.list();
+      const srvs = await servicesService.list();
       setServices(srvs);
     } catch (err) {
       console.error('Failed to fetch services', err);
@@ -42,7 +42,7 @@ export function useServices() {
 
   const fetchRulesForService = React.useCallback(async (serviceId: string) => {
     try {
-      const rules = await priceRulesApi.listByService(serviceId);
+      const rules = await priceRulesService.listByService(serviceId);
       setServiceRules(rules.sort((a, b) => a.name.localeCompare(b.name)));
     } catch (err) {
       console.error('Failed to fetch service rules', err);
@@ -101,12 +101,12 @@ export function useServices() {
     setIsSavingTemplate(true);
     try {
       if (editingRuleId) {
-        await priceRulesApi.update(editingRuleId, {
+        await priceRulesService.update(editingRuleId, {
           unit_price: Number(templatePrice),
           name: templateName,
         });
       } else {
-        await priceRulesApi.create({
+        await priceRulesService.create({
           service_id: selectedServiceId,
           unit_price: Number(templatePrice),
           name: templateName,
@@ -127,7 +127,7 @@ export function useServices() {
     if (!selectedServiceId) return;
     if (!confirm(t('ConfirmArchive'))) return;
     try {
-      await servicesApi.archive(selectedServiceId);
+      await servicesService.archive(selectedServiceId);
       setSelectedServiceId(null);
       await fetchServices();
     } catch (err) {
@@ -147,12 +147,12 @@ export function useServices() {
 
     try {
       setIsLoading(true);
-      const srv = await servicesApi.create({
+      const srv = await servicesService.create({
         name: quickAddData.id_key,
         unit: quickAddData.unit_key,
       });
 
-      await priceRulesApi.create({
+      await priceRulesService.create({
         service_id: srv.id,
         unit_price: Number(quickAddPrice),
         name: t('StandardPrice'),
@@ -174,7 +174,7 @@ export function useServices() {
     if (!selectedServiceId) return;
     if (confirm(t('ConfirmDeleteTemplate'))) {
       try {
-        await priceRulesApi.remove(ruleId);
+        await priceRulesService.remove(ruleId);
         await fetchRulesForService(selectedServiceId);
       } catch (err) {
         console.error('Failed to remove rule', err);

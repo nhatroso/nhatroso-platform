@@ -1,9 +1,6 @@
 import * as React from 'react';
 import { useTranslations } from 'next-intl';
-import {
-  getMeterConfig,
-  updateMeterConfig,
-} from '@/services/api/meter-automation';
+import { meterAutomationService } from '@/services/api/meter-automation';
 
 export function useMeterConfig() {
   const t = useTranslations('MeterRequests.Config');
@@ -26,7 +23,7 @@ export function useMeterConfig() {
   const fetchConfig = React.useCallback(async () => {
     try {
       setLoading(true);
-      const config = await getMeterConfig();
+      const config = await meterAutomationService.getMeterConfig();
       if (config) {
         const data = {
           auto_generate: config.auto_generate,
@@ -71,7 +68,7 @@ export function useMeterConfig() {
         day_of_month: dayOfMonth,
         grace_days: graceDays,
       };
-      await updateMeterConfig(data);
+      await meterAutomationService.updateMeterConfig(data);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
       setInitialData(data);

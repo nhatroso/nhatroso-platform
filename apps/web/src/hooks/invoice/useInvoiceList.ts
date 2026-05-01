@@ -1,10 +1,10 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
-import { Invoice, getInvoices, remindInvoice } from '@/services/api/invoices';
 import { Building, Floor, Room } from '@nhatroso/shared';
-import { getBuildings, getAllFloors } from '@/services/api/buildings';
-import { getAllRooms } from '@/services/api/rooms';
+import { invoicesService, Invoice } from '@/services/api/invoices';
+import { buildingsService } from '@/services/api/buildings';
+import { roomsService } from '@/services/api/rooms';
 
-export function useInvoices() {
+export function useInvoiceList() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
@@ -26,10 +26,10 @@ export function useInvoices() {
     setIsLoading(true);
     try {
       const [invData, bData, fData, rData] = await Promise.all([
-        getInvoices(),
-        getBuildings(),
-        getAllFloors(),
-        getAllRooms(),
+        invoicesService.getInvoices(),
+        buildingsService.getBuildings(),
+        buildingsService.getAllFloors(),
+        roomsService.getAllRooms(),
       ]);
       setInvoices(invData);
       setBuildings(bData);
@@ -133,7 +133,7 @@ export function useInvoices() {
 
   const handleRemind = async (id: number) => {
     try {
-      await remindInvoice(id);
+      await invoicesService.remindInvoice(id);
       return true;
     } catch (err) {
       console.error('Failed to send reminder', err);

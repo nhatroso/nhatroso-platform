@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useTranslations } from 'next-intl';
-import { Room } from '@nhatroso/shared';
-import { useMeterManagement } from '@/hooks/use-meter-management';
+import { Room, MeterReading } from '@nhatroso/shared';
+import { useMeterManagement } from '@/hooks/meter/useMeterManagement';
 import { getServiceDisplayName } from '@/lib/utils';
 import {
   Activity,
@@ -174,7 +174,7 @@ export function MeterManagementModal({
                       {t('NoReadingsYet')}
                     </div>
                   ) : (
-                    readings.map((r) => (
+                    readings.map((r: MeterReading) => (
                       <div
                         key={r.id}
                         className="flex items-center justify-between rounded-xl border border-gray-border p-3 shadow-sm transition-all hover:bg-gray-surface"

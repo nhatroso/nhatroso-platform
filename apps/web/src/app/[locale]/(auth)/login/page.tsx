@@ -4,7 +4,7 @@ import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { login } from '@/services/api/auth';
+import { authService } from '@/services/api/auth';
 import { LoginSchema } from '@nhatroso/shared';
 
 export default function LoginPage() {
@@ -34,7 +34,7 @@ export default function LoginPage() {
     }
 
     try {
-      await login(result.data);
+      await authService.login(result.data);
       router.push('/dashboard');
     } catch (err) {
       const key = err instanceof Error ? err.message : 'UNKNOWN_ERROR';

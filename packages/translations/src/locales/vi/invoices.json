@@ -96,5 +96,11 @@
   "remindTenant": "Nhắc nợ",
   "confirmRemind": "Gửi SMS nhắc khách thuê thanh toán hóa đơn này?",
   "remindSent": "Đã gửi tin nhắn nhắc nợ thành công",
-  "remindFailed": "Gửi tin nhắn nhắc nợ thất bại"
+  "remindFailed": "Gửi tin nhắn nhắc nợ thất bại",
+  "tabs": {
+    "unpaid": "Chưa thanh toán",
+    "paid": "Đã thanh toán"
+  },
+  "historyTitle": "Lịch sử hóa đơn",
+  "historySubtitle": "Xem tất cả hóa đơn của bạn"
 }

@@ -38,81 +38,78 @@ export interface Invoice {
   updated_at: string;
 }
 
-export async function getInvoices(): Promise<Invoice[]> {
-  const res = await apiFetch(`/invoices`, {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' },
-  });
-  if (!res.ok) throw new Error('Failed to fetch invoices');
-  return res.json();
-}
+export const invoicesService = {
+  getInvoices: async (): Promise<Invoice[]> => {
+    const res = await apiFetch(`/landlord/invoices`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (!res.ok) throw new Error('Failed to fetch invoices');
+    return res.json();
+  },
 
-export async function getInvoice(id: number): Promise<Invoice> {
-  const res = await apiFetch(`/invoices/${id}`, {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' },
-  });
-  if (!res.ok) throw new Error('Failed to fetch invoice');
-  return res.json();
-}
+  getInvoice: async (id: number): Promise<Invoice> => {
+    const res = await apiFetch(`/landlord/invoices/${id}`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (!res.ok) throw new Error('Failed to fetch invoice');
+    return res.json();
+  },
 
-export async function createInvoice(
-  payload: Partial<Invoice>,
-): Promise<Invoice> {
-  const res = await apiFetch(`/invoices`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) throw new Error('Failed to create invoice');
-  return res.json();
-}
+  createInvoice: async (payload: Partial<Invoice>): Promise<Invoice> => {
+    const res = await apiFetch(`/landlord/invoices`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error('Failed to create invoice');
+    return res.json();
+  },
 
-export async function calculateInvoice(
-  roomId: string,
-  periodMonth: string,
-): Promise<{
-  room_code: string;
-  tenant_name: string;
-  details: { description: string; amount: string }[];
-  total_amount: string;
-}> {
-  const res = await apiFetch(`/invoices/calculate`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ room_id: roomId, period_month: periodMonth }),
-  });
-  if (!res.ok) throw new Error('Failed to calculate invoice');
-  return res.json();
-}
+  calculateInvoice: async (
+    roomId: string,
+    periodMonth: string,
+  ): Promise<{
+    room_code: string;
+    tenant_name: string;
+    details: { description: string; amount: string }[];
+    total_amount: string;
+  }> => {
+    const res = await apiFetch(`/landlord/invoices/calculate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ room_id: roomId, period_month: periodMonth }),
+    });
+    if (!res.ok) throw new Error('Failed to calculate invoice');
+    return res.json();
+  },
 
-export async function voidInvoice(
-  id: number,
-  reason: string,
-): Promise<Invoice> {
-  const res = await apiFetch(`/invoices/${id}/void`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ reason }),
-  });
-  if (!res.ok) throw new Error('Failed to void invoice');
-  return res.json();
-}
+  voidInvoice: async (id: number, reason: string): Promise<Invoice> => {
+    const res = await apiFetch(`/landlord/invoices/${id}/void`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reason }),
+    });
+    if (!res.ok) throw new Error('Failed to void invoice');
+    return res.json();
+  },
 
-export async function payInvoice(id: number): Promise<Invoice> {
-  const res = await apiFetch(`/invoices/${id}/pay`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-  });
-  if (!res.ok) throw new Error('Failed to pay invoice');
-  return res.json();
-}
+  payInvoice: async (id: number): Promise<Invoice> => {
+    const res = await apiFetch(`/landlord/invoices/${id}/pay`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (!res.ok) throw new Error('Failed to pay invoice');
+    return res.json();
+  },
 
-export async function remindInvoice(id: number): Promise<{ success: boolean }> {
-  const res = await apiFetch(`/invoices/${id}/remind`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-  });
-  if (!res.ok) throw new Error('Failed to send reminder');
-  return res.json();
-}
+  remindInvoice: async (id: number): Promise<{ success: boolean }> => {
+    const res = await apiFetch(`/landlord/invoices/${id}/remind`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (!res.ok) throw new Error('Failed to send reminder');
+    return res.json();
+  },
+};

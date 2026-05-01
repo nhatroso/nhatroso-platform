@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { generateManualRequests } from '@/services/api/meter-automation';
-import { getBuildings } from '@/services/api/buildings';
+import { meterAutomationService } from '@/services/api/meter-automation';
+import { buildingsService } from '@/services/api/buildings';
 import { Building } from '@nhatroso/shared';
 import { Loader2, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -37,7 +37,7 @@ export default function ManualGenerateModal({
   useEffect(() => {
     async function loadBuildings() {
       try {
-        const data = await getBuildings();
+        const data = await buildingsService.getBuildings();
         setBuildings(data);
         if (data.length > 0) {
           setBuildingId(data[0].id);
@@ -69,7 +69,7 @@ export default function ManualGenerateModal({
       const tzString = `${sign}${pad(offset / 60)}:${pad(offset % 60)}`;
       const dueDateTime = `${dueDate}T23:59:59${tzString}`;
 
-      const res = await generateManualRequests({
+      const res = await meterAutomationService.generateManualRequests({
         building_id: buildingId,
         period_month: periodMonth,
         due_date: dueDateTime,

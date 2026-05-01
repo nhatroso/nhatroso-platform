@@ -1,32 +1,23 @@
 'use client';
 
 import * as React from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { contractsService } from '@/services/api/contracts';
-import { ContractResponse } from '@nhatroso/shared';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Icons } from '@/components/icons';
 
 // Use same tailwind classes that mimic the provided CSS or convert inline
+import { useContractDetail } from '@/hooks/contract/useContractDetail';
+
 export default function ContractDetailPage() {
   const t = useTranslations('Contracts');
   const router = useRouter();
-  const params = useParams();
-  const contractId = params.id as string;
-  const [contract, setContract] = React.useState<ContractResponse | null>(null);
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [errorMSG, setErrorMSG] = React.useState('');
-
-  React.useEffect(() => {
-    if (!contractId) return;
-
-    contractsService
-      .getById(contractId)
-      .then(setContract)
-      .catch((err) => setErrorMSG(err?.message || 'Failed to load contract'))
-      .finally(() => setIsLoading(false));
-  }, [contractId]);
+  const {
+    contract,
+    isLoading,
+    errorMSG,
+    handlePrint,
+  } = useContractDetail();
 
   if (isLoading) {
     return (
@@ -52,9 +43,6 @@ export default function ContractDetailPage() {
     );
   }
 
-  const handlePrint = () => {
-    window.print();
-  };
 
   return (
     <div className="mx-auto max-w-4xl py-8">

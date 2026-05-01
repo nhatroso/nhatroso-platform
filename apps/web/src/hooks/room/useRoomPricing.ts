@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { useTranslations } from 'next-intl';
 import { Room, Service, PriceRule, RoomService, Meter } from '@nhatroso/shared';
-import { servicesApi } from '@/services/api/services';
-import { priceRulesApi } from '@/services/api/price-rules';
-import { roomServicesApi } from '@/services/api/room-services';
-import { metersApi } from '@/services/api/meters';
+import { servicesService } from '@/services/api/services';
+import { priceRulesService } from '@/services/api/price-rules';
+import { roomServicesService } from '@/services/api/room-services';
+import { metersService } from '@/services/api/meters';
 
 function isUtilityService(name?: string | null): boolean {
   const lower = (name || '').toLowerCase();
@@ -38,9 +38,9 @@ export function useRoomPricing(room: Room) {
     setLoading(true);
     try {
       const [allServices, assignedServices, roomMeters] = await Promise.all([
-        servicesApi.list(),
-        roomServicesApi.listByRoom(room.id),
-        metersApi.listByRoom(room.id),
+        servicesService.list(),
+        roomServicesService.listByRoom(room.id),
+        metersService.listByRoom(room.id),
       ]);
 
       const activeServices = allServices.filter((s) => s.status === 'ACTIVE');
@@ -60,7 +60,7 @@ export function useRoomPricing(room: Room) {
 
   const fetchTemplates = React.useCallback(async (serviceId: string) => {
     try {
-      const templates = await priceRulesApi.listByService(serviceId);
+      const templates = await priceRulesService.listByService(serviceId);
       setServiceTemplates(
         templates.sort((a, b) => a.name.localeCompare(b.name)),
       );
@@ -157,7 +157,7 @@ export function useRoomPricing(room: Room) {
       if (stagedIsActive) {
         if (!assigned) {
           // New assignment
-          await roomServicesApi.assign(room.id, {
+          await roomServicesService.assign(room.id, {
             service_id: selectedServiceId,
             price_rule_id: stagedPriceRuleId,
           });
@@ -165,7 +165,7 @@ export function useRoomPricing(room: Room) {
           // Auto-create meter with initial reading for utility services
           if (isNewUtilityActivation) {
             try {
-              await metersApi.create({
+              await metersService.create({
                 room_id: room.id,
                 service_id: selectedServiceId,
                 initial_reading: initialMeterReading || '0',
@@ -176,7 +176,7 @@ export function useRoomPricing(room: Room) {
           }
         } else {
           // Update existing assignment
-          await roomServicesApi.update(room.id, assigned.id, {
+          await roomServicesService.update(room.id, assigned.id, {
             price_rule_id: stagedPriceRuleId,
             is_active: true,
           });
@@ -184,12 +184,12 @@ export function useRoomPricing(room: Room) {
       } else {
         // Disabling
         if (assigned) {
-          await roomServicesApi.remove(room.id, assigned.id);
+          await roomServicesService.remove(room.id, assigned.id);
 
           // Deactivate the active meter if it exists for this service
           if (activeMeter) {
             try {
-              await metersApi.updateStatus(activeMeter.id, 'INACTIVE');
+              await metersService.updateStatus(activeMeter.id, 'INACTIVE');
             } catch (err) {
               console.error('Failed to deactivate meter', err);
             }
@@ -199,8 +199,8 @@ export function useRoomPricing(room: Room) {
 
       // Reload room services and meters
       const [assignedServices, roomMeters] = await Promise.all([
-        roomServicesApi.listByRoom(room.id),
-        metersApi.listByRoom(room.id),
+        roomServicesService.listByRoom(room.id),
+        metersService.listByRoom(room.id),
       ]);
       setRoomServices(assignedServices);
       setMeters(roomMeters);

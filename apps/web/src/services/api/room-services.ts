@@ -5,9 +5,9 @@ import {
 } from '@nhatroso/shared';
 import { apiFetch } from './base';
 
-export const roomServicesApi = {
+export const roomServicesService = {
   listByRoom: async (roomId: string): Promise<RoomService[]> => {
-    const res = await apiFetch(`/rooms/${roomId}/services`);
+    const res = await apiFetch(`/landlord/rooms/${roomId}/services`);
     if (!res.ok) throw new Error('Failed to fetch assigned room services');
     return res.json();
   },
@@ -16,7 +16,7 @@ export const roomServicesApi = {
     roomId: string,
     data: AssignServiceInput,
   ): Promise<RoomService> => {
-    const res = await apiFetch(`/rooms/${roomId}/services`, {
+    const res = await apiFetch(`/landlord/rooms/${roomId}/services`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -34,7 +34,7 @@ export const roomServicesApi = {
     data: UpdateAssignedServiceInput,
   ): Promise<RoomService> => {
     const res = await apiFetch(
-      `/rooms/${roomId}/services/${id}`,
+      `/landlord/rooms/${roomId}/services/${id}`,
       {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -50,7 +50,7 @@ export const roomServicesApi = {
 
   remove: async (roomId: string, id: string): Promise<void> => {
     const res = await apiFetch(
-      `/rooms/${roomId}/services/${id}`,
+      `/landlord/rooms/${roomId}/services/${id}`,
       {
         method: 'DELETE',
       },

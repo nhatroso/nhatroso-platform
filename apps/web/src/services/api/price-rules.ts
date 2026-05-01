@@ -5,17 +5,17 @@ import {
 } from '@nhatroso/shared';
 import { apiFetch } from './base';
 
-export const priceRulesApi = {
+export const priceRulesService = {
   listByService: async (serviceId: string): Promise<PriceRule[]> => {
     const res = await apiFetch(
-      `/price-rules/service/${serviceId}`,
+      `/services/${serviceId}/price-rules`,
     );
     if (!res.ok) throw new Error('Failed to fetch service price rules');
     return res.json();
   },
 
   create: async (data: CreatePriceRuleInput): Promise<PriceRule> => {
-    const res = await apiFetch(`/price-rules`, {
+    const res = await apiFetch(`/landlord/price-rules`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -31,7 +31,7 @@ export const priceRulesApi = {
     id: string,
     data: UpdatePriceRuleInput,
   ): Promise<PriceRule> => {
-    const res = await apiFetch(`/price-rules/${id}`, {
+    const res = await apiFetch(`/landlord/price-rules/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -44,7 +44,7 @@ export const priceRulesApi = {
   },
 
   remove: async (id: string): Promise<void> => {
-    const res = await apiFetch(`/price-rules/${id}`, {
+    const res = await apiFetch(`/landlord/price-rules/${id}`, {
       method: 'DELETE',
     });
     if (!res.ok) {

@@ -145,9 +145,11 @@ impl Model {
         Ok(res)
     }
 
-    pub async fn list(db: &DatabaseConnection, user_id: Uuid) -> ModelResult<Vec<InvoiceResponse>> {
+    pub async fn list(db: &DatabaseConnection, user_id: Uuid, params: &crate::views::invoices::InvoiceListParams) -> ModelResult<Vec<InvoiceResponse>> {
+        use sea_orm::QueryOrder;
+
         // Query as Landlord (owner) OR as Tenant (via contract)
-        let invoices = Entity::find()
+        let mut query = Entity::find()
             .filter(
                 Condition::any()
                     .add(InvoiceColumn::LandlordId.eq(user_id))
@@ -161,9 +163,23 @@ impl Model {
                                 .into_query()
                         )
                     )
+            );
 
-            )
+        if let Some(status_filter) = &params.status {
+            let statuses: Vec<String> = status_filter.split(',').map(|s| s.trim().to_uppercase()).collect();
+            if !statuses.is_empty() {
+                query = query.filter(InvoiceColumn::Status.is_in(statuses));
+            }
+        }
+
+        let limit = params.limit.unwrap_or(20);
+        let page = params.page.unwrap_or(1);
+        let offset = (page.saturating_sub(1)) * limit;
+
+        let invoices = query
             .order_by_desc(InvoiceColumn::CreatedAt)
+            .limit(limit)
+            .offset(offset)
             .all(db)
             .await?;
 
@@ -532,30 +548,26 @@ impl Model {
                 .await?;
 
             if let Some(meter) = meter_opt {
-                // Metered service: usage * unit_price
                 let reading_opt = MeterReadings::find()
                     .filter(crate::models::_entities::meter_readings::Column::MeterId.eq(meter.id))
                     .filter(crate::models::_entities::meter_readings::Column::PeriodMonth.eq(&params.period_month))
                     .filter(
                         crate::models::_entities::meter_readings::Column::Status
-                            .is_in(vec!["SUBMITTED", "COMPLETED"]),
+                            .is_in(vec!["SUBMITTED", "COMPLETED", "MANUAL_REVIEW"]),
                     )
                     .one(db)
                     .await?;
 
-                if let Some(reading) = reading_opt {
-                    let usage = reading.usage.unwrap_or(Decimal::new(0, 0));
-                    let amount = usage * price_rule.unit_price;
-                    if amount > Decimal::new(0, 0) {
-                        details.push(InvoiceDetailParams {
-                            description: format!("{} ({})", service.name, params.period_month),
-                            amount,
-                        });
-                        total_amount += amount;
-                    }
-                } else {
-                    tracing::info!(meter_id = %meter.id, period = %params.period_month, "Reading not ready for metered service, skipping from invoice");
-                }
+                let usage = reading_opt
+                    .and_then(|r| r.usage)
+                    .unwrap_or(Decimal::new(0, 0));
+
+                let amount = usage * price_rule.unit_price;
+                details.push(InvoiceDetailParams {
+                    description: format!("{} ({})", service.name, params.period_month),
+                    amount,
+                });
+                total_amount += amount;
             } else {
                 // Flat rate service
                 let amount = price_rule.unit_price;

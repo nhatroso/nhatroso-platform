@@ -61,7 +61,7 @@ pub async fn remove(
 
 pub fn routes() -> Routes {
     Routes::new()
-        .prefix("/api/v1/rooms/{room_id}/services")
-        .add("/", get(list_by_room).post(assign))
-        .add("/{id}", patch(update).delete(remove))
+        .prefix("api/v1")
+        .add("/landlord/rooms/{room_id}/services", get(list_by_room).post(assign))
+        .add("/landlord/rooms/{room_id}/services/{id}", patch(update).delete(remove))
 }

@@ -1,8 +1,10 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Zap, Droplets, CheckCircle2 } from '@/assets/icons';
+import { Zap, Droplets } from '@/assets/icons';
+import { AppCard } from '@/components/core/AppCard';
+import { StatusBadge } from '@/components/core/StatusBadge';
 
 interface MeterStatusListProps {
   meters: any[] | undefined;
@@ -38,9 +40,13 @@ export function MeterStatusList({
         const isSubmittedThisMonth = activeRequest?.period_month
           ? m.latest_reading_period === activeRequest.period_month &&
             m.latest_reading_status != null &&
-            m.latest_reading_status !== 'PENDING'
+            ['SUBMITTED', 'COMPLETED', 'MANUAL_REVIEW'].includes(
+              m.latest_reading_status,
+            )
           : m.latest_reading_status != null &&
-            m.latest_reading_status !== 'PENDING';
+            ['SUBMITTED', 'COMPLETED', 'MANUAL_REVIEW'].includes(
+              m.latest_reading_status,
+            );
 
         const serviceLabel =
           getServiceLabel(m.service_name) ||
@@ -49,26 +55,17 @@ export function MeterStatusList({
             : t('Dashboard.tenant.water'));
 
         return (
-          <TouchableOpacity
+          <AppCard
             key={m.id}
             onPress={() =>
               router.push({
-                pathname: '/meters/history',
-                params: {
-                  meterId: m.id,
-                  serviceName: String(serviceLabel),
-                  unit: String(
-                    t(
-                      `Services.Unit_${m.service_unit || (isElectricity ? 'kWh' : 'm³')}`,
-                      m.service_unit || (isElectricity ? 'kWh' : 'm³'),
-                    ),
-                  ),
-                },
+                pathname: '/meters',
+                params: { type: isElectricity ? 'ELECTRIC' : 'WATER' },
               })
             }
-            className="bg-white p-4 rounded-2xl border border-border shadow-sm mb-3 active:bg-input"
+            className="mb-3"
           >
-            <View className="flex-row items-center justify-between mb-2">
+            <View className="flex-row items-center justify-between mb-4">
               <View className="flex-row items-center">
                 <View
                   className={`h-8 w-8 rounded-full items-center justify-center mr-3 ${isElectricity ? 'bg-warning/10' : 'bg-primary/10'}`}
@@ -84,15 +81,14 @@ export function MeterStatusList({
                 </Text>
               </View>
               <View className="flex-row items-center">
-                <View
-                  className={`h-2 w-2 rounded-full mr-1.5 ${isSubmittedThisMonth ? 'bg-success' : 'bg-warning'}`}
+                <StatusBadge
+                  status={isSubmittedThisMonth ? 'success' : 'warning'}
+                  label={
+                    isSubmittedThisMonth
+                      ? String(t('Dashboard.tenant.submitted'))
+                      : String(t('Dashboard.tenant.notSubmitted'))
+                  }
                 />
-                <Text className="text-xs text-muted font-medium mr-1.5">
-                  {isSubmittedThisMonth
-                    ? String(t('Dashboard.tenant.submitted'))
-                    : String(t('Dashboard.tenant.notSubmitted'))}
-                </Text>
-                <CheckCircle2 size={16} className="text-muted/50" />
               </View>
             </View>
 
@@ -107,6 +103,11 @@ export function MeterStatusList({
                       ? m.latest_reading
                       : m.initial_reading}
                   </Text>
+                  {m.latest_usage != null && (
+                    <Text className="text-green-600 text-xs font-bold ml-1 mb-0.5">
+                      (+{m.latest_usage})
+                    </Text>
+                  )}
                   <Text className="text-muted text-xs font-medium ml-1 mb-0.5">
                     {String(
                       t(
@@ -128,7 +129,7 @@ export function MeterStatusList({
                 </Text>
               </View>
             </View>
-          </TouchableOpacity>
+          </AppCard>
         );
       })}
     </View>

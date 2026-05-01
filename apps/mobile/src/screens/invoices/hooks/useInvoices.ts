@@ -1,24 +1,36 @@
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { invoiceService } from '@/services/invoice.service';
-import { useState } from 'react';
 
-export const useInvoices = () => {
-  const [refreshing, setRefreshing] = useState(false);
-
-  const query = useQuery({
-    queryKey: ['my-invoices'],
-    queryFn: invoiceService.getMyInvoices,
+export const useInvoices = (status: string) => {
+  const query = useInfiniteQuery({
+    queryKey: ['invoices', { status }],
+    queryFn: async ({ pageParam = 1 }) => {
+      return await invoiceService.getMyInvoices({
+        status,
+        page: pageParam,
+        limit: 10,
+      });
+    },
+    getNextPageParam: (lastPage, allPages) => {
+      // If the last page has less than the limit (10), there are no more pages
+      if (lastPage.length < 10) {
+        return undefined;
+      }
+      return allPages.length + 1;
+    },
+    initialPageParam: 1,
+    staleTime: 5 * 60 * 1000, // 5 minutes cache
   });
 
   const onRefresh = async () => {
-    setRefreshing(true);
     await query.refetch();
-    setRefreshing(false);
   };
 
   return {
     ...query,
-    refreshing,
+    refreshing: query.isRefetching && !query.isFetchingNextPage,
     onRefresh,
+    // Flatten the paginated data
+    data: query.data?.pages.flat() ?? [],
   };
 };

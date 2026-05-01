@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useTranslations } from 'next-intl';
-import { useRoomServicesDashboard } from '@/hooks/use-room-services-dashboard';
+import { useRoomServices } from '@/hooks/room/useRoomServices';
 import { Room } from '@nhatroso/shared';
 import { RoomPricingModal } from '@/components/buildings/RoomPricingModal';
 import { MeterManagementModal } from '@/components/buildings/MeterManagementModal';
@@ -79,7 +79,7 @@ function RoomServicesContent() {
     setSelectedFloorId,
     setSelectedStatus,
     refresh,
-  } = useRoomServicesDashboard();
+  } = useRoomServices();
 
   const [searchTerm, setSearchTerm] = React.useState('');
 

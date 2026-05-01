@@ -1,9 +1,6 @@
 import * as React from 'react';
 import { useTranslations } from 'next-intl';
-import {
-  getAutoInvoiceConfig,
-  updateAutoInvoiceConfig,
-} from '@/services/api/auto-invoice-configs';
+import { autoInvoiceService } from '@/services/api/auto-invoice-configs';
 
 export function useAutoInvoiceConfig() {
   const t = useTranslations('Invoices.automation');
@@ -26,7 +23,7 @@ export function useAutoInvoiceConfig() {
   const fetchConfig = React.useCallback(async () => {
     try {
       setLoading(true);
-      const config = await getAutoInvoiceConfig();
+      const config = await autoInvoiceService.getAutoInvoiceConfig();
       if (config) {
         const data = {
           auto_generate: config.auto_generate,
@@ -71,7 +68,7 @@ export function useAutoInvoiceConfig() {
         day_of_month: dayOfMonth,
         grace_days: graceDays,
       };
-      await updateAutoInvoiceConfig(data);
+      await autoInvoiceService.updateAutoInvoiceConfig(data);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
       setInitialData(data);

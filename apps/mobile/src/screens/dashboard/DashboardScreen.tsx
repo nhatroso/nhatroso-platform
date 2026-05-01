@@ -3,7 +3,6 @@ import {
   View,
   Text,
   ScrollView,
-  TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
 } from 'react-native';
@@ -12,7 +11,7 @@ import {
   CreditCard,
   AlertCircle,
   MessageSquare,
-  ChevronRight,
+  ClipboardList,
 } from '@/assets/icons';
 
 import { useApp } from '@/context';
@@ -24,6 +23,8 @@ import {
 import { MeterStatusList } from './components/MeterStatusList';
 import { formatCurrency, formatDate } from '@/utils/format';
 import { DashboardAlert } from './components/DashboardAlert';
+import { AppListItem } from '@/components/core/AppListItem';
+import { AppCard } from '@/components/core/AppCard';
 
 export function DashboardScreen() {
   const { user } = useApp();
@@ -99,41 +100,41 @@ export function DashboardScreen() {
 
       {/* Stats Grid */}
       <View className="flex-row flex-wrap gap-4 mb-8">
-        <View className="flex-1 min-w-[45%] bg-background p-5 rounded-2xl border border-border shadow-sm">
-          <View className="h-12 w-12 bg-primary/10 rounded-xl items-center justify-center mb-4">
-            <CreditCard size={24} className="text-primary" />
+        <AppCard className="flex-1 min-w-[45%]">
+          <View className="h-12 w-12 bg-blue-50 rounded-xl items-center justify-center mb-4">
+            <CreditCard size={24} className="text-blue-600" />
           </View>
-          <Text className="text-muted text-xs font-bold uppercase tracking-widest">
+          <Text className="text-gray-500 text-xs font-bold uppercase tracking-widest">
             {t('Dashboard.tenant.rentBalance')}
           </Text>
           {isLoadingInvoices ? (
             <ActivityIndicator
               size="small"
-              color="#3b82f6"
+              color="#2563EB"
               className="mt-2 self-start"
             />
           ) : (
-            <Text className="text-text text-2xl font-extrabold mt-1">
+            <Text className="text-gray-900 text-2xl font-extrabold mt-1">
               {formatCurrency(totalUnpaidAmount)}
             </Text>
           )}
-        </View>
+        </AppCard>
 
-        <View className="flex-1 min-w-[45%] bg-background p-5 rounded-2xl border border-border shadow-sm">
-          <View className="h-12 w-12 bg-error/10 rounded-xl items-center justify-center mb-4">
-            <AlertCircle size={24} className="text-error" />
+        <AppCard className="flex-1 min-w-[45%]">
+          <View className="h-12 w-12 bg-red-50 rounded-xl items-center justify-center mb-4">
+            <AlertCircle size={24} className="text-red-500" />
           </View>
-          <Text className="text-muted text-xs font-bold uppercase tracking-widest">
+          <Text className="text-gray-500 text-xs font-bold uppercase tracking-widest">
             {t('Dashboard.tenant.dueDate')}
           </Text>
           {isLoadingInvoices ? (
             <ActivityIndicator
               size="small"
-              color="#ef4444"
+              color="#EF4444"
               className="mt-2 self-start"
             />
           ) : (
-            <Text className="text-error text-2xl font-extrabold mt-1">
+            <Text className="text-red-500 text-2xl font-extrabold mt-1">
               {latestUnpaidInvoice
                 ? formatDate(
                     latestUnpaidInvoice.due_date ||
@@ -142,7 +143,7 @@ export function DashboardScreen() {
                 : t('Dashboard.tenant.noDue')}
             </Text>
           )}
-        </View>
+        </AppCard>
       </View>
 
       {/* Meter Status */}
@@ -164,21 +165,37 @@ export function DashboardScreen() {
       </View>
 
       {/* Quick Actions */}
-      <Text className="text-xl font-bold text-text mb-5">
+      <Text className="text-xl font-bold text-gray-900 mb-4">
         {t('Dashboard.tenant.quickActions')}
       </Text>
-      <View className="gap-y-4 mb-8">
-        <TouchableOpacity className="flex-row items-center justify-between bg-background p-5 rounded-2xl border border-border shadow-sm active:bg-input">
-          <View className="flex-row items-center">
-            <View className="h-10 w-10 bg-warning/10 rounded-xl items-center justify-center mr-4">
-              <MessageSquare size={20} className="text-warning" />
+      <View className="gap-y-1 mb-8">
+        <AppListItem
+          title={t('Meters.requestsTitle', 'Yêu cầu nộp chỉ số')}
+          icon={
+            <View className="h-10 w-10 bg-blue-50 rounded-xl items-center justify-center">
+              <ClipboardList size={20} className="text-blue-600" />
             </View>
-            <Text className="text-text font-bold text-base">
-              {t('Dashboard.tenant.contactLandlord')}
-            </Text>
-          </View>
-          <ChevronRight size={20} className="text-icon" />
-        </TouchableOpacity>
+          }
+          onPress={() => router.push('/meters/requests')}
+        />
+        <AppListItem
+          title={t('Invoices.historyTitle', 'Lịch sử hóa đơn')}
+          icon={
+            <View className="h-10 w-10 bg-emerald-50 rounded-xl items-center justify-center">
+              <CreditCard size={20} className="text-emerald-600" />
+            </View>
+          }
+          onPress={() => router.push('/invoices')}
+        />
+        <AppListItem
+          title={t('Dashboard.tenant.contactLandlord')}
+          icon={
+            <View className="h-10 w-10 bg-amber-50 rounded-xl items-center justify-center">
+              <MessageSquare size={20} className="text-amber-500" />
+            </View>
+          }
+          onPress={() => {}}
+        />
       </View>
 
       <View className="h-20" />

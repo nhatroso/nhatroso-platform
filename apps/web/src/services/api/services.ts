@@ -5,16 +5,16 @@ import {
 } from '@nhatroso/shared';
 import { apiFetch } from './base';
 
-export const servicesApi = {
+export const servicesService = {
   list: async (): Promise<Service[]> => {
-    const res = await apiFetch(`/services`);
+    const res = await apiFetch(`/landlord/services`);
     if (!res.ok) throw new Error('Failed to fetch services');
     const json = await res.json();
     return Array.isArray(json) ? json : json.data || [];
   },
 
   create: async (data: CreateServiceParams): Promise<Service> => {
-    const res = await apiFetch(`/services`, {
+    const res = await apiFetch(`/landlord/services`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -25,7 +25,7 @@ export const servicesApi = {
   },
 
   update: async (id: string, data: UpdateServiceParams): Promise<Service> => {
-    const res = await apiFetch(`/services/${id}`, {
+    const res = await apiFetch(`/landlord/services/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -36,7 +36,7 @@ export const servicesApi = {
   },
 
   archive: async (id: string): Promise<Service> => {
-    const res = await apiFetch(`/services/${id}/archive`, {
+    const res = await apiFetch(`/landlord/services/${id}/archive`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
     });

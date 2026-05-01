@@ -1,16 +1,13 @@
 use loco_rs::prelude::*;
 use loco_rs::controller::extractor::auth::JWT;
-use axum::{Json, http::StatusCode, extract::Query};
+use axum::{Json, extract::Query};
 use uuid::Uuid;
 
 use crate::{
-    views::meters::{CreateMeterParams, RecordReadingParams, LandlordListParams, UpdateMeterStatusParams, LandlordReadingsParams},
+    views::meters::{CreateMeterParams, LandlordListParams, UpdateMeterStatusParams},
     models::meters::Model as Meter,
-    models::meter_readings::Model as MeterReading,
-    utils::{auth, error::error_response, storage::Storage},
-    views::meters::OcrReadingParams,
+    utils::{auth, error::error_response},
 };
-use std::time::Duration;
 
 pub async fn list_by_room(
     Path(room_id): Path<Uuid>,
@@ -40,69 +37,6 @@ pub async fn get_my_meters(
     format::json(meters)
 }
 
-pub async fn record_reading(
-    auth: JWT,
-    Path(id): Path<Uuid>,
-    State(ctx): State<AppContext>,
-    Json(params): Json<RecordReadingParams>,
-) -> Result<Response> {
-    let user_id = auth::get_user_id(&auth)?;
-
-    // Ownership check: Meter must belong to the tenant's current room
-    if !Meter::validate_meter_access(&ctx.db, id, user_id).await? {
-        return error_response("METER_ACCESS_DENIED", StatusCode::FORBIDDEN);
-    }
-
-    match MeterReading::record_reading(&ctx.db, id, user_id, params).await? {
-        Ok(res) => format::json(res),
-        Err((status, code)) => error_response(code, status),
-    }
-}
-
-pub async fn get_upload_url(
-    _auth: JWT,
-    State(_ctx): State<AppContext>,
-) -> Result<Response> {
-    let bucket = std::env::var("S3_BUCKET").map_err(|_| Error::BadRequest("Missing S3_BUCKET".to_string()))?;
-    let storage = Storage::new(bucket).await;
-
-    let key = format!("meters/{}.jpg", Uuid::new_v4());
-    let url = storage.get_presigned_upload_url(&key, Duration::from_secs(3600)).await
-        .map_err(|e| Error::BadRequest(format!("Failed to generate S3 URL: {}", e)))?;
-
-    format::json(serde_json::json!({
-        "url": url,
-        "key": key
-    }))
-}
-
-pub async fn submit_ocr(
-    auth: JWT,
-    Path(id): Path<Uuid>,
-    State(ctx): State<AppContext>,
-    Json(params): Json<OcrReadingParams>,
-) -> Result<Response> {
-    let user_id = auth::get_user_id(&auth)?;
-
-    // Ownership check
-    if !Meter::validate_meter_access(&ctx.db, id, user_id).await? {
-        return error_response("METER_ACCESS_DENIED", StatusCode::FORBIDDEN);
-    }
-
-    let res = MeterReading::submit_ocr_reading(&ctx, id, user_id, params).await?;
-    format::json(res)
-}
-
-pub async fn list_readings(
-    _auth: JWT,
-    Path(id): Path<Uuid>,
-    State(ctx): State<AppContext>,
-) -> Result<Response> {
-    let readings = MeterReading::list_by_meter(&ctx.db, id).await?;
-    format::json(readings)
-}
-
-
 pub async fn get_landlord_summary(
     auth: JWT,
     State(ctx): State<AppContext>,
@@ -123,16 +57,6 @@ pub async fn list_landlord_meters(
     format::json(meters)
 }
 
-pub async fn list_landlord_readings(
-    auth: JWT,
-    State(ctx): State<AppContext>,
-    Query(params): Query<LandlordReadingsParams>,
-) -> Result<Response> {
-    let landlord_id = auth::get_user_id(&auth)?;
-    let readings = MeterReading::list_landlord_readings(&ctx.db, landlord_id, params.building_id, params.period_month).await?;
-    format::json(readings)
-}
-
 pub async fn update_status(
     _auth: JWT,
     Path(id): Path<Uuid>,
@@ -145,16 +69,12 @@ pub async fn update_status(
 
 pub fn routes() -> Routes {
     Routes::new()
-        .prefix("api/v1/meters")
-        .add("/", post(create))
-        .add("/my-meters", get(get_my_meters))
-        .add("/landlord/summary", get(get_landlord_summary))
-        .add("/landlord/list", get(list_landlord_meters))
-        .add("/landlord/readings", get(list_landlord_readings))
-        .add("/room/{room_id}", get(list_by_room))
-        .add("/{id}/status", patch(update_status))
-        .add("/upload-url", get(get_upload_url))
-        .add("/{id}/ocr", post(submit_ocr))
-        .add("/{id}/readings", post(record_reading))
-        .add("/{id}/readings", get(list_readings))
+        .prefix("api/v1")
+        .add("/meters", post(create))
+        .add("/me/meters", get(get_my_meters))
+        .add("/landlord/meters/summary", get(get_landlord_summary))
+        .add("/landlord/meters", get(list_landlord_meters))
+        .add("/rooms/{room_id}/meters", get(list_by_room))
+        .add("/meters/{id}/status", patch(update_status))
 }
+

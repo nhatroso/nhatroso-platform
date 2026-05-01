@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { Icons } from '@/components/icons';
 import { InvoiceCreatePanel } from '@/components/invoices/InvoiceCreatePanel';
-import { useInvoices } from '@/hooks/use-invoices';
+import { useInvoiceList } from '@/hooks/invoice/useInvoiceList';
 import { useRouter } from 'next/navigation';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { cn } from '@/lib/utils';
@@ -37,7 +37,7 @@ export default function InvoicesPage() {
     handleClosePanel,
     handleSuccess,
     handleRemind,
-  } = useInvoices();
+  } = useInvoiceList();
 
   return (
     <div className="flex h-[calc(100vh-112px)] w-full flex-col overflow-hidden rounded-2xl border border-gray-border bg-gray-card shadow-sm animate-in fade-in duration-500">

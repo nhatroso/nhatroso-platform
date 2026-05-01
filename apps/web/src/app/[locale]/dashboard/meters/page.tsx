@@ -1,16 +1,9 @@
 'use client';
 
 import * as React from 'react';
-import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Icons } from '@/components/icons';
-import {
-  LandlordMeterSummary,
-  LandlordMeterDetail,
-  Building,
-} from '@nhatroso/shared';
-import { metersApi } from '@/services/api/meters';
-import { getBuildings } from '@/services/api/buildings';
+import { useLandlordMeters } from '@/hooks/meter/useLandlordMeters';
 import { getServiceDisplayName, getUnitDisplayName, cn } from '@/lib/utils';
 import { PageHeader } from '@/components/ui/PageHeader';
 
@@ -18,59 +11,21 @@ export default function MeterManagementPage() {
   const t = useTranslations('Meters');
   const tServices = useTranslations('Services');
 
-  const [summary, setSummary] = useState<LandlordMeterSummary | null>(null);
-  const [meters, setMeters] = useState<LandlordMeterDetail[]>([]);
-  const [buildings, setBuildings] = useState<Building[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  // Filters
-  const [selectedBuilding, setSelectedBuilding] = useState<string>('all');
-  const [statusFilter] = useState<'ALL' | 'PENDING' | 'SUBMITTED' | 'OVERDUE'>(
-    'ALL',
-  );
-  const [serviceFilter, setServiceFilter] = useState<string>('all');
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const now = new Date();
-  const currentPeriod = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-  const [selectedPeriod, setSelectedPeriod] = useState(currentPeriod);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const [summaryData, buildingsData] = await Promise.all([
-          metersApi.getLandlordSummary(selectedPeriod),
-          getBuildings(),
-        ]);
-        setSummary(summaryData);
-        setBuildings(buildingsData);
-
-        const metersData = await metersApi.listLandlordMeters(
-          selectedBuilding === 'all' ? undefined : selectedBuilding,
-          selectedPeriod,
-        );
-        setMeters(metersData);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [selectedBuilding, selectedPeriod]);
-
-  const filteredMeters = meters.filter((m) => {
-    const matchesStatus = statusFilter === 'ALL' || m.status === statusFilter;
-    const matchesService =
-      serviceFilter === 'all' || m.service_name === serviceFilter;
-    const matchesSearch =
-      m.room_code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      m.serial_number?.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesStatus && matchesService && matchesSearch;
-  });
-
-  const serviceOptions = Array.from(new Set(meters.map((m) => m.service_name)));
+  const {
+    summary,
+    buildings,
+    loading,
+    selectedBuilding,
+    setSelectedBuilding,
+    serviceFilter,
+    setServiceFilter,
+    searchQuery,
+    setSearchQuery,
+    selectedPeriod,
+    setSelectedPeriod,
+    filteredMeters,
+    serviceOptions,
+  } = useLandlordMeters();
 
   if (loading && !summary) {
     return (

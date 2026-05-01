@@ -7,9 +7,7 @@ import {
 
 export const meterService = {
   getMyMeters: async (): Promise<MeterResponse[]> => {
-    const response = await apiClient.get<MeterResponse[]>(
-      '/v1/meters/my-meters',
-    );
+    const response = await apiClient.get<MeterResponse[]>('/v1/me/meters');
     return response.data;
   },
 
@@ -39,16 +37,33 @@ export const meterService = {
     return response.data;
   },
 
-  getReadingRequests: async (): Promise<any[]> => {
-    const response = await apiClient.get<any[]>(
-      '/v1/meter-requests/my-requests',
-    );
+  getReadingRequests: async (params?: {
+    status?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<any[]> => {
+    const response = await apiClient.get<any[]>('/v1/me/meter-requests', {
+      params,
+    });
+    return response.data;
+  },
+
+  getAllMyReadings: async (params?: {
+    type?: string;
+    from?: string;
+    to?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<any[]> => {
+    const response = await apiClient.get<any[]>('/v1/me/meter-readings', {
+      params,
+    });
     return response.data;
   },
 
   getUploadUrl: async (): Promise<{ url: string; key: string }> => {
     const response = await apiClient.get<{ url: string; key: string }>(
-      '/v1/meters/upload-url',
+      '/v1/attachments/upload-url',
     );
     return response.data;
   },

@@ -56,8 +56,8 @@ pub async fn remove(
 
 pub fn routes() -> Routes {
     Routes::new()
-        .prefix("/api/v1/price-rules")
-        .add("/", post(create))
-        .add("/service/{service_id}", get(list_by_service))
-        .add("/{id}", patch(update).delete(remove))
+        .prefix("api/v1")
+        .add("/landlord/price-rules", post(create))
+        .add("/services/{service_id}/price-rules", get(list_by_service))
+        .add("/landlord/price-rules/{id}", patch(update).delete(remove))
 }

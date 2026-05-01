@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useTranslations } from 'next-intl';
 import { Room } from '@nhatroso/shared';
-import { useRoomPricing } from '@/hooks/use-room-pricing';
+import { useRoomPricing } from '@/hooks/room/useRoomPricing';
 import { getServiceDisplayName, getUnitDisplayName } from '@/lib/utils';
 import { Gauge } from 'lucide-react';
 

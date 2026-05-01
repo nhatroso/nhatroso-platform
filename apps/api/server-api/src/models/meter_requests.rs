@@ -65,7 +65,7 @@ impl Model {
                     room_id: sea_orm::ActiveValue::Set(room.id),
                     period_month: sea_orm::ActiveValue::Set(period_month.to_string()),
                     due_date: sea_orm::ActiveValue::Set(due_date),
-                    status: sea_orm::ActiveValue::Set("PENDING".to_string()),
+                    status: sea_orm::ActiveValue::Set("OPEN".to_string()),
                     created_at: sea_orm::ActiveValue::Set(chrono::Utc::now().into()),
                     updated_at: sea_orm::ActiveValue::Set(chrono::Utc::now().into()),
                 }
@@ -140,16 +140,17 @@ impl Model {
         period_month: &str,
     ) -> std::result::Result<(), DbErr> {
         use crate::models::_entities::{meters, meter_readings};
+        use sea_orm::{QueryFilter, ColumnTrait};
 
-        // Find PENDING or LATE requests for this room and period
-        let pending_requests = Entity::find()
+        // Find OPEN, PARTIAL or OVERDUE requests for this room and period
+        let requests = Entity::find()
             .filter(Column::RoomId.eq(room_id))
             .filter(Column::PeriodMonth.eq(period_month))
-            .filter(Column::Status.is_in(vec!["PENDING", "LATE"]))
+            .filter(Column::Status.is_in(vec!["OPEN", "PARTIAL", "PENDING", "LATE"])) // Include legacy states for migration
             .all(db)
             .await?;
 
-        if pending_requests.is_empty() {
+        if requests.is_empty() {
             return Ok(());
         }
 
@@ -160,9 +161,8 @@ impl Model {
             .all(db)
             .await?;
 
-        let mut all_submitted = true;
-        for rm in room_meters {
-            // Check if this meter has a reading for this period with status that counts as "submitted"
+        let mut submitted_count = 0;
+        for rm in &room_meters {
             let has_reading = meter_readings::Entity::find()
                 .filter(meter_readings::Column::MeterId.eq(rm.id))
                 .filter(meter_readings::Column::PeriodMonth.eq(period_month))
@@ -173,19 +173,33 @@ impl Model {
                 .one(db)
                 .await?;
 
-            if has_reading.is_none() {
-                all_submitted = false;
-                break;
+            if has_reading.is_some() {
+                submitted_count += 1;
             }
         }
 
-        if all_submitted {
-            for req in pending_requests {
-                let mut req_active: ActiveModel = req.into();
-                req_active.status = sea_orm::ActiveValue::Set("SUBMITTED".to_string());
-                req_active.updated_at = sea_orm::ActiveValue::Set(chrono::Utc::now().into());
-                req_active.update(db).await?;
-            }
+        let new_status = if submitted_count == 0 {
+            "OPEN".to_string()
+        } else if submitted_count < room_meters.len() {
+            "PARTIAL".to_string()
+        } else {
+            "COMPLETED".to_string()
+        };
+
+        for req in requests {
+            // Check if actually overdue based on server time
+            let is_overdue = req.due_date.timestamp() < chrono::Utc::now().timestamp();
+            
+            let status_to_set = if is_overdue && new_status != "COMPLETED" {
+                "OVERDUE".to_string()
+            } else {
+                new_status.clone()
+            };
+
+            let mut req_active: ActiveModel = req.into();
+            req_active.status = sea_orm::ActiveValue::Set(status_to_set);
+            req_active.updated_at = sea_orm::ActiveValue::Set(chrono::Utc::now().into());
+            req_active.update(db).await?;
         }
 
         Ok(())

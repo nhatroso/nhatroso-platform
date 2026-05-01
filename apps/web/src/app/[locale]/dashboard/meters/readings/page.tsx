@@ -1,62 +1,26 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { Icons } from '@/components/icons';
-import { Building } from '@nhatroso/shared';
-import { metersApi, LandlordMeterReadingDetail } from '@/services/api/meters';
-import { getBuildings } from '@/services/api/buildings';
 import { PageHeader } from '@/components/ui/PageHeader';
+
+import { useLandlordReadings } from '@/hooks/meter/useLandlordReadings';
 
 export default function MeterReadingsPage() {
   const t = useTranslations('Meters');
-  const [readings, setReadings] = useState<LandlordMeterReadingDetail[]>([]);
-  const [buildings, setBuildings] = useState<Building[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedBuilding, setSelectedBuilding] = useState<string>('all');
-  const [selectedPeriod, setSelectedPeriod] = useState<string>(
-    new Date().toISOString().slice(0, 7),
-  );
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-
-  useEffect(() => {
-    const fetchBuildings = async () => {
-      try {
-        const data = await getBuildings();
-        setBuildings(data);
-      } catch (error) {
-        console.error('Error fetching buildings:', error);
-      }
-    };
-    fetchBuildings();
-  }, []);
-
-  useEffect(() => {
-    const fetchReadings = async () => {
-      setLoading(true);
-      try {
-        const data = await metersApi.listLandlordReadings({
-          buildingId: selectedBuilding === 'all' ? undefined : selectedBuilding,
-          periodMonth: selectedPeriod,
-        });
-        setReadings(data);
-      } catch (error) {
-        console.error('Error fetching readings:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchReadings();
-  }, [selectedBuilding, selectedPeriod]);
-
-  const filteredReadings = readings.filter((r) => {
-    const matchesSearch =
-      r.room_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      r.building_name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || r.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  const {
+    readings: filteredReadings,
+    buildings,
+    loading,
+    selectedBuilding,
+    setSelectedBuilding,
+    selectedPeriod,
+    setSelectedPeriod,
+    searchTerm,
+    setSearchTerm,
+    statusFilter,
+    setStatusFilter,
+  } = useLandlordReadings();
 
   return (
     <div className="flex h-[calc(100vh-112px)] w-full flex-col overflow-hidden rounded-2xl border border-gray-border bg-gray-card shadow-sm animate-in fade-in duration-500">
@@ -65,12 +29,12 @@ export default function MeterReadingsPage() {
         title={t('ReadingHistory')}
         description={t('ReadingHistoryDesc')}
         icon={Icons.History}
-        actions={
-          <button className="flex items-center gap-2 px-4 py-2 bg-primary border border-transparent rounded-xl text-body font-bold text-white hover:bg-primary-hover transition-all shadow-sm active:scale-95">
-            <Icons.Export className="h-4 w-4" strokeWidth={2.5} />
-            {t('ExportExcel')}
-          </button>
-        }
+        // actions={
+        //   <button className="flex items-center gap-2 px-4 py-2 bg-primary border border-transparent rounded-xl text-body font-bold text-white hover:bg-primary-hover transition-all shadow-sm active:scale-95">
+        //     <Icons.Export className="h-4 w-4" strokeWidth={2.5} />
+        //     {t('ExportExcel')}
+        //   </button>
+        // }
       >
         <div className="flex flex-col gap-4 py-1">
           <div className="flex flex-wrap items-center gap-4">
@@ -218,9 +182,11 @@ export default function MeterReadingsPage() {
                       <td className="px-6 py-4 text-center whitespace-nowrap">
                         <span
                           className={`px-2 py-1 rounded-full text-tiny font-bold uppercase ${
-                            r.status === 'SUBMITTED'
+                            r.status === 'SUBMITTED' || r.status === 'COMPLETED'
                               ? 'bg-success-light text-success'
-                              : 'bg-warning-light text-warning'
+                              : r.status === 'PENDING'
+                                ? 'bg-gray-subtle text-gray-muted'
+                                : 'bg-warning-light text-warning'
                           }`}
                         >
                           {t(`Status_${r.status}`)}

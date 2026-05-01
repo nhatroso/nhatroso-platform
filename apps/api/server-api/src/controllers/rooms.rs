@@ -95,9 +95,9 @@ pub async fn get_my_room(
 pub fn routes() -> Routes {
     Routes::new()
         .prefix("api/v1")
-        .add("/floors/{floor_id}/rooms", post(create).get(list_by_floor))
-        .add("/rooms", get(list_owner_rooms))
-        .add("/rooms/{id}", get(get_by_id).patch(update))
-        .add("/rooms/available", get(list_available))
-        .add("/tenant/room", get(get_my_room))
+        .add("/landlord/floors/{floor_id}/rooms", post(create).get(list_by_floor))
+        .add("/landlord/rooms", get(list_owner_rooms))
+        .add("/landlord/rooms/available", get(list_available))
+        .add("/landlord/rooms/{id}", get(get_by_id).patch(update))
+        .add("/me/room", get(get_my_room))
 }

@@ -23,9 +23,9 @@ export function ServiceSelector({
   return (
     <>
       <Text className="text-sm font-bold text-muted uppercase tracking-widest mb-4">
-        {t('Services.submission.requiredSubmissions')}
+        {t('Services.submission.requiredSubmissions', 'Các chỉ số cần nộp')}
       </Text>
-      <View className="flex-row gap-4 mb-8">
+      <View className="flex-row gap-4 mb-6">
         {services.map((service: any) => {
           const name = service.name?.toLowerCase() || '';
           const isElectricity = name.includes('electricity');
@@ -37,29 +37,32 @@ export function ServiceSelector({
             <TouchableOpacity
               key={service.service_id}
               onPress={() => onSelect(service.service_id)}
-              className={`flex-1 p-4 rounded-2xl border border-border items-center justify-center shadow-sm ${isSelected ? 'bg-primary' : 'bg-white'}`}
+              className={`flex-1 p-4 rounded-2xl border items-center justify-center shadow-sm active:scale-95 transition-transform ${
+                isSelected
+                  ? 'bg-primary border-primary shadow-primary/20'
+                  : 'bg-white border-border shadow-black/5'
+              }`}
             >
-              <View className="flex-row items-center justify-center relative">
-                <View className="h-10 w-10 rounded-full items-center justify-center mb-2 bg-input/20">
-                  <Icon
-                    size={20}
-                    className={
-                      isSelected
-                        ? 'text-white'
-                        : isElectricity
-                          ? 'text-warning'
-                          : 'text-primary'
-                    }
-                  />
-                </View>
+              <View className="h-11 w-11 rounded-xl items-center justify-center mb-2 bg-gray-50/50">
+                <Icon
+                  size={22}
+                  className={
+                    isSelected
+                      ? 'text-white'
+                      : isElectricity
+                        ? 'text-warning'
+                        : 'text-primary'
+                  }
+                  color={isSelected ? 'white' : undefined}
+                />
                 {isSubmitted && (
-                  <View className="absolute -top-1 -right-1 rounded-full p-0.5 border-2 border-white bg-success">
+                  <View className="absolute -top-1 -right-1 rounded-full p-1 border-2 border-white bg-success">
                     <CheckCircle2 size={12} color="white" />
                   </View>
                 )}
               </View>
               <Text
-                className={`font-bold text-sm ${isSelected ? 'text-white' : 'text-text'}`}
+                className={`font-black text-sm ${isSelected ? 'text-white' : 'text-text'}`}
               >
                 {getLabel(service.name)}
               </Text>

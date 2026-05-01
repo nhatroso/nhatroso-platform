@@ -27,75 +27,75 @@ export interface MeterRequest {
   updated_at: string;
 }
 
-export async function getMeterConfig(): Promise<MeterRequestConfig | null> {
-  const res = await apiFetch(`/meter-request-configs`, {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' },
-  });
-
-  if (!res.ok) {
-    if (res.status === 404 || res.status === 204) return null;
-    throw new Error('Failed to fetch meter configuration');
-  }
-
-  const text = await res.text();
-  return text ? JSON.parse(text) : null;
-}
-
-export async function updateMeterConfig(
-  data: ConfigParams,
-): Promise<MeterRequestConfig> {
-  const res = await apiFetch(`/meter-request-configs`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-
-  if (!res.ok) {
-    throw new Error('Failed to update meter configuration');
-  }
-
-  return res.json();
-}
-
-export async function getMeterRequests(
-  periodMonth?: string,
-): Promise<MeterRequest[]> {
-  let url = `/meter-requests`;
-  if (periodMonth) {
-    url += `?period_month=${encodeURIComponent(periodMonth)}`;
-  }
-
-  const res = await apiFetch(url, {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' },
-  });
-
-  if (!res.ok) {
-    throw new Error('Failed to fetch meter requests');
-  }
-
-  return res.json();
-}
-
 export interface GenerateManualParams {
   building_id: string;
   period_month: string;
   due_date: string;
 }
 
-export async function generateManualRequests(
-  data: GenerateManualParams,
-): Promise<{ generated_count: number }> {
-  const res = await apiFetch(`/meter-requests/generate-manual`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
+export const meterAutomationService = {
+  getMeterConfig: async (): Promise<MeterRequestConfig | null> => {
+    const res = await apiFetch(`/landlord/meter-request-configs`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    });
 
-  if (!res.ok) {
-    throw new Error('Failed to generate manual meter requests');
-  }
+    if (!res.ok) {
+      if (res.status === 404 || res.status === 204) return null;
+      throw new Error('Failed to fetch meter configuration');
+    }
 
-  return res.json();
-}
+    const text = await res.text();
+    return text ? JSON.parse(text) : null;
+  },
+
+  updateMeterConfig: async (
+    data: ConfigParams,
+  ): Promise<MeterRequestConfig> => {
+    const res = await apiFetch(`/landlord/meter-request-configs`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+
+    if (!res.ok) {
+      throw new Error('Failed to update meter configuration');
+    }
+
+    return res.json();
+  },
+
+  getMeterRequests: async (periodMonth?: string): Promise<MeterRequest[]> => {
+    let url = `/landlord/meter-requests`;
+    if (periodMonth) {
+      url += `?period_month=${encodeURIComponent(periodMonth)}`;
+    }
+
+    const res = await apiFetch(url, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (!res.ok) {
+      throw new Error('Failed to fetch meter requests');
+    }
+
+    return res.json();
+  },
+
+  generateManualRequests: async (
+    data: GenerateManualParams,
+  ): Promise<{ generated_count: number }> => {
+    const res = await apiFetch(`/landlord/meter-requests/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+
+    if (!res.ok) {
+      throw new Error('Failed to generate manual meter requests');
+    }
+
+    return res.json();
+  },
+};

@@ -4,11 +4,7 @@ import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import {
-  requestForgotPasswordOtp,
-  verifyForgotPasswordOtp,
-  resetPassword,
-} from '@/services/api/auth';
+import { authService } from '@/services/api/auth';
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
@@ -80,7 +76,7 @@ export default function ForgotPasswordPage() {
     }
 
     try {
-      await requestForgotPasswordOtp(emailValue);
+      await authService.requestForgotPasswordOtp(emailValue);
 
       setEmail(emailValue);
       setStep(2);
@@ -98,7 +94,7 @@ export default function ForgotPasswordPage() {
     setLoading(true);
 
     try {
-      await requestForgotPasswordOtp(email);
+      await authService.requestForgotPasswordOtp(email);
       setResendTimer(60);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'UNKNOWN_ERROR');
@@ -119,7 +115,7 @@ export default function ForgotPasswordPage() {
 
     setLoading(true);
     try {
-      const token = await verifyForgotPasswordOtp(email, currentOtp);
+      const token = await authService.verifyForgotPasswordOtp(email, currentOtp);
       setResetToken(token);
       setStep(3);
     } catch (err) {
@@ -138,7 +134,7 @@ export default function ForgotPasswordPage() {
 
     setLoading(true);
     try {
-      await resetPassword(resetToken, password);
+      await authService.resetPassword(resetToken, password);
       router.push('/login');
     } catch (err) {
       const key = err instanceof Error ? err.message : 'UNKNOWN_ERROR';
